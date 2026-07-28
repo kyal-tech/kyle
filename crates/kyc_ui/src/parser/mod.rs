@@ -318,12 +318,18 @@ impl KyxParser {
             let block = self.extract_and_advance(after_paren, content_start);
             return Ok(KyxNode::CodeBlock(block));
         }
-        // @if(cond): ... @else: ... or @for(item in list): or @match(expr): or @expr
-        if self.starts_with("if(") {
+        // @if cond: ... @else: ... or @if(cond): ... @else: ... or @for(item in list): or @match(expr): or @expr
+        if self.starts_with("if ") || self.starts_with("if(") {
             self.pos += 2; // skip 'if'
-            self.advance(); // skip '('
-            let condition = self.read_while(|c| c != ')')?;
-            self.expect_char(')')?;
+            self.skip_whitespace();
+            let condition = if self.peek() == Some('(') {
+                self.advance(); // skip '('
+                let cond = self.read_while(|c| c != ')')?;
+                self.expect_char(')')?;
+                cond
+            } else {
+                self.read_while(|c| c != ':' && c != '\n')?.trim().to_string()
+            };
             self.expect_char(':')?;
             let then_branch = self.parse_body_until(&["@else", "@elif"])?;
             let mut else_branch = Vec::new();

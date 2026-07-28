@@ -32,7 +32,7 @@ impl UiBackend for WebBackend {
         js.push_str("// Target: Web (JS/DOM) — ES Modules\n\n");
 
         js.push_str("import { ReactiveState, Binding, createKyleEvent, enableLongPress, createVirtualList } from '/target/debug/reactivity.js';\n");
-        js.push_str("import { Router, routeParams, set_title, set_meta, navigate, navigate_back, navigate_replace } from '/target/debug/router.js';\n");
+        js.push_str("import { createRouter, Router, routeParams, set_title, set_meta, navigate, navigate_back, navigate_replace } from '/target/debug/router.js';\n");
         js.push_str("import { A11yManager } from '/target/debug/a11y.js';\n");
         js.push_str("import { portalManager } from '/target/debug/portal.js';\n");
         js.push_str("import { ErrorBoundary } from '/target/debug/error_boundary.js';\n");
@@ -533,7 +533,8 @@ fn gen_node(node: &UiNode, js: &mut String, indent: usize, parent: &str, model: 
             }
         }
         UiNode::If { condition, then_branch, else_branch } => {
-            js.push_str(&format!("{}if ({}) {{\n", ind, condition));
+            let js_cond = kyle_to_js_expr(condition);
+            js.push_str(&format!("{}if ({}) {{\n", ind, js_cond));
             for child in then_branch {
                 gen_node(child, js, indent + 4, parent, model);
             }
@@ -562,7 +563,7 @@ fn gen_node(node: &UiNode, js: &mut String, indent: usize, parent: &str, model: 
             } else {
                 list.to_string()
             };
-            js.push_str(&format!("{}for (const {} of {}) {{\n", ind, item, js_list));
+            js.push_str(&format!("{}for (const {} of {}) {{\n", ind, item, kyle_to_js_expr(&js_list)));
             for child in body {
                 gen_node(child, js, indent + 4, parent, model);
             }
@@ -1699,6 +1700,10 @@ fn kyle_to_js_expr(expr: &str) -> String {
     result = result.replace(".is_empty()", " === ''");
     result = result.replace(".contains(", ".includes(");
 
+    // Phase 1b: Convert Kyle set literals {a,b,c} to JS arrays [a,b,c]
+    // Keep object literals {k:v} as-is
+    result = convert_set_literals(&result);
+
     // Phase 2: Replace state variable references with state.get('var')
     // We scan for identifiers (outside strings) and wrap them in state.get()
     let mut out = String::new();
@@ -1748,6 +1753,74 @@ fn kyle_to_js_expr(expr: &str) -> String {
     flush_token(&mut current, &mut out, after_dot, false);
 
     out
+}
+
+/// Convert Kyle set literals {a,b,c} to JS arrays [a,b,c].
+/// Dict literals {k:v} are kept as-is.
+fn convert_set_literals(s: &str) -> String {
+    let mut out = String::new();
+    let mut chars = s.chars().peekable();
+    let mut in_string = false;
+    let mut brace_start = None;
+
+    while let Some(c) = chars.next() {
+        if c == '"' || c == '\'' {
+            if brace_start.is_some() {
+                in_string = !in_string;
+                out.push(c);
+            } else {
+                out.push(c);
+                in_string = !in_string;
+            }
+            continue;
+        }
+        if in_string {
+            out.push(c);
+            continue;
+        }
+        if c == '{' && brace_start.is_none() {
+            brace_start = Some(out.len() as i32);
+            out.push(c);
+            continue;
+        }
+        if c == '}' {
+            if let Some(start) = brace_start {
+                let full: String = out[start as usize..].chars().collect();
+                let inner = &full[1..]; // content between { and }
+                if !inner.is_empty() && inner.contains(',') && !contains_top_level_colon(inner) {
+                    out.truncate(start as usize);
+                    out.push('[');
+                    out.push_str(inner);
+                    out.push(']');
+                } else {
+                    out.push(c);
+                }
+                brace_start = None;
+            } else {
+                out.push(c);
+            }
+            continue;
+        }
+        out.push(c);
+    }
+    out
+}
+
+/// Check if a string contains a colon at the top level (not inside nested braces or strings).
+fn contains_top_level_colon(s: &str) -> bool {
+    let mut depth = 0;
+    let mut in_str = false;
+    for c in s.chars() {
+        if c == '"' || c == '\'' { in_str = !in_str; continue; }
+        if in_str { continue; }
+        match c {
+            '(' | '[' | '{' => depth += 1,
+            ')' | ']' | '}' => depth -= 1,
+            ':' if depth == 0 => return true,
+            _ => {}
+        }
+    }
+    false
 }
 
 fn flush_token(current: &mut String, out: &mut String, after_dot: bool, in_string: bool) {
