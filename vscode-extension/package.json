@@ -2,12 +2,12 @@
   "name": "ky",
   "displayName": "Kyle Language Support",
   "description": "Kyle programming language \u2014 syntax highlighting, LSP, snippets, and language support",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "publisher": "kynera",
   "icon": "icons/ky_128.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/IT-KYNERA/KYLE.git"
+    "url": "https://github.com/kyal-tech/kyle.git"
   },
   "engines": {
     "vscode": "^1.85.0"

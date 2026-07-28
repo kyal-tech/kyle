@@ -13,13 +13,13 @@ LLVM 18 + Rust are only needed to **build** the compiler from source.
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.sh | sh
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-iwr -Uri "https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/scripts/install.ps1" | iex
+iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.ps1" | iex
 ```
 
 Both scripts:
@@ -57,7 +57,7 @@ $env:LLVM_SYS_181_PREFIX = "C:\Program Files\LLVM"
 ### Build
 
 ```bash
-git clone https://github.com/IT-KYNERA/KYLE.git
+git clone https://github.com/kyal-tech/kyle.git
 cd KYLE
 cargo build --release --bin ky
 

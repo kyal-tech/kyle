@@ -24,7 +24,7 @@ $env:LLVM_SYS_181_PREFIX = "C:\Program Files\LLVM"
 ## Build the Compiler
 
 ```bash
-git clone https://github.com/IT-KYNERA/KYLE.git
+git clone https://github.com/kyal-tech/kyle.git
 cd KYLE
 
 # Release build (recommended)
@@ -77,10 +77,10 @@ done
 
 ```bash
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.sh | sh
 
 # Windows (PowerShell)
-iwr -Uri "https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/scripts/install.ps1" | iex
+iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.ps1" | iex
 ```
 
 ## Install VS Code Extension

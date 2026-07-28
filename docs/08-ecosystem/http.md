@@ -61,7 +61,7 @@ use http.client
 client = client { timeout: 10 }
 
 # GET
-ris = client.get("https://api.github.com/repos/IT-KYNERA/KYLE")
+ris = client.get("https://api.github.com/repos/kyal-tech/kyle")
 if res.is_ok:
  print(res.body)
 

@@ -107,8 +107,8 @@ tar xzf dist/ky-macos-arm64.tar.gz -C /tmp/test-ky
 
 | Script | Plataforma | Comando |
 |--------|------------|---------|
-| `install.sh` | macOS / Linux | `curl -fsSL https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/install.sh \| sh` |
-| `install.ps1` | Windows | `iwr -Uri "https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/install.ps1" \| iex` |
+| `install.sh` | macOS / Linux | `curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/install.sh \| sh` |
+| `install.ps1` | Windows | `iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/install.ps1" \| iex` |
 
 Ambos scripts:
 1. Detectan SO + arquitectura automáticamente

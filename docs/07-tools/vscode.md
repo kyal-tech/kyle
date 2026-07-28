@@ -6,12 +6,12 @@
 
 **macOS / Linux:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/vscode-ky/install-extension.sh | sh
+curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/vscode-ky/install-extension.sh | sh
 ```
 
 **Windows (PowerShell):**
 ```powershell
-iwr -Uri "https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/vscode-ky/install-extension.ps1" | iex
+iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/vscode-ky/install-extension.ps1" | iex
 ```
 
 Or install from the VS Code Marketplace: search "Kyle Language Support".

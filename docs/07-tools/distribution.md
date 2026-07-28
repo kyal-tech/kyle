@@ -37,7 +37,7 @@ Sin necesidad de tener Rust, LLVM, ni ning&uacute;n otro requisito previo instal
 El usuario ejecuta un solo comando:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/install.sh | sh
 ```
 
 El script:
@@ -57,7 +57,7 @@ Si el usuario ya tiene Kyle, el script detecta la versi&oacute;n actual y pregun
 El usuario ejecuta en PowerShell:
 
 ```powershell
-iwr -Uri "https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/install.ps1" | iex
+iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/install.ps1" | iex
 ```
 
 El script:
@@ -74,8 +74,8 @@ El script:
 Usuarios avanzados pueden descargar manualmente desde GitHub Releases:
 
 ```
-https://github.com/IT-KYNERA/KYLE/releases/download/v0.6.0/ky-macos-arm64.tar.gz
-https://github.com/IT-KYNERA/KYLE/releases/download/v0.6.0/ky-windows-x64.zip
+https://github.com/kyal-tech/kyle/releases/download/v0.6.0/ky-macos-arm64.tar.gz
+https://github.com/kyal-tech/kyle/releases/download/v0.6.0/ky-windows-x64.zip
 ...
 ```
 
@@ -135,7 +135,7 @@ detect_platform() {
 #!/bin/bash
 set -eu
 
-REPO="IT-KYNERA/KYLE"
+REPO="kyal-tech/kyle"
 VERSION="v0.6.0"
 PLATFORM=$(detect_platform)
 
@@ -199,7 +199,7 @@ param(
 
 $arch = if ([Environment]::Is64BitOperatingSystem) { "x64" } else { "arm64" }
 $bundle = "ky-windows-$arch.zip"
-$url = "https://github.com/IT-KYNERA/KYLE/releases/download/$Version/$bundle"
+$url = "https://github.com/kyal-tech/kyle/releases/download/$Version/$bundle"
 
 Write-Host "Downloading Kyle $Version for Windows..."
 Invoke-WebRequest -Uri $url -OutFile "$env:TEMP\$bundle"

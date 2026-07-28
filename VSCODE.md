@@ -19,7 +19,7 @@ The Kyle VS Code extension is at [`vscode-extension/`](vscode-extension/) in thi
 code --install-extension kynera.ky
 
 # Or from the .vsix file
-code --install-extension ky-0.8.7.vsix
+code --install-extension ky-0.8.8.vsix
 ```
 
 ## Extension Structure
@@ -41,7 +41,7 @@ vscode-extension/
 │   └── kl-color-theme.json      # "Kyle Pastel" dark theme
 ├── icons/                       # Extension icons
 ├── out/                         # Compiled JS
-├── package.json                 # Extension manifest (v0.8.7)
+├── package.json                 # Extension manifest (v0.8.8)
 └── language-configuration.json  # Comment toggles, brackets, folding
 ```
 

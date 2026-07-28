@@ -109,7 +109,7 @@ source (.ky) → kyc_frontend (lexer+parser) → kyc_hir (desugar)
 
 | Component | Location | Status |
 |-----------|----------|--------|
-| Extension manifest | `vscode-extension/package.json` | ✅ v0.8.7 |
+| Extension manifest | `vscode-extension/package.json` | ✅ v0.8.8 |
 | .ky grammar | `vscode-extension/syntaxes/ky.tmLanguage.json` | ✅ Updated |
 | .kyx grammar | `vscode-extension/syntaxes/kyx.tmLanguage.json` | ✅ Updated |
 | Snippets (60+) | `vscode-extension/snippets/ky.json` + `kyx.json` | ✅ Complete |

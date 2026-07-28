@@ -1,6 +1,6 @@
 # Kyle Language Support for Visual Studio Code
 
-Syntax highlighting, LSP integration, snippets, and language support for the [Kyle programming language](https://github.com/IT-KYNERA/KYLE).
+Syntax highlighting, LSP integration, snippets, and language support for the [Kyle programming language](https://github.com/kyal-tech/kyle).
 
 ## Features
 
