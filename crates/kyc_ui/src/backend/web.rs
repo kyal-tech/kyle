@@ -1551,10 +1551,18 @@ fn translate_kyle_block_to_js(block: &str) -> String {
             if let Some(paren_pos) = rest.find('(') {
                 let name = rest[..paren_pos].trim();
                 let params_end = rest.rfind(')').unwrap_or(rest.len());
-                let params = &rest[paren_pos..=params_end];
-                // Strip trailing colon from params
-                let params = params.trim_end_matches(':');
-                js.push_str(&format!("const {} = {} => {{\n", name, params));
+                let raw_params = &rest[paren_pos..=params_end];
+                // Strip type annotations from params: (event: click_event) → (event)
+                let params = raw_params.split(',').map(|p| {
+                    let p = p.trim_start_matches('(').trim_end_matches(')').trim();
+                    if let Some(colon) = p.find(':') {
+                        p[..colon].trim()
+                    } else {
+                        p
+                    }
+                }).collect::<Vec<_>>().join(", ");
+                let params_str = format!("({})", params);
+                js.push_str(&format!("const {} = {} => {{\n", name, params_str));
                 open_fns.push(indent);
             }
             continue;
@@ -1579,10 +1587,10 @@ fn translate_kyle_block_to_js(block: &str) -> String {
         let trimmed_line = line.strip_suffix(':').unwrap_or(line).trim_start_matches('@');
         if trimmed_line.starts_with("if ") {
             let cond = &trimmed_line[3..].trim().trim_end_matches(':');
-            js.push_str(&format!("  if ({}) {{\n", strip_at_refs(cond)));
+            js.push_str(&format!("  if ({}) {{\n", kyle_to_js_expr(cond)));
             open_fns.push(indent);
         } else {
-            js.push_str(&format!("{}\n", trimmed_line));
+            js.push_str(&format!("{}\n", kyle_to_js_expr(trimmed_line)));
         }
     }
 
@@ -1694,6 +1702,13 @@ fn kyle_to_js_expr(expr: &str) -> String {
         if in_string {
             out.push(c);
             continue;
+        }
+        // Strip Kyle @ prefix before string literals: @"text" → "text"
+        if c == '@' {
+            let next = chars.peek();
+            if next == Some(&'"') {
+                continue; // skip @ before string
+            }
         }
         if c.is_alphanumeric() || c == '_' {
             current.push(c);
