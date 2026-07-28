@@ -99,7 +99,7 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 | Style classes (`style=`) | ✅ | Working |
 | Inline styles | ✅ | Working |
 | Animations | 🟡 | Basic support |
-| Transitions | 🟡 | CSS transitions via style system |
+| Transitions | ✅ | CSS transition() type parsed to CSS shorthand |
 | Lazy loading (images) | ✅ | IntersectionObserver + loading='lazy' |
 | Virtualization (lists) | ✅ | createVirtualList() runtime |
 
@@ -369,7 +369,7 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 2. ✅ ~~Implement touch events~~
 3. ✅ ~~Implement lifecycle hooks~~
 4. ✅ ~~Implement image lazy loading~~
-5. 🟡 Implement CSS transitions (basic via style system)
+5. ✅ ~~Implement CSS transitions~~
 6. ✅ ~~Implement list virtualization~~
 7. ✅ ~~Create unit tests~~
 8. 🔴 Create integration tests
