@@ -335,8 +335,8 @@ See [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md) for detailed implementation plan.
 - [x] Implement touch events (touch_start, touch_end, touch_move)
 - [x] Implement lifecycle hooks (on_created, on_mounted, on_updated, on_unmounted)
 - [x] Implement image lazy loading
+- [x] Implement list virtualization
 - [ ] Implement CSS transitions
-- [ ] Implement list virtualization
 - [ ] Create unit tests
 - [ ] Create integration tests
 

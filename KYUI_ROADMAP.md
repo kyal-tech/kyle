@@ -101,7 +101,7 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 | Animations | 🟡 | Basic support |
 | Transitions | 🟡 | CSS transitions via style system |
 | Lazy loading (images) | ✅ | IntersectionObserver + loading='lazy' |
-| Virtualization (lists) | ❌ | Not implemented |
+| Virtualization (lists) | ✅ | createVirtualList() runtime |
 
 **Files:**
 - `crates/kyc_ui/src/backend/web.rs` - Feature implementation
@@ -370,7 +370,7 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 3. ✅ ~~Implement lifecycle hooks~~
 4. ✅ ~~Implement image lazy loading~~
 5. 🟡 Implement CSS transitions (basic via style system)
-6. 🔴 Implement list virtualization
+6. ✅ ~~Implement list virtualization~~
 7. 🔴 Create unit tests
 8. 🔴 Create integration tests
 
