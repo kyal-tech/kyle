@@ -38,10 +38,10 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 | `mouse_up` | ✅ `addEventListener('mouseup')` | ✅ Done |
 | `mouse_move` | ✅ `addEventListener('mousemove')` | ✅ Done |
 | `context_menu` | ✅ `addEventListener('contextmenu')` | ✅ Done |
-| `touch_start` | ❌ Not implemented | 🔴 TODO |
-| `touch_end` | ❌ Not implemented | 🔴 TODO |
-| `touch_move` | ❌ Not implemented | 🔴 TODO |
-| `long_press` | ❌ Not implemented | 🔴 TODO |
+| `touch_start` | ✅ `addEventListener('touchstart')` + touch data | ✅ Done |
+| `touch_end` | ✅ `addEventListener('touchend')` | ✅ Done |
+| `touch_move` | ✅ `addEventListener('touchmove')` | ✅ Done |
+| `long_press` | ✅ `enableLongPress()` (500ms timer) | ✅ Done |
 
 **Files:**
 - `crates/kyc_ui/src/backend/web.rs` - Event handler generation
@@ -57,16 +57,16 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 
 ### 1.2 Lifecycle Hooks Implementation
 
-**Status:** ❌ Not Implemented
+**Status:** ✅ Implemented
 
 | Hook | Web Implementation | Status |
 |------|-------------------|--------|
-| `on_created()` | ❌ Not implemented | 🔴 TODO |
-| `on_mounted()` | ❌ Not implemented | 🔴 TODO |
-| `on_before_update()` | ❌ Not implemented | 🔴 TODO |
-| `on_updated()` | ❌ Not implemented | 🔴 TODO |
-| `on_before_unmount()` | ❌ Not implemented | 🔴 TODO |
-| `on_unmounted()` | ❌ Not implemented | 🔴 TODO |
+| `on_created()` | ✅ Called before DOM creation | ✅ Done |
+| `on_mounted()` | ✅ Called via router after DOM insertion | ✅ Done |
+| `on_before_update()` | ❌ Not implemented | 🟡 Medium |
+| `on_updated()` | ✅ Called on any state change via state.onAnyChange() | ✅ Done |
+| `on_before_unmount()` | ❌ Not implemented | 🟡 Medium |
+| `on_unmounted()` | ✅ Called via router before container clear | ✅ Done |
 
 **Files:**
 - `crates/kyc_ui/src/backend/web.rs` - Lifecycle hook generation
@@ -365,15 +365,15 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 
 **Priority:** 🔴 CRITICAL
 
-1. ✅ Fix web backend bugs (toString, compound assignments, watch keys)
-2. 🔴 Implement touch events
-3. 🔴 Implement lifecycle hooks
+1. ✅ ~~Fix web backend bugs (toString, compound assignments, watch keys)~~
+2. ✅ ~~Implement touch events~~
+3. ✅ ~~Implement lifecycle hooks~~
 4. 🔴 Implement transitions
 5. 🔴 Create unit tests
 
 **Deliverables:**
-- All basic events working
-- Lifecycle hooks functional
+- All basic events working ✅
+- Lifecycle hooks functional ✅
 - Unit tests passing
 
 ---

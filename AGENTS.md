@@ -332,8 +332,8 @@ See [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md) for detailed implementation plan.
 
 **Priority:** 🔴 CRITICAL
 
-- [ ] Implement touch events (touch_start, touch_end, touch_move)
-- [ ] Implement lifecycle hooks (on_created, on_mounted, on_updated, on_unmounted)
+- [x] Implement touch events (touch_start, touch_end, touch_move)
+- [x] Implement lifecycle hooks (on_created, on_mounted, on_updated, on_unmounted)
 - [ ] Implement CSS transitions
 - [ ] Implement image lazy loading
 - [ ] Implement list virtualization
