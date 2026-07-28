@@ -25,10 +25,12 @@ Kyle UI es un framework UI declarativo multiplataforma que compila `.kyx` a web 
 | [style-system.md](style-system.md) | Sistema de estilos tipado (color, spacing, layout, theme, responsive) |
 | [state-events.md](state-events.md) | Estado, eventos, binding, formularios, validación, modelos |
 | [events.md](events.md) | **Eventos completos** — click, hover, touch, keyboard, etc. |
+| [lifecycle.md](lifecycle.md) | **Ciclo de vida** — on_created, on_mounted, on_updated, on_unmounted |
 | [animation.md](animation.md) | Animaciones y transiciones tipadas |
 | [routing.md](routing.md) | Routing, `<route>`, `<layout>`, `<slot>`, guards, navegación |
 | [accessibility.md](accessibility.md) | Accesibilidad WCAG 2.1 AA, ARIA, teclado, screen readers |
 | [anti-patterns.md](anti-patterns.md) | Anti-patrones de otros frameworks y cómo Kyle los evita |
+| [framework-comparison.md](framework-comparison.md) | **Comparativa** con React, Vue, SwiftUI, Jetpack Compose, Flutter |
 
 ## Componentes Nativos
 
