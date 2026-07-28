@@ -339,13 +339,15 @@ impl KyxParser {
         }
         if self.starts_with("for(") {
             self.pos += 3;
-            let item = self.read_while(|c| c != ' ' && c != '\t')?.trim().to_string();
+            self.advance(); // skip '('
+            let item = self.read_while(|c| c != ' ' && c != '\t' && c != ')')?.trim().to_string();
             self.skip_whitespace();
             self.expect_string("in")?;
             self.skip_whitespace();
             let list = self.read_while(|c| c != ')')?.trim().to_string();
             self.expect_char(')')?;
-            self.expect_char(':')?;
+            self.skip_whitespace();
+            if self.peek() == Some(':') { self.advance(); }
             let body = self.parse_body_until(&[])?;
             return Ok(KyxNode::For { item, list, body });
         }
@@ -485,6 +487,10 @@ impl KyxParser {
             match self.peek() {
                 None => break,
                 Some('<') => {
+                    // Check if this is a closing tag (</) — always break for parent to handle
+                    if self.starts_with("</") {
+                        break;
+                    }
                     // Check if this is a closing delimiter tag
                     let mut is_delim = false;
                     for d in delimiters {

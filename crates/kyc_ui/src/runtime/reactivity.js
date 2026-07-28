@@ -252,4 +252,91 @@ if (typeof window !== 'undefined') {
     window.Binding = Binding;
     window.createKyleEvent = createKyleEvent;
 }
+
+// =============================================================================
+//  Virtual List — only renders visible items + buffer
+// =============================================================================
+
+export function createVirtualList(container, totalItems, itemHeight, renderItem, options = {}) {
+    const overscan = options.overscan || 5;
+    const scrollEl = document.createElement('div');
+    scrollEl.style.overflowY = 'auto';
+    scrollEl.style.height = options.height || '400px';
+    scrollEl.style.position = 'relative';
+    scrollEl.style.willChange = 'transform';
+
+    const spacer = document.createElement('div');
+    spacer.style.height = (totalItems * itemHeight) + 'px';
+    spacer.style.pointerEvents = 'none';
+    scrollEl.appendChild(spacer);
+
+    const viewport = document.createElement('div');
+    viewport.style.position = 'absolute';
+    viewport.style.top = '0';
+    viewport.style.left = '0';
+    viewport.style.right = '0';
+    scrollEl.appendChild(viewport);
+
+    const rendered = new Map(); // index -> { el, top }
+
+    function renderRange(start, end) {
+        // Remove items outside range
+        for (const [idx, item] of rendered) {
+            if (idx < start || idx > end) {
+                item.el.remove();
+                rendered.delete(idx);
+            }
+        }
+        // Add items in range
+        for (let i = start; i <= end; i++) {
+            if (i < 0 || i >= totalItems) continue;
+            if (!rendered.has(i)) {
+                const el = document.createElement('div');
+                el.style.position = 'absolute';
+                el.style.top = (i * itemHeight) + 'px';
+                el.style.left = '0';
+                el.style.right = '0';
+                el.style.height = itemHeight + 'px';
+                renderItem(el, i);
+                viewport.appendChild(el);
+                rendered.set(i, { el, top: i * itemHeight });
+            }
+        }
+    }
+
+    function onScroll() {
+        const scrollTop = scrollEl.scrollTop;
+        const viewportHeight = scrollEl.clientHeight;
+        const visibleStart = Math.floor(scrollTop / itemHeight);
+        const visibleEnd = Math.ceil((scrollTop + viewportHeight) / itemHeight);
+        const rangeStart = Math.max(0, visibleStart - overscan);
+        const rangeEnd = Math.min(totalItems - 1, visibleEnd + overscan);
+        renderRange(rangeStart, rangeEnd);
+    }
+
+    scrollEl.addEventListener('scroll', onScroll, { passive: true });
+    // Initial render
+    onScroll();
+
+    container.appendChild(scrollEl);
+
+    // Return update function
+    return {
+        update(newTotal) {
+            totalItems = newTotal;
+            spacer.style.height = (totalItems * itemHeight) + 'px';
+            rendered.clear();
+            viewport.innerHTML = '';
+            onScroll();
+        },
+        scrollTo(index) {
+            scrollEl.scrollTop = index * itemHeight;
+        },
+        destroy() {
+            scrollEl.removeEventListener('scroll', onScroll);
+            rendered.clear();
+            container.removeChild(scrollEl);
+        }
+    };
+}
 //# sourceURL=reactivity.js
