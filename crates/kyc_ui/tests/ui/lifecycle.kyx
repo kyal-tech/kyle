@@ -1,0 +1,10 @@
+# Test: Lifecycle hooks
+<view>
+    @(
+        mounted: ^bool = false
+        fn on_mounted(): mounted = true
+        fn on_updated(changed): print(changed)
+        fn on_unmounted(): print("unmounted")
+    )
+    <text value=@mounted.to_str() />
+</view>

@@ -1,0 +1,12 @@
+# Test: File picker
+<view>
+    @(
+        file: ^file_data? = none
+        fn handle_file(event):
+            file = event.files[0]
+    )
+
+    <file_picker bind=@file accept="image/*" label="Photo" />
+    @if file != none:
+        <text value=@"File: " + file.name />
+</view>

@@ -1,0 +1,8 @@
+# Test: Conditional rendering
+<view>
+    @( show: ^bool = true)
+    @if show:
+        <text value="Visible" />
+    @else:
+        <text value="Hidden" />
+</view>

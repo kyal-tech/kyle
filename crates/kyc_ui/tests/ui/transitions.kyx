@@ -1,0 +1,13 @@
+# Test: CSS transitions
+style<button> Primary:
+    background = color("#0066FF")
+    color = color("#FFFFFF")
+    transition = transition(property: "all", duration: 200, easing: easing.ease_out)
+
+<view>
+    @( hovered: ^bool = false)
+    <button
+        text="Test"
+        style=Primary
+    />
+</view>

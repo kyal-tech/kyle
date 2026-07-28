@@ -1,0 +1,4 @@
+# Test: Image with lazy loading (simplified)
+<view>
+    <img src="https://picsum.photos/200" lazy alt="Random" />
+</view>

@@ -1,0 +1,7 @@
+# Test: Routing (simplified, no imports)
+<app title="Test App">
+    <router>
+        <route path="/" component=home title="Home" />
+        <route path="*" component=not_found title="404" />
+    </router>
+</app>

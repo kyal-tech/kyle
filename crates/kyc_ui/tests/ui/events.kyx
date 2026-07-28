@@ -1,0 +1,23 @@
+# Test: All event types
+<view>
+    @(
+        clicks: ^i32 = 0
+        fn handle_click(): clicks += 1
+        fn handle_touch(): print("touch")
+        fn handle_key(): print("key")
+        fn handle_hover(): print("hover")
+    )
+
+    <button
+        text="Click"
+        click=@handle_click
+        mouse_enter=@handle_hover
+        mouse_leave=@handle_hover
+        touch_start=@handle_touch
+        touch_end=@handle_touch
+        keydown=@handle_key
+        keyup=@handle_key
+        focus=@handle_hover
+        blur=@handle_hover
+    />
+</view>

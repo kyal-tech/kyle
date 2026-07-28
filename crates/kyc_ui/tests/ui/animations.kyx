@@ -1,0 +1,11 @@
+# Test: Animations (simplified)
+animation<view> FadeIn:
+    duration = 300
+    easing = easing.ease_out
+    fill_mode = fill_mode.forwards
+    from = animation_state(opacity: 0.0)
+    to = animation_state(opacity: 1.0)
+
+<view>
+    <text value="Fade In" animation=FadeIn />
+</view>
