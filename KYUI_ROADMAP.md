@@ -371,7 +371,7 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 4. ✅ ~~Implement image lazy loading~~
 5. 🟡 Implement CSS transitions (basic via style system)
 6. ✅ ~~Implement list virtualization~~
-7. 🔴 Create unit tests
+7. ✅ ~~Create unit tests~~
 8. 🔴 Create integration tests
 
 **Deliverables:**

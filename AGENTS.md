@@ -336,8 +336,8 @@ See [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md) for detailed implementation plan.
 - [x] Implement lifecycle hooks (on_created, on_mounted, on_updated, on_unmounted)
 - [x] Implement image lazy loading
 - [x] Implement list virtualization
+- [x] Create unit tests
 - [ ] Implement CSS transitions
-- [ ] Create unit tests
 - [ ] Create integration tests
 
 ### Next: Phase 2 - Testing & Validation
