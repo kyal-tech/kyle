@@ -1338,6 +1338,24 @@ fn translate_kyle_block_to_js(block: &str) -> String {
             continue;
         }
 
+        // Compound assignment: "count += 1" → "state.set('count', state.get('count') + 1);"
+        // MUST come before simple assignment check
+        if line.contains("+=") || line.contains("-=") || line.contains("*=") || line.contains("/=") {
+            let op = if line.contains("+=") { "+=" } else if line.contains("-=") { "-=" }
+                     else if line.contains("*=") { "*=" } else { "/=" };
+            if let Some(pos) = line.find(op) {
+                let target = line[..pos].trim().trim_start_matches('@');
+                let value = line[pos + 2..].trim();
+                if !target.contains('(') && !target.contains(' ') && !target.starts_with("state.") {
+                    let js_value = strip_at_refs(value);
+                    js.push_str(&format!("  state.set('{}', state.get('{}') {} {});\n", target, target, &op[..1], js_value));
+                } else {
+                    js.push_str(&format!("  {} {} {};\n", target, op, value));
+                }
+                continue;
+            }
+        }
+
         // State initialization: "name := value" or "name: type = value" → "state.set('name', value);"
         if line.contains('=') && !line.starts_with("fn ") && !line.contains("==") {
             let eq_op = if line.contains(":=") { ":=" } else if line.contains('=') { "=" } else { "" };
@@ -1383,23 +1401,6 @@ fn translate_kyle_block_to_js(block: &str) -> String {
                 open_fns.push(indent);
             }
             continue;
-        }
-
-        // Compound assignment: "count += 1" → "state.set('count', state.get('count') + 1);"
-        if line.contains("+=") || line.contains("-=") || line.contains("*=") || line.contains("/=") {
-            let op = if line.contains("+=") { "+=" } else if line.contains("-=") { "-=" }
-                     else if line.contains("*=") { "*=" } else { "/=" };
-            if let Some(pos) = line.find(op) {
-                let target = line[..pos].trim().trim_start_matches('@');
-                let value = line[pos + 2..].trim();
-                if !target.contains('(') && !target.contains(' ') && !target.starts_with("state.") {
-                    let js_value = strip_at_refs(value);
-                    js.push_str(&format!("  state.set('{}', state.get('{}') {} {});\n", target, target, &op[..1], js_value));
-                } else {
-                    js.push_str(&format!("  {} {} {};\n", target, op, value));
-                }
-                continue;
-            }
         }
 
         // Function body: "count = count + 1" → "state.set('count', state.get('count') + 1);"
@@ -1462,12 +1463,14 @@ fn extract_state_keys(expr: &str) -> Vec<String> {
     let mut keys = Vec::new();
     let mut current = String::new();
     let mut in_string = false;
+    let mut after_dot = false;
     let mut chars = expr.chars().peekable();
 
     while let Some(c) = chars.next() {
         if c == '"' || c == '\'' {
             in_string = !in_string;
-            flush_ident(&mut current, &mut keys);
+            flush_ident(&mut current, &mut keys, after_dot);
+            after_dot = false;
             continue;
         }
         if in_string {
@@ -1476,19 +1479,25 @@ fn extract_state_keys(expr: &str) -> Vec<String> {
         if c.is_alphanumeric() || c == '_' {
             current.push(c);
         } else {
-            if c != '.' {
-                flush_ident(&mut current, &mut keys);
+            if c == '.' {
+                // Flush the identifier before the dot (it's a state var)
+                flush_ident(&mut current, &mut keys, false);
+                after_dot = true;
+            } else {
+                // Flush and don't treat as state var if after dot
+                flush_ident(&mut current, &mut keys, after_dot);
+                after_dot = false;
             }
         }
     }
-    flush_ident(&mut current, &mut keys);
+    flush_ident(&mut current, &mut keys, after_dot);
     keys
 }
 
-fn flush_ident(current: &mut String, keys: &mut Vec<String>) {
+fn flush_ident(current: &mut String, keys: &mut Vec<String>, after_dot: bool) {
     if !current.is_empty() {
         let token = current.clone();
-        if !is_builtin(&token) {
+        if !after_dot && !is_builtin(&token) {
             keys.push(token);
         }
         current.clear();
@@ -1529,8 +1538,8 @@ fn kyle_to_js_expr(expr: &str) -> String {
             current.push(c);
         } else {
             if c == '(' {
-                // Function call — don't wrap function name
-                flush_token(&mut current, &mut out, false, false);
+                // Function call — don't wrap function name if it's after a dot (method call)
+                flush_token(&mut current, &mut out, after_dot, false);
                 out.push(c);
                 after_dot = false;
             } else if c == '.' {
