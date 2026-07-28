@@ -546,7 +546,23 @@ fn gen_node(node: &UiNode, js: &mut String, indent: usize, parent: &str, model: 
             js.push_str(&format!("{}}}\n", ind));
         }
         UiNode::For { item, list, body } => {
-            js.push_str(&format!("{}for (const {} of {}) {{\n", ind, item, list));
+            // Convert Kyle range syntax "0..30" to JS array
+            let js_list = if list.contains("..") {
+                let parts: Vec<&str> = list.split("..").collect();
+                if parts.len() == 2 {
+                    let start = parts[0].trim();
+                    let end = parts[1].trim();
+                    let start_n: i32 = start.parse().unwrap_or(0);
+                    let end_n: i32 = end.parse().unwrap_or(0);
+                    let len = (end_n - start_n).max(0);
+                    format!("Array.from({{length: {}}}, (_, i) => i + {})", len, start_n)
+                } else {
+                    list.to_string()
+                }
+            } else {
+                list.to_string()
+            };
+            js.push_str(&format!("{}for (const {} of {}) {{\n", ind, item, js_list));
             for child in body {
                 gen_node(child, js, indent + 4, parent, model);
             }
