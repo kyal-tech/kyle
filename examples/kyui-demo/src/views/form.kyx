@@ -36,7 +36,7 @@
                 <button text="Enviar" style=Primary click=@handle_submit />
 
                 @if submitted:
-                    <text value="Formulario enviado!" style=style(color: color("#10B981")) />
+                    <text value="Formulario enviado!" style=SuccessText />
             </vstack>
         </card>
     </vstack>

@@ -423,8 +423,8 @@ impl KyxParser {
                         Ok(KyxAttr { name, value: AttrValue::Expr(expr) })
                     }
                     _ => {
-                        let val = self.read_while(|c| c != ' ' && c != '\t' && c != '>' && c != '/' && c != '\n')?;
-                        Ok(KyxAttr { name, value: AttrValue::String(val) })
+                        let val = self.read_expression()?;
+                        Ok(KyxAttr { name, value: AttrValue::Expr(val) })
                     }
                 }
             }

@@ -799,7 +799,7 @@ fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str, tag: &s
                     "alt" => {
                         js.push_str(&format!("{}{}.alt = state.get({:?});\n", ind, el, expr));
                     }
-                    "tpl" => {
+                    "tpl" | "style" => {
                         js.push_str(&format!("{}applyStyle({}, state.get({:?}));\n", ind, el, expr));
                     }
                     "animation" => {

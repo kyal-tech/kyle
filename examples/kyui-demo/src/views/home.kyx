@@ -33,7 +33,7 @@
                 </hstack>
 
                 @if count >= 5:
-                    <text value="¡Llegaste a 5 clicks!" style=style(color: color("#10B981"), font_weight: font_weight.bold) />
+                    <text value="¡Llegaste a 5 clicks!" style=SuccessText />
 
                 <divider />
 

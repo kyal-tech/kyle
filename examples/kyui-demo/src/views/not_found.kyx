@@ -1,7 +1,7 @@
 # Not Found
 <view>
     <vstack spacing=16 alignment=alignment.center>
-        <text value="404" style=style(font_size: 72, font_weight: font_weight.bold, color: color("#0066FF")) />
+        <text value="404" style=title_404 />
         <text value="Página no encontrada" />
         <link href="/" text="Volver al inicio" />
     </vstack>

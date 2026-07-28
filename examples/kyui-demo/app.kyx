@@ -1,5 +1,4 @@
 # Kyle UI — Demo Completo
-# Muestra: binding, lifecycle, eventos, estilos, transiciones, imágenes, listas, formularios
 
 from views.home import home
 from views.form import form
@@ -25,6 +24,15 @@ style<button> Secondary:
 style<text> Title:
     font_size = 24
     font_weight = font_weight.bold
+
+style<text> SuccessText:
+    color = color("#10B981")
+    font_weight = font_weight.bold
+
+style<text> title_404:
+    font_size = 72
+    font_weight = font_weight.bold
+    color = color("#0066FF")
 
 style<card> Elevated:
     background = color("#FFFFFF")
