@@ -684,10 +684,10 @@ fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str, tag: &s
                     } else {
                         format!("{}", expr)
                     };
-                    js.push_str(&format!("{}const __upd_{} = () => {{ {}.style[{}] = {}; }};\n", ind, el, el, css_prop, css_val));
-                    js.push_str(&format!("{}__upd_{}();\n", ind, el));
+                    js.push_str(&format!("{}const __upd_{}_{} = () => {{ {}.style[{}] = {}; }};\n", ind, el, attr.name, el, css_prop, css_val));
+                    js.push_str(&format!("{}__upd_{}_{}();\n", ind, el, attr.name));
                     // Watch count as a heuristic
-                    js.push_str(&format!("{}state.watch('count', __upd_{});\n", ind, el));
+                    js.push_str(&format!("{}state.watch('count', __upd_{}_{});\n", ind, el, attr.name));
                 }
                 AttrValue::Flag => {
                     js.push_str(&format!("{}{}.style[{}] = '1';\n", ind, el, css_prop));
@@ -776,11 +776,12 @@ fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str, tag: &s
                             js.push_str(&format!("{}Binding.oneWay({}, 'textContent', state, {:?});\n", ind, el, expr));
                         } else {
                             let js_expr = kyle_to_js_expr(expr);
-                            js.push_str(&format!("{}const __upd_{} = () => {{ {}.textContent = {}; }};\n", ind, el, el, js_expr));
-                            js.push_str(&format!("{}__upd_{}();\n", ind, el));
+                            let upd_name = format!("__upd_{}_{}", el, attr.name);
+                            js.push_str(&format!("{}const {} = () => {{ {}.textContent = {}; }};\n", ind, upd_name, el, js_expr));
+                            js.push_str(&format!("{}__upd_{}_{}();\n", ind, el, attr.name));
                             let state_keys = extract_state_keys(expr);
                             for key in &state_keys {
-                                js.push_str(&format!("{}state.watch({:?}, __upd_{});\n", ind, key, el));
+                                js.push_str(&format!("{}state.watch({:?}, __upd_{}_{});\n", ind, key, el, attr.name));
                             }
                         }
                     }
@@ -789,11 +790,12 @@ fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str, tag: &s
                             js.push_str(&format!("{}if (state.get({:?}) != null) {}.src = state.get({:?});\n", ind, expr, el, expr));
                         } else {
                             let js_expr = kyle_to_js_expr(expr);
-                            js.push_str(&format!("{}const __upd_{} = () => {{ if ({}) {}.src = {}; }};\n", ind, el, js_expr, el, js_expr));
-                            js.push_str(&format!("{}__upd_{}();\n", ind, el));
+                            let upd_name = format!("__upd_{}_{}", el, attr.name);
+                            js.push_str(&format!("{}const {} = () => {{ if ({}) {}.src = {}; }};\n", ind, upd_name, js_expr, el, js_expr));
+                            js.push_str(&format!("{}__upd_{}_{}();\n", ind, el, attr.name));
                             let state_keys = extract_state_keys(expr);
                             for key in &state_keys {
-                                js.push_str(&format!("{}state.watch({:?}, __upd_{});\n", ind, key, el));
+                                js.push_str(&format!("{}state.watch({:?}, __upd_{}_{});\n", ind, key, el, attr.name));
                             }
                         }
                     }
@@ -822,8 +824,9 @@ fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str, tag: &s
                         if is_simple_key(expr) {
                             js.push_str(&format!("{}{}.style['{}'] = state.get({:?});\n", ind, el, css_name, expr));
                         } else {
-                            js.push_str(&format!("{}const __upd_{} = () => {{ {}.style['{}'] = {}; }};\n", ind, el, el, css_name, expr));
-                            js.push_str(&format!("{}__upd_{}();\n", ind, el));
+                            let upd_name = format!("__upd_{}_{}", el, attr.name);
+                            js.push_str(&format!("{}const {} = () => {{ {}.style['{}'] = {}; }};\n", ind, upd_name, el, css_name, expr));
+                            js.push_str(&format!("{}__upd_{}_{}();\n", ind, el, attr.name));
                         }
                     }
                 }
