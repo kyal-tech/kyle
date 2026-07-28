@@ -336,7 +336,7 @@ fn gen_node(node: &UiNode, js: &mut String, indent: usize, parent: &str, model: 
                 js.push_str(&format!("{}portalManager.registerOutlet({:?}, {});\n", ind, name, el));
             }
             js.push_str(&format!("{}const {} = document.createElement('{}');\n", ind, el, tag_js));
-            gen_attrs(attrs, js, indent, &el);
+            gen_attrs(attrs, js, indent, &el, tag_js);
             gen_events(attrs, js, indent, &el, child_model);
 
             // App component: handle title and icon
@@ -457,7 +457,7 @@ fn gen_node(node: &UiNode, js: &mut String, indent: usize, parent: &str, model: 
 
             let tag_js = js_tag(tag);
             js.push_str(&format!("{}const {} = document.createElement('{}');\n", ind, el, tag_js));
-            gen_attrs(attrs, js, indent, &el);
+            gen_attrs(attrs, js, indent, &el, tag_js);
             gen_events(attrs, js, indent, &el, model);
 
             // Link component: intercept clicks for client-side navigation
@@ -604,7 +604,7 @@ fn interpolate_state(val: &str) -> String {
     result
 }
 
-fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str) {
+fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str, tag: &str) {
     let ind = " ".repeat(indent + 2);
     for attr in attrs {
         // Check if this is a style-related attribute
@@ -691,6 +691,9 @@ fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str) {
                     "class" | "id" | "type" | "placeholder" | "src" | "alt" | "href" => {
                         js.push_str(&format!("{}{}.setAttribute({:?}, {:?});\n", ind, el, attr.name, val));
                     }
+                    "fallback" => {
+                        js.push_str(&format!("{}{}.setAttribute('onerror', 'this.src=\"{}\"');\n", ind, el, val));
+                    }
                     _ => {
                         // Unknown attr: try as style first, else setAttribute
                         let css_name = attr.name.replace("_", "-");
@@ -716,6 +719,22 @@ fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str) {
                                 js.push_str(&format!("{}state.watch({:?}, __upd);\n", ind, key));
                             }
                         }
+                    }
+                    "src" => {
+                        if is_simple_key(expr) {
+                            js.push_str(&format!("{}if (state.get({:?}) != null) {}.src = state.get({:?});\n", ind, expr, el, expr));
+                        } else {
+                            let js_expr = kyle_to_js_expr(expr);
+                            js.push_str(&format!("{}const __upd = () => {{ if ({}) {}.src = {}; }};\n", ind, js_expr, el, js_expr));
+                            js.push_str(&format!("{}__upd();\n", ind));
+                            let state_keys = extract_state_keys(expr);
+                            for key in &state_keys {
+                                js.push_str(&format!("{}state.watch({:?}, __upd);\n", ind, key));
+                            }
+                        }
+                    }
+                    "alt" => {
+                        js.push_str(&format!("{}{}.alt = state.get({:?});\n", ind, el, expr));
                     }
                     "tpl" => {
                         js.push_str(&format!("{}applyStyle({}, state.get({:?}));\n", ind, el, expr));
@@ -746,7 +765,15 @@ fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str) {
                 }
             }
             AttrValue::Flag => {
-                js.push_str(&format!("{}{}.setAttribute({:?}, '');\n", ind, el, attr.name));
+                if attr.name == "lazy" && tag == "img" {
+                    // Native browser lazy loading + fade in
+                    js.push_str(&format!("{}{}.loading = 'lazy';\n", ind, el));
+                    js.push_str(&format!("{}{}.style.opacity = '0.5';\n", ind, el));
+                    js.push_str(&format!("{}{}.style.transition = 'opacity 0.3s';\n", ind, el));
+                    js.push_str(&format!("{}{}.onload = () => {{ {}.style.opacity = '1'; }};\n", ind, el, el));
+                } else {
+                    js.push_str(&format!("{}{}.setAttribute({:?}, '');\n", ind, el, attr.name));
+                }
             }
         }
     }
