@@ -1,0 +1,43 @@
+# Formulario — todos los inputs
+<view>
+    @(
+        email: ^str = ""
+        password: ^str = ""
+        bio: ^str = ""
+        subscribe: ^bool = true
+        country: ^str = ""
+        volume: ^f32 = 50.0
+        submitted: ^bool = false
+
+        fn handle_submit():
+            submitted = true
+    )
+
+    <vstack spacing=24>
+        <card>
+            <vstack spacing=16>
+                <text value="Formulario" style=Title />
+
+                <text_field bind=@email label="Email" placeholder="email@ejemplo.com" />
+                <password_field bind=@password label="Contraseña" placeholder="******" />
+                <text_area bind=@bio label="Biografía" placeholder="Sobre ti..." rows=3 />
+                <checkbox bind=@subscribe label="Suscribirme" />
+                <switch bind=@subscribe label="Notificaciones" />
+                <select bind=@country label="País">
+                    <option value="pe" label="Perú" />
+                    <option value="cl" label="Chile" />
+                </select>
+                <slider bind=@volume label="Volumen" min=0 max=100 />
+                <hstack spacing=12>
+                    <radio bind=@country value="pe" label="Perú" />
+                    <radio bind=@country value="cl" label="Chile" />
+                </hstack>
+
+                <button text="Enviar" style=Primary click=@handle_submit />
+
+                @if submitted:
+                    <text value="Formulario enviado!" style=style(color: color("#10B981")) />
+            </vstack>
+        </card>
+    </vstack>
+</view>

@@ -1,0 +1,41 @@
+# Kyle UI — Demo Completo
+# Muestra: binding, lifecycle, eventos, estilos, transiciones, imágenes, listas, formularios
+
+from views.home import home
+from views.form import form
+from views.not_found import not_found
+
+style<button> Primary:
+    background = color("#0066FF")
+    color = color("#FFFFFF")
+    border_radius = 8
+    padding = spacing.all(12)
+    font_size = 16
+    font_weight = font_weight.medium
+    transition = transition(property: "all", duration: 200, easing: easing.ease_out)
+
+style<button> Secondary:
+    background = color("transparent")
+    color = color("#0066FF")
+    border = border(2, color("#0066FF"), border_style.solid)
+    border_radius = 8
+    padding = spacing.all(12)
+    font_size = 16
+
+style<text> Title:
+    font_size = 24
+    font_weight = font_weight.bold
+
+style<card> Elevated:
+    background = color("#FFFFFF")
+    border_radius = 12
+    padding = spacing.all(20)
+    shadow = shadow(x: 0, y: 2, blur: 12, color: color("#000000").with_alpha(0.08))
+
+<app title="Kyle UI Demo">
+    <router>
+        <route path="/" component=home title="Inicio" />
+        <route path="/form" component=form title="Formulario" />
+        <route path="*" component=not_found title="404" />
+    </router>
+</app>

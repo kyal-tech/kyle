@@ -1,0 +1,53 @@
+# Home — binding, contador, estilos, imágenes, lista virtual
+<view>
+    @(
+        count: ^i32 = 0
+        name: ^str = "Mundo"
+        hovered: ^bool = false
+        loaded: ^bool = false
+        items: ^{str} = {}
+        img_src: ^str = "https://picsum.photos/seed/1/400/300"
+
+        fn on_mounted():
+            loaded = true
+            items = {"Manzana", "Banana", "Naranja", "Uva", "Fresa"}
+
+        fn increment():
+            count += 1
+
+        fn reset():
+            count = 0
+    )
+
+    <vstack spacing=24>
+        <card>
+            <vstack spacing=16>
+                <text value="Kyle UI Demo" style=Title />
+                <text value=@"Hola " + name />
+                <text_field bind=@name label="Nombre" placeholder="Tu nombre" />
+
+                <text value=@"Clicks: " + count.to_str() />
+                <hstack spacing=12>
+                    <button text="+1" style=Primary click=@increment />
+                    <button text="Reset" style=Secondary click=@reset />
+                </hstack>
+
+                @if count >= 5:
+                    <text value="¡Llegaste a 5 clicks!" style=style(color: color("#10B981"), font_weight: font_weight.bold) />
+
+                <divider />
+
+                <text value="Imagen con lazy loading" />
+                <img src=@img_src width=400 height=300 lazy />
+
+                <divider />
+
+                <text value="Lista de frutas" />
+                <list virtual=true item_height=40>
+                    @for(item in items):
+                        <text value=@item />
+                </list>
+            </vstack>
+        </card>
+    </vstack>
+</view>
