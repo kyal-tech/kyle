@@ -1,0 +1,58 @@
+# Test minimal del lexer — borrowing minimal, todo por valor
+
+enum TokenKind:
+    Plus
+    Minus
+    Star
+    Integer(str)
+    Identifier(str)
+    Eof
+
+final class Token:
+    kind: TokenKind
+    text: str
+
+fn tokenize(source: &str) ^{Token}:
+    result: ^{Token} = {Token{kind: TokenKind.Eof, text: ""}}
+    result.pop()
+    pos: ^i32 = 0
+    while pos.get() < source.len():
+        c = source[pos.get()]
+        if c == "+":
+            result.push(Token{kind: TokenKind.Plus, text: "+"})
+            pos.set(pos.get() + 1)
+        elif c == "-":
+            result.push(Token{kind: TokenKind.Minus, text: "-"})
+            pos.set(pos.get() + 1)
+        elif c == "*":
+            result.push(Token{kind: TokenKind.Star, text: "*"})
+            pos.set(pos.get() + 1)
+        elif c >= "0" and c <= "9":
+            num: ^str = ""
+            while pos.get() < source.len() and source[pos.get()] >= "0" and source[pos.get()] <= "9":
+                num.set(num.get() + source[pos.get()])
+                pos.set(pos.get() + 1)
+            result.push(Token{kind: TokenKind.Integer(num.get()), text: num.get()})
+        elif c >= "a" and c <= "z" or c >= "A" and c <= "Z" or c == "_":
+            word: ^str = ""
+            while pos.get() < source.len():
+                nc = source[pos.get()]
+                if (nc >= "a" and nc <= "z") or (nc >= "A" and nc <= "Z") or (nc >= "0" and nc <= "9") or nc == "_":
+                    word.set(word.get() + nc)
+                    pos.set(pos.get() + 1)
+                else:
+                    break
+            result.push(Token{kind: TokenKind.Identifier(word.get()), text: word.get()})
+        elif c == " " or c == "\t" or c == "\n":
+            pos.set(pos.get() + 1)
+        else:
+            pos.set(pos.get() + 1)
+    result.push(Token{kind: TokenKind.Eof, text: ""})
+    return result
+
+fn main():
+    source = "fn add(a + b * 42)"
+    tokens = tokenize(&source)
+    print("Tokens: " + tokens.len().to_str())
+    for tok in tokens:
+        print("  " + tok.text)

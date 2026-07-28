@@ -1,0 +1,44 @@
+# Kyle Syntax Verification File
+
+# 1. Variables and basic types
+a = 10
+b: ^i32 = 20
+b += 5
+
+# 2. String interpolation and operations
+text = "Kyle"
+greeting = "Hello, {text}!"
+println(greeting)
+
+# 3. Class and methods (using this implicitly)
+final class Person:
+    name: str
+    age: ^i32
+
+    fn introduce():
+        curr_age = this.age
+        println("Hola, mi nombre es {this.name} y tengo {curr_age} anos.")
+
+    fn have_birthday():
+        this.age += 1
+
+# Instantiate Person
+p: ^Person = Person { name: "Alice", age: 30 }
+p.introduce()
+p.have_birthday()
+p.introduce()
+
+# 4. Pattern matching (match)
+status_code = 200
+msg = match status_code:
+    200: "OK"
+    404: "Not Found"
+    _: "Unknown"
+println("Status: {msg}")
+
+# 5. Functions passing copy types (str)
+fn print_val(s: str):
+    println("String value: {s}")
+
+str_val = "Antigravity Pair Programmer"
+print_val(str_val)

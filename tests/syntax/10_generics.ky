@@ -1,0 +1,21 @@
+# Genericos — tipos y funciones genericas
+
+final class Box<T>:
+    value: T
+
+    fn get(this) T:
+        return this.value
+
+final class Pair<A, B>:
+    first: A
+    second: B
+
+fn firstOf<T>(items: &{T}) T:
+    return items[0]
+
+fn main():
+    b = Box{value: 42}
+    v = b.get()
+    print(v.to_str())
+
+    p = Pair{first: 1, second: "hello"}

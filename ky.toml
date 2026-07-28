@@ -1,0 +1,11 @@
+name = "ky"
+version = "1.0.0"
+edition = "2024"
+authors = ["Kynera"]
+license = "MIT"
+
+[compiler]
+optimization = "O2"
+target = "native"
+
+[dependencies]

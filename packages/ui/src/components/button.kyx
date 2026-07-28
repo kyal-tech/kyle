@@ -1,0 +1,40 @@
+# button — botón clickeable con estilos
+# Props: text, tpl, click, disabled, type
+
+style<button> Primary:
+    background = Color("#0066FF")
+    color = Color("#FFFFFF")
+    border_radius = 8
+    font_size = 14
+    font_weight = FontWeight.Bold
+    padding = Spacing.all(12)
+    cursor = Cursor.Pointer
+
+style<button> Secondary:
+    background = Color("transparent")
+    color = Color("#0066FF")
+    border = Border(2, Color("#0066FF"), BorderStyle.Solid)
+    border_radius = 8
+    font_size = 14
+    padding = Spacing.all(12)
+    cursor = Cursor.Pointer
+
+style<button> Danger:
+    background = Color("#DC3545")
+    color = Color("#FFFFFF")
+    border_radius = 8
+    font_size = 14
+    padding = Spacing.all(12)
+    cursor = Cursor.Pointer
+
+style<button> Ghost:
+    background = Color("transparent")
+    color = Color("#666666")
+    border_radius = 8
+    font_size = 14
+    padding = Spacing.all(12)
+    cursor = Cursor.Pointer
+
+<button tpl=@tpl disabled=@disabled click=@click>
+    <slot />
+</button>

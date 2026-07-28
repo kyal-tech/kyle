@@ -1,0 +1,157 @@
+# Driver Kyle — Pipeline de compilacion
+# Por ahora: demo inline sin CLI args
+
+@link "c"
+extern fn ky_print(ptr, i32)
+
+IDENT: ^str = ""
+POS: ^i32 = 0
+SRC: ^str = ""
+
+fn reset():
+    SRC = ""
+    POS = 0
+
+fn is_digit(c: &str) bool:
+    return c >= "0" and c <= "9"
+
+fn is_ident_cont(c: &str) bool:
+    a = (c >= "a" and c <= "z") or (c >= "A" and c <= "Z")
+    d = c >= "0" and c <= "9"
+    return a or d or c == "_"
+
+fn skip_ws():
+    while POS.get() < SRC.len():
+        c = SRC[POS.get()]
+        if c == " " or c == "\t" or c == "\r":
+            POS.set(POS.get() + 1)
+        elif c == "#":
+            POS.set(POS.get() + 1)
+            while POS.get() < SRC.len():
+                if SRC[POS.get()] == "\n":
+                    break
+                POS.set(POS.get() + 1)
+        else:
+            break
+
+# ─── Pipeline: tokenize ────────────────────────────────────
+
+fn tokenize() ^{str}:
+    tokens: ^{str} = {"EOF"}
+    tokens.pop()
+    while POS.get() < SRC.len():
+        skip_ws()
+        if POS.get() >= SRC.len(): break
+        c = SRC[POS.get()]
+        if c == "\n":
+            POS.set(POS.get() + 1)
+            tokens.push("NEWLINE")
+        elif c == "+":
+            tokens.push("+")
+            POS.set(POS.get() + 1)
+        elif c == "-":
+            tokens.push("-")
+            POS.set(POS.get() + 1)
+        elif c == "*":
+            tokens.push("*")
+            POS.set(POS.get() + 1)
+        elif c == "/":
+            tokens.push("/")
+            POS.set(POS.get() + 1)
+        elif c == "(":
+            tokens.push("(")
+            POS.set(POS.get() + 1)
+        elif c == ")":
+            tokens.push(")")
+            POS.set(POS.get() + 1)
+        elif c == "=":
+            tokens.push("=")
+            POS.set(POS.get() + 1)
+        elif c == ":":
+            tokens.push(":")
+            POS.set(POS.get() + 1)
+        elif is_digit(&c):
+            num: ^str = ""
+            while POS.get() < SRC.len() and is_digit(&SRC[POS.get()]):
+                num.set(num.get() + SRC[POS.get()])
+                POS.set(POS.get() + 1)
+            tokens.push("NUM:" + num.get())
+        elif is_ident_cont(&c):
+            word: ^str = ""
+            while POS.get() < SRC.len():
+                ch = SRC[POS.get()]
+                if is_ident_cont(&ch):
+                    word.set(word.get() + ch)
+                    POS.set(POS.get() + 1)
+                else:
+                    break
+            if word.get() == "fn":
+                tokens.push("FN")
+            elif word.get() == "if":
+                tokens.push("IF")
+            elif word.get() == "return":
+                tokens.push("RETURN")
+            else:
+                tokens.push("ID:" + word.get())
+        else:
+            POS.set(POS.get() + 1)
+    return tokens
+
+# ─── Pipeline: check (simple) ──────────────────────────────
+
+OUT: ^str = ""
+
+fn check_source():
+    reset()
+    OUT = ""
+    while POS.get() < SRC.len():
+        skip_ws()
+        if POS.get() >= SRC.len(): break
+        if SRC[POS.get()] == "\n":
+            POS.set(POS.get() + 1)
+            continue
+        if SRC[POS.get()] == "#":
+            while POS.get() < SRC.len():
+                if SRC[POS.get()] == "\n": break
+                POS.set(POS.get() + 1)
+            continue
+        if is_ident_cont(&SRC[POS.get()]):
+            word: ^str = ""
+            while POS.get() < SRC.len():
+                ch = SRC[POS.get()]
+                if is_ident_cont(&ch):
+                    word.set(word.get() + ch)
+                    POS.set(POS.get() + 1)
+                else:
+                    break
+            OUT.set(OUT.get() + "ID:" + word.get() + " ")
+        elif is_digit(&SRC[POS.get()]):
+            num: ^str = ""
+            while POS.get() < SRC.len() and is_digit(&SRC[POS.get()]):
+                num.set(num.get() + SRC[POS.get()])
+                POS.set(POS.get() + 1)
+            OUT.set(OUT.get() + "NUM:" + num.get() + " ")
+        else:
+            OUT.set(OUT.get() + SRC[POS.get()] + " ")
+            POS.set(POS.get() + 1)
+
+# ─── Pipeline: full demo ───────────────────────────────────
+
+fn demo():
+    source = "fn add(a: i32, b: i32) i32:\n    return a + b\n"
+    print("=== Source ===")
+    print(source)
+    SRC = source
+    POS = 0
+    tokens = tokenize()
+    print("=== Tokens ===")
+    for t in tokens:
+        print("  " + t)
+    SRC = source
+    POS = 0
+    check_source()
+    print("=== Checked ===")
+    print(OUT.get())
+
+fn main():
+    demo()

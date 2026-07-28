@@ -1,0 +1,233 @@
+# LLVM C API bindings — Kyle wrappers para libLLVM
+# Permite que el codegen Kyle genere LLVM IR y binarios.
+# ~150 extern fn esenciales, mismo patron que packages/http/
+
+# ─── Module ─────────────────────────────────────────────────
+
+@link "llvm"
+extern fn LLVMModuleCreateWithName(name: ptr) ptr
+extern fn LLVMDisposeModule(mod: ptr)
+extern fn LLVMGetModuleIdentifier(mod: ptr, len: ptr) ptr
+extern fn LLVMSetModuleIdentifier(mod: ptr, name: ptr, len: i64)
+
+# ─── Types ─────────────────────────────────────────────────
+
+extern fn LLVMInt1Type() ptr
+extern fn LLVMInt8Type() ptr
+extern fn LLVMInt32Type() ptr
+extern fn LLVMInt64Type() ptr
+extern fn LLVMFloatType() ptr
+extern fn LLVMDoubleType() ptr
+extern fn LLVMPointerType(inner: ptr, addrspace: i32) ptr
+extern fn LLVMVoidType() ptr
+extern fn LLVMFunctionType(ret: ptr, params: ptr, count: i32, variadic: i32) ptr
+extern fn LLVMStructType(elems: ptr, count: i32, packed: i32) ptr
+extern fn LLVMArrayType(elem: ptr, count: i32) ptr
+extern fn LLVMVectorType(elem: ptr, count: i32) ptr
+
+# ─── Values ────────────────────────────────────────────────
+
+extern fn LLVMAddFunction(mod: ptr, name: ptr, fn_type: ptr) ptr
+extern fn LLVMGetNamedFunction(mod: ptr, name: ptr) ptr
+extern fn LLVMCountParams(fn_val: ptr) i32
+extern fn LLVMGetParams(fn_val: ptr, params: ptr)
+extern fn LLVMGetParam(fn_val: ptr, index: i32) ptr
+extern fn LLVMSetParamAlignment(param: ptr, align: i32)
+extern fn LLVMAddGlobal(mod: ptr, type_: ptr, name: ptr) ptr
+extern fn LLVMSetInitializer(global: ptr, val: ptr)
+extern fn LLVMIsDeclaration(val: ptr) i32
+
+# ─── Constants ─────────────────────────────────────────────
+
+extern fn LLVMConstInt(int_type: ptr, val: i64, sign_ext: i32) ptr
+extern fn LLVMConstReal(real_type: ptr, val: f64) ptr
+extern fn LLVMConstString(str: ptr, len: i32, dont_null: i32) ptr
+extern fn LLVMConstNull(type_: ptr) ptr
+extern fn LLVMConstAllOnes(type_: ptr) ptr
+extern fn LLVMConstPointerNull(type_: ptr) ptr
+extern fn LLVMConstStruct(consts: ptr, count: i32, packed: i32) ptr
+extern fn LLVMConstArray(type_: ptr, vals: ptr, count: i32) ptr
+extern fn LLVMConstGEP(type_: ptr, val: ptr, indices: ptr, count: i32) ptr
+
+# ─── Builder ───────────────────────────────────────────────
+
+extern fn LLVMCreateBuilder() ptr
+extern fn LLVMPositionBuilderAtEnd(builder: ptr, block: ptr)
+extern fn LLVMInsertBasicBlock(block: ptr, name: ptr) ptr
+
+# ─── Basic Blocks ──────────────────────────────────────────
+
+extern fn LLVMAppendBasicBlock(fn_val: ptr, name: ptr) ptr
+extern fn LLVMGetBasicBlockName(block: ptr) ptr
+extern fn LLVMCountBasicBlocks(fn_val: ptr) i32
+extern fn LLVMGetBasicBlocks(fn_val: ptr, blocks: ptr)
+
+# ─── Instructions ──────────────────────────────────────────
+
+# Alloca
+extern fn LLVMBuildAlloca(builder: ptr, type_: ptr, name: ptr) ptr
+
+# Arithmetic
+extern fn LLVMBuildAdd(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildNSWAdd(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildNUWAdd(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildFAdd(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildSub(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildFSub(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildMul(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildFMul(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildUDiv(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildSDiv(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildFDiv(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildURem(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildSRem(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildFRem(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+
+# Comparison
+extern fn LLVMBuildICmp(builder: ptr, op: i32, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildFCmp(builder: ptr, op: i32, lhs: ptr, rhs: ptr, name: ptr) ptr
+
+# Bitwise
+extern fn LLVMBuildAnd(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildOr(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildXor(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildShl(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildLShr(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildAShr(builder: ptr, lhs: ptr, rhs: ptr, name: ptr) ptr
+extern fn LLVMBuildNot(builder: ptr, val: ptr, name: ptr) ptr
+
+# Memory
+extern fn LLVMBuildLoad(builder: ptr, ptr_val: ptr, name: ptr) ptr
+extern fn LLVMBuildStore(builder: ptr, val: ptr, ptr_val: ptr) ptr
+extern fn LLVMBuildGEP(builder: ptr, ptr_val: ptr, indices: ptr, count: i32, name: ptr) ptr
+extern fn LLVMBuildStructGEP(builder: ptr, ptr_val: ptr, index: i32, name: ptr) ptr
+extern fn LLVMBuildPointerCast(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildIntToPtr(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildPtrToInt(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildBitCast(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildZExt(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildSExt(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildTrunc(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildFPToUI(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildFPToSI(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildUIToFP(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildSIToFP(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildFPTrunc(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+extern fn LLVMBuildFPExt(builder: ptr, val: ptr, dest_type: ptr, name: ptr) ptr
+
+# Call
+extern fn LLVMBuildCall(builder: ptr, fn_val: ptr, args: ptr, count: i32, name: ptr) ptr
+extern fn LLVMBuildTailCall(builder: ptr, fn_val: ptr, args: ptr, count: i32, name: ptr) ptr
+
+# Control flow
+extern fn LLVMBuildRetVoid(builder: ptr) ptr
+extern fn LLVMBuildRet(builder: ptr, val: ptr) ptr
+extern fn LLVMBuildBr(builder: ptr, block: ptr) ptr
+extern fn LLVMBuildCondBr(builder: ptr, cond: ptr, then_block: ptr, else_block: ptr) ptr
+extern fn LLVMBuildSwitch(builder: ptr, val: ptr, default: ptr, cases: i32) ptr
+extern fn LLVMBuildUnreachable(builder: ptr) ptr
+
+# Select
+extern fn LLVMBuildSelect(builder: ptr, cond: ptr, true_val: ptr, false_val: ptr, name: ptr) ptr
+
+# Extract/Insert (structs)
+extern fn LLVMBuildExtractValue(builder: ptr, val: ptr, index: i32, name: ptr) ptr
+extern fn LLVMBuildInsertValue(builder: ptr, val: ptr, elem: ptr, index: i32, name: ptr) ptr
+
+# Phi
+extern fn LLVMBuildPhi(builder: ptr, type_: ptr, name: ptr) ptr
+extern fn LLVMAddIncoming(phi: ptr, vals: ptr, blocks: ptr, count: i32)
+
+# ─── Target Machine ────────────────────────────────────────
+
+extern fn LLVMGetDefaultTargetTriple() ptr
+extern fn LLVMNormalizeTargetTriple(triple: ptr) ptr
+extern fn LLVMGetHostCPUName() ptr
+extern fn LLVMGetHostCPUFeatures() ptr
+extern fn LLVMCreateTargetMachine(target: ptr, triple: ptr, cpu: ptr, features: ptr, level: i32, reloc: i32, code_model: i32) ptr
+extern fn LLVMDisposeTargetMachine(machine: ptr)
+
+# ─── Object emission ───────────────────────────────────────
+
+extern fn LLVMTargetMachineEmitToFile(machine: ptr, mod: ptr, filename: ptr, codegen: i32, err: ptr) i32
+extern fn LLVMTargetMachineEmitToMemoryBuffer(machine: ptr, mod: ptr, codegen: i32, err: ptr, buf: ptr) i32
+
+# ─── Verification ──────────────────────────────────────────
+
+extern fn LLVMVerifyModule(mod: ptr, action: i32, err: ptr) i32
+
+# ─── Optimization passes ───────────────────────────────────
+
+extern fn LLVMCreatePassManager() ptr
+extern fn LLVMAddConstantPropagationPass(pm: ptr)
+extern fn LLVMAddInstructionCombiningPass(pm: ptr)
+extern fn LLVMAddReassociatePass(pm: ptr)
+extern fn LLVMAddGVNPass(pm: ptr)
+extern fn LLVMAddCFGSimplificationPass(pm: ptr)
+extern fn LLVMAddLICMPass(pm: ptr)
+extern fn LLVMAddAggressiveDCEPass(pm: ptr)
+extern fn LLVMRunPassManager(pm: ptr, mod: ptr) i32
+
+# ─── LLVM IR output ────────────────────────────────────────
+
+extern fn LLVMPrintModuleToString(mod: ptr) ptr
+extern fn LLVMDisposeMessage(msg: ptr)
+
+# ═══════════════════════════════════════════════════════════════
+# Wrappers Kyle (opcionales, para uso desde Kyle)
+# ═══════════════════════════════════════════════════════════════
+
+fn create_module(name: &str) ptr:
+    return LLVMModuleCreateWithName(ky_ptr_read_ptr(name as ptr))
+
+fn i32_type() ptr:
+    return LLVMInt32Type()
+
+fn i64_type() ptr:
+    return LLVMInt64Type()
+
+fn void_type() ptr:
+    return LLVMVoidType()
+
+fn ptr_type() ptr:
+    return LLVMPointerType(LLVMInt8Type(), 0)
+
+fn fn_type(ret: ptr, params: ptr, count: i32, variadic: i32) ptr:
+    return LLVMFunctionType(ret, params, count, variadic)
+
+fn add_fn(mod: ptr, name: &str, ft: ptr) ptr:
+    return LLVMAddFunction(mod, ky_ptr_read_ptr(name as ptr), ft)
+
+fn build_ret_void(builder: ptr):
+    LLVMBuildRetVoid(builder)
+
+fn print_module(mod: ptr) str:
+    msg = LLVMPrintModuleToString(mod)
+    if msg == 0 as ptr:
+        return ""
+    s: ptr = msg
+    result = s as str
+    LLVMDisposeMessage(msg)
+    return result
+
+# ═══════════════════════════════════════════════════════════════
+# Test: generate a minimal LLVM IR module
+# ═══════════════════════════════════════════════════════════════
+
+fn test_minimal():
+    mod = create_module(&"test")
+    i32 = i32_type()
+    ret_type = fn_type(void_type(), 0 as ptr, 0, 0)
+    fn_val = add_fn(mod, &"main", ret_type)
+    entry = LLVMAppendBasicBlock(fn_val, &"entry")
+    builder = LLVMCreateBuilder()
+    LLVMPositionBuilderAtEnd(builder, entry)
+    build_ret_void(builder)
+    ir = print_module(mod)
+    if ir != "":
+        print("=== LLVM IR ===")
+        print(ir)
+    LLVMDisposeModule(mod)
+
+fn main():
+    test_minimal()

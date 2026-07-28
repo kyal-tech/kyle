@@ -1,0 +1,125 @@
+# Kyle UI — Style Types
+# Tipos fuertemente tipados para el sistema de estilos.
+
+final class Color:
+    r: u8
+    g: u8
+    b: u8
+    a: f32 = 1.0
+
+    static fn from_hex(hex: str) Color:
+        Color(r: 0, g: 0, b: 0)
+
+    static fn from_rgba(r: u8, g: u8, b: u8, a: f32) Color:
+        Color(r, g, b, a)
+
+    static fn transparent() Color:
+        Color(r: 0, g: 0, b: 0, a: 0.0)
+
+    static fn black() Color:
+        Color(r: 0, g: 0, b: 0)
+
+    static fn white() Color:
+        Color(r: 255, g: 255, b: 255)
+
+    fn darken(this, amount: f32) Color:
+        Color(r: 0, g: 0, b: 0)
+
+    fn lighten(this, amount: f32) Color:
+        Color(r: 255, g: 255, b: 255)
+
+    fn with_alpha(this, a: f32) Color:
+        Color(r: this.r, g: this.g, b: this.b, a)
+
+final class Spacing:
+    top: f32
+    right: f32
+    bottom: f32
+    left: f32
+
+    static fn all(value: f32) Spacing:
+        Spacing(top: value, right: value, bottom: value, left: value)
+
+    static fn symmetric(h: f32, v: f32) Spacing:
+        Spacing(top: v, right: h, bottom: v, left: h)
+
+enum Length:
+    Px(f32)
+    Percent(f32)
+    Auto
+    Fill
+
+enum FontWeight:
+    Thin
+    Light
+    Normal
+    Medium
+    SemiBold
+    Bold
+    Black
+
+enum TextAlign:
+    Left
+    Center
+    Right
+    Justify
+
+enum BorderStyle:
+    Solid
+    Dashed
+    Dotted
+    None
+
+final class Border:
+    width: f32
+    color: Color
+    style: BorderStyle
+
+final class Shadow:
+    x: f32
+    y: f32
+    blur: f32
+    spread: f32
+    color: Color
+
+final class TextStyle:
+    font_family: str
+    font_size: f32
+    font_weight: FontWeight
+    line_height: f32
+    letter_spacing: f32
+    color: Color
+    align: TextAlign
+
+enum Display:
+    Flex
+    Grid
+    None
+
+enum FlexDirection:
+    Row
+    Column
+    RowReverse
+    ColumnReverse
+
+enum Alignment:
+    Start
+    Center
+    End
+    Stretch
+    SpaceBetween
+    Baseline
+
+enum Cursor:
+    Pointer
+    Default
+    Text
+    Wait
+    Crosshair
+    NotAllowed
+
+enum Overflow:
+    Visible
+    Hidden
+    Scroll
+    Auto

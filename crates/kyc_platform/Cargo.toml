@@ -1,0 +1,8 @@
+[package]
+name = "kyc_platform"
+version = "0.1.0"
+edition = "2024"
+description = "Kyle Platform API — platform-independent interfaces for file system, networking, time, etc."
+
+[dependencies]
+libc = "0.2"

@@ -1,0 +1,20 @@
+# env v0.1.0 — Environment variables for Kyle
+#
+# NOTA: `getenv` se resuelve desde libc (siempre disponible).
+# No necesita @link.
+#
+# Uso:
+#   use env.{env}
+#   home = env("HOME")
+
+extern fn getenv(ptr) ptr
+
+fn env(key: str) str:
+    getenv(key as ptr) as str
+
+fn env_or(key: str, default: str) str:
+    val = env(&key)
+    if len(val) == 0:
+        default
+    else:
+        val

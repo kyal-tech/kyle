@@ -1,0 +1,177 @@
+# Type Checker Kyle — inference de tipos para expresiones
+# Usa variables globales y strings (sin structs en listas)
+
+SRC: ^str = ""
+POS: ^i32 = 0
+ERRS: ^{str} = {""}
+ERRS.pop()
+
+fn add_err(msg: str):
+    ERRS.push(msg)
+
+fn peek() str:
+    if POS.get() >= SRC.len():
+        return ""
+    return SRC[POS.get()]
+
+fn advance():
+    if POS.get() < SRC.len():
+        POS.set(POS.get() + 1)
+
+fn skip_ws():
+    while POS.get() < SRC.len():
+        c = SRC[POS.get()]
+        if c == " " or c == "\t" or c == "\r":
+            POS.set(POS.get() + 1)
+        elif c == "#":
+            POS.set(POS.get() + 1)
+            while POS.get() < SRC.len():
+                if SRC[POS.get()] == "\n":
+                    break
+                POS.set(POS.get() + 1)
+        else:
+            break
+
+fn is_digit(c: str) bool:
+    return c >= "0" and c <= "9"
+
+fn is_ident_cont(c: str) bool:
+    a = (c >= "a" and c <= "z") or (c >= "A" and c <= "Z")
+    d = c >= "0" and c <= "9"
+    return a or d or c == "_"
+
+IDENT: ^str = ""
+
+fn parse_ident():
+    IDENT = ""
+    while POS.get() < SRC.len():
+        c = SRC[POS.get()]
+        if is_ident_cont(&c):
+            IDENT.set(IDENT.get() + c)
+            POS.set(POS.get() + 1)
+        else:
+            break
+
+# ─── Infer type from expression ──────────────────────────────
+
+fn infer_type() str:
+    skip_ws()
+    c = peek()
+
+    if c == "" or c == "\n" or c == "#" or c == ")" or c == "}":
+        return "?"
+
+    # String literal
+    if c == "\"" or c == "'":
+        q = c
+        advance()
+        while POS.get() < SRC.len():
+            sc = SRC[POS.get()]
+            if sc == q:
+                advance()
+                return "str"
+            if sc == "\\":
+                advance()
+                if POS.get() < SRC.len():
+                    advance()
+            else:
+                advance()
+        return "str"
+
+    # Number literal
+    if is_digit(&c):
+        is_float: ^bool = false
+        while POS.get() < SRC.len() and (is_digit(&SRC[POS.get()]) or SRC[POS.get()] == "."):
+            if SRC[POS.get()] == ".":
+                is_float = true
+            POS.set(POS.get() + 1)
+        if is_float:
+            return "f64"
+        return "i32"
+
+    # Identifier or keyword
+    if is_ident_cont(&c):
+        parse_ident()
+        name = IDENT.get()
+        skip_ws()
+
+        if name == "true" or name == "false":
+            return "bool"
+        if name == "none":
+            return "?"
+
+        if peek() == "(":
+            advance()
+            depth: ^i32 = 1
+            while depth.get() > 0 and POS.get() < SRC.len():
+                sc = SRC[POS.get()]
+                if sc == "(":
+                    depth.set(depth.get() + 1)
+                elif sc == ")":
+                    depth.set(depth.get() - 1)
+                POS.set(POS.get() + 1)
+            if name == "print" or name == "assert":
+                return "?"
+            if name == "len" or name == "abs" or name == "to_str":
+                return "i32"
+            if name == "input" or name == "read_file":
+                return "str"
+            return "?"
+
+        return "?"
+
+    # Parenthesized
+    if c == "(":
+        advance()
+        result = infer_type()
+        skip_ws()
+        if peek() == ")":
+            advance()
+        return result
+
+    return "?"
+
+# ─── Type check binary operation ────────────────────────────
+
+fn check_binop(op: str, left: str, right: str) str:
+    if op == "+":
+        if left == "str" and right == "str":
+            return "str"
+        if left == "i32" and right == "i32":
+            return "i32"
+        if left == "f64" or right == "f64":
+            return "f64"
+    if op == "-" or op == "*" or op == "/":
+        if left == "i32" and right == "i32":
+            return "i32"
+        if left == "f64" or right == "f64":
+            return "f64"
+    if op == "==" or op == "!=" or op == "<" or op == ">" or op == "<=" or op == ">=":
+        return "bool"
+    return "?"
+
+# ─── Test function ──────────────────────────────────────────
+
+fn test_expr(source: &str):
+    SRC = source
+    POS = 0
+    t = infer_type()
+    print(source + " : " + t)
+
+fn test_binop(op: &str, left: &str, right: &str):
+    t = check_binop(&op, &left, &right)
+    print("(" + left + " " + op + " " + right + ") : " + t)
+
+fn main():
+    print("=== Type inference ===")
+    test_expr(&"42")
+    test_expr(&"3.14")
+    test_expr(&"\"hello\"")
+    test_expr(&"true")
+    test_expr(&"x")
+    test_expr(&"f(1, 2)")
+    print("")
+    print("=== Binary ops ===")
+    test_binop(&"+", &"i32", &"i32")
+    test_binop(&"+", &"str", &"str")
+    test_binop(&"==", &"i32", &"i32")

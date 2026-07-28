@@ -1,0 +1,75 @@
+# Kyle UI — Themes
+# Temas light y dark con colores y tipografía predefinidos.
+
+use .types.{Color, TextStyle, FontWeight}
+
+final class Theme:
+    primary: Color
+    on_primary: Color
+    primary_container: Color
+    secondary: Color
+    on_secondary: Color
+    background: Color
+    on_background: Color
+    surface: Color
+    on_surface: Color
+    error: Color
+    on_error: Color
+    outline: Color
+    font_display: TextStyle
+    font_headline: TextStyle
+    font_title: TextStyle
+    font_body: TextStyle
+    font_caption: TextStyle
+    spacing_xs: f32
+    spacing_sm: f32
+    spacing_md: f32
+    spacing_lg: f32
+    spacing_xl: f32
+    radius_sm: f32
+    radius_md: f32
+    radius_lg: f32
+
+LightTheme = Theme(
+    primary: Color.from_hex("#0066FF"),
+    on_primary: Color.white(),
+    primary_container: Color.from_hex("#D6E4FF"),
+    secondary: Color.from_hex("#FF6600"),
+    on_secondary: Color.white(),
+    background: Color.white(),
+    on_background: Color.from_hex("#1A1A1A"),
+    surface: Color.from_hex("#F5F5F5"),
+    on_surface: Color.from_hex("#1A1A1A"),
+    error: Color.from_hex("#DC3545"),
+    on_error: Color.white(),
+    outline: Color.from_hex("#CCCCCC"),
+    font_display: TextStyle(font_family: "Inter", font_size: 32, font_weight: FontWeight.Bold, line_height: 1.2, letter_spacing: -0.5, color: Color.black(), align: TextAlign.Left),
+    font_headline: TextStyle(font_family: "Inter", font_size: 24, font_weight: FontWeight.SemiBold, line_height: 1.3, letter_spacing: 0, color: Color.black(), align: TextAlign.Left),
+    font_title: TextStyle(font_family: "Inter", font_size: 18, font_weight: FontWeight.Medium, line_height: 1.4, letter_spacing: 0, color: Color.black(), align: TextAlign.Left),
+    font_body: TextStyle(font_family: "Inter", font_size: 14, font_weight: FontWeight.Normal, line_height: 1.5, letter_spacing: 0, color: Color.black(), align: TextAlign.Left),
+    font_caption: TextStyle(font_family: "Inter", font_size: 12, font_weight: FontWeight.Normal, line_height: 1.4, letter_spacing: 0, color: Color.from_hex("#666666"), align: TextAlign.Left),
+    spacing_xs: 4, spacing_sm: 8, spacing_md: 16, spacing_lg: 24, spacing_xl: 32,
+    radius_sm: 4, radius_md: 8, radius_lg: 16,
+)
+
+DarkTheme = Theme(
+    primary: Color.from_hex("#4D8EFF"),
+    on_primary: Color.white(),
+    primary_container: Color.from_hex("#1A3A6E"),
+    secondary: Color.from_hex("#FF8533"),
+    on_secondary: Color.white(),
+    background: Color.from_hex("#121212"),
+    on_background: Color.from_hex("#E0E0E0"),
+    surface: Color.from_hex("#1E1E1E"),
+    on_surface: Color.from_hex("#E0E0E0"),
+    error: Color.from_hex("#FF6B6B"),
+    on_error: Color.black(),
+    outline: Color.from_hex("#444444"),
+    font_display: TextStyle(font_family: "Inter", font_size: 32, font_weight: FontWeight.Bold, line_height: 1.2, letter_spacing: -0.5, color: Color.white(), align: TextAlign.Left),
+    font_headline: TextStyle(font_family: "Inter", font_size: 24, font_weight: FontWeight.SemiBold, line_height: 1.3, letter_spacing: 0, color: Color.white(), align: TextAlign.Left),
+    font_title: TextStyle(font_family: "Inter", font_size: 18, font_weight: FontWeight.Medium, line_height: 1.4, letter_spacing: 0, color: Color.white(), align: TextAlign.Left),
+    font_body: TextStyle(font_family: "Inter", font_size: 14, font_weight: FontWeight.Normal, line_height: 1.5, letter_spacing: 0, color: Color.from_hex("#E0E0E0"), align: TextAlign.Left),
+    font_caption: TextStyle(font_family: "Inter", font_size: 12, font_weight: FontWeight.Normal, line_height: 1.4, letter_spacing: 0, color: Color.from_hex("#999999"), align: TextAlign.Left),
+    spacing_xs: 4, spacing_sm: 8, spacing_md: 16, spacing_lg: 24, spacing_xl: 32,
+    radius_sm: 4, radius_md: 8, radius_lg: 16,
+)

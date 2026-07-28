@@ -1,0 +1,7 @@
+# Imports — use keyword
+# Tests packages/my/lib.ky
+
+use my.{hello}
+
+fn main():
+    print(hello("imports work"))

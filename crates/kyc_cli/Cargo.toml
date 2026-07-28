@@ -1,0 +1,20 @@
+[package]
+name = "kyc_cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "ky"
+path = "src/main.rs"
+
+[dependencies]
+kyc_core = { path = "../kyc_core" }
+kyc_ui = { path = "../kyc_ui" }
+kyc_driver = { path = "../kyc_driver" }
+kyc_tools = { path = "../kyc_tools" }
+ureq = { version = "3", features = ["json"] }
+flate2 = "1"
+tar = "0.4"
+

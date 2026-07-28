@@ -1,0 +1,70 @@
+# Kyle Codegen - LLVM IR generator (all inline, no helper functions)
+
+fn compile_add():
+    OUT = "define i32 @add(i32 %a, i32 %b) \{"
+    OUT = OUT + "\n"
+    OUT = OUT + "entry:"
+    OUT = OUT + "\n"
+    OUT = OUT + "  %t0 = add i32 %a, %b"
+    OUT = OUT + "\n"
+    OUT = OUT + "  ret i32 %t0"
+    OUT = OUT + "\n"
+    OUT = OUT + "\}"
+    OUT = OUT + "\n"
+    print("=== add() ===")
+    print(OUT)
+
+fn compile_max():
+    OUT = "define i32 @max(i32 %a, i32 %b) \{"
+    OUT = OUT + "\n"
+    OUT = OUT + "entry:"
+    OUT = OUT + "\n"
+    OUT = OUT + "  %cmp = icmp sgt i32 %a, %b"
+    OUT = OUT + "\n"
+    OUT = OUT + "  br i1 %cmp, label %then, label %else"
+    OUT = OUT + "\n"
+    OUT = OUT + "then:"
+    OUT = OUT + "\n"
+    OUT = OUT + "  ret i32 %a"
+    OUT = OUT + "\n"
+    OUT = OUT + "else:"
+    OUT = OUT + "\n"
+    OUT = OUT + "  ret i32 %b"
+    OUT = OUT + "\n"
+    OUT = OUT + "\}"
+    OUT = OUT + "\n"
+    print("=== max() ===")
+    print(OUT)
+
+fn compile_fact():
+    OUT = "define i32 @fact(i32 %n) \{"
+    OUT = OUT + "\n"
+    OUT = OUT + "entry:"
+    OUT = OUT + "\n"
+    OUT = OUT + "  %c1 = icmp sle i32 %n, 1"
+    OUT = OUT + "\n"
+    OUT = OUT + "  br i1 %c1, label %done, label %rec"
+    OUT = OUT + "\n"
+    OUT = OUT + "rec:"
+    OUT = OUT + "\n"
+    OUT = OUT + "  %n1 = sub i32 %n, 1"
+    OUT = OUT + "\n"
+    OUT = OUT + "  %r = call i32 @fact(i32 %n1)"
+    OUT = OUT + "\n"
+    OUT = OUT + "  %res = mul i32 %n, %r"
+    OUT = OUT + "\n"
+    OUT = OUT + "  ret i32 %res"
+    OUT = OUT + "\n"
+    OUT = OUT + "done:"
+    OUT = OUT + "\n"
+    OUT = OUT + "  ret i32 1"
+    OUT = OUT + "\n"
+    OUT = OUT + "\}"
+    OUT = OUT + "\n"
+    print("=== fact() ===")
+    print(OUT)
+
+fn main():
+    compile_add()
+    compile_max()
+    compile_fact()

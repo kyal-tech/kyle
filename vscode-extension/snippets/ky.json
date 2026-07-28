@@ -1,0 +1,257 @@
+{
+  "Function": {
+    "prefix": "fn",
+    "body": "fn ${1:name}(${2:params})${3: ReturnType}:\n    ${4:body}",
+    "description": "Define a function"
+  },
+  "Main function": {
+    "prefix": "main",
+    "body": "fn main():\n    ${1:print(\"Hello, World!\")}",
+    "description": "Define the main entry point"
+  },
+  "Immutable variable": {
+    "prefix": "let",
+    "body": "${1:name} = ${2:value}",
+    "description": "Declare an immutable variable"
+  },
+  "Mutable variable": {
+    "prefix": "mut",
+    "body": "${1:name}: ^${2:type} = ${3:value}",
+    "description": "Declare a mutable variable"
+  },
+  "Constant": {
+    "prefix": "const",
+    "body": "${1:NAME} := ${2:value}",
+    "description": "Declare a compile-time constant"
+  },
+  "If": {
+    "prefix": "if",
+    "body": "if ${1:condition}:\n    ${2:body}",
+    "description": "If statement"
+  },
+  "If-else": {
+    "prefix": "ifelse",
+    "body": "if ${1:condition}:\n    ${2:body}\nelse:\n    ${3:body}",
+    "description": "If-else statement"
+  },
+  "If-elif-else": {
+    "prefix": "ifelif",
+    "body": "if ${1:cond1}:\n    ${2:body}\nelif ${3:cond2}:\n    ${4:body}\nelse:\n    ${5:body}",
+    "description": "If-elif-else chain"
+  },
+  "Binding if": {
+    "prefix": "iflet",
+    "body": "if ${1:name} = ${2:expression}:\n    ${3:body}",
+    "description": "Binding if — bind and test in one"
+  },
+  "While": {
+    "prefix": "while",
+    "body": "while ${1:condition}:\n    ${2:body}",
+    "description": "While loop"
+  },
+  "Binding while": {
+    "prefix": "whilelet",
+    "body": "while ${1:name} = ${2:expression}:\n    ${3:body}",
+    "description": "Binding while — bind and loop in one"
+  },
+  "For range": {
+    "prefix": "for",
+    "body": "for ${1:i} in 0..${2:10}:\n    ${3:body}",
+    "description": "For loop with range"
+  },
+  "For list": {
+    "prefix": "forin",
+    "body": "for ${1:item} in ${2:list}:\n    ${3:body}",
+    "description": "For loop over list"
+  },
+  "Match": {
+    "prefix": "match",
+    "body": "match ${1:value}:\n    ${2:pattern}:\n        ${3:body}",
+    "description": "Match statement"
+  },
+  "Match with guard": {
+    "prefix": "matchguard",
+    "body": "match ${1:value}:\n    ${2:pattern} if ${3:guard}:\n        ${4:body}",
+    "description": "Match with guard condition"
+  },
+  "Or-pattern": {
+    "prefix": "orpat",
+    "body": "${1:patternA} | ${2:patternB}",
+    "description": "Or-pattern in match arm"
+  },
+  "Final Class": {
+    "prefix": "finalclass",
+    "body": "final class ${1:Name}:\n    _${2:field}: ${3:type}\n\n    fn init(${4:params}):\n        this._${2} = ${5:value}\n\n    fn ${6:method}()${7: -> type}:\n        ${8:body}",
+    "description": "Define a final class (lightweight, no inheritance)"
+  },
+  "Abstract Class": {
+    "prefix": "absclass",
+    "body": "abstract class ${1:Name}:\n    ${2:field}: ${3:type}\n\n    abstract fn ${4:method}()${5: ReturnType}:\n        pass\n\n    fn ${6:concrete}()${7: ReturnType}:\n        ${8:body}",
+    "description": "Define an abstract class"
+  },
+  "Class with inheritance": {
+    "prefix": "class",
+    "body": "class ${1:Name} :: ${2:Parent}:\n    ${3:field}: ${4:type}\n\n    fn init(${5:params}):\n        super.init(${6:args})\n        this.${3} = ${7:value}\n\n    fn ${8:method}()${9: ReturnType}:\n        ${10:body}",
+    "description": "Define a class that extends a parent"
+  },
+  "Property (get/set)": {
+    "prefix": "prop",
+    "body": "fn ${1:name}() -> ${2:type}:\n    this._${1}\n\nfn ${1:name}=(value: ${2:type}):\n    this._${1} = value",
+    "description": "Define a property with getter and setter"
+  },
+  "Enum": {
+    "prefix": "enum",
+    "body": "enum ${1:Name}:\n    ${2:Variant1}\n    ${3:Variant2}(${4:type})",
+    "description": "Define an enum"
+  },
+  "Contract": {
+    "prefix": "contract",
+    "body": "contract ${1:Name}:\n    fn ${2:method}(${3:params})${4: ReturnType}",
+    "description": "Define a contract (trait)"
+  },
+  "Implement contract": {
+    "prefix": "impl",
+    "body": "${1:Class} :: ${2:Contract}:\n    fn ${3:method}(${4:params})${5: ReturnType}:\n        ${6:body}",
+    "description": "Implement a contract for a class"
+  },
+  "Import": {
+    "prefix": "import",
+    "body": "import ${1:module}",
+    "description": "Import a module"
+  },
+  "From import": {
+    "prefix": "from",
+    "body": "from ${1:module} import ${2:symbol}",
+    "description": "Import a specific symbol from a module"
+  },
+  "From import as": {
+    "prefix": "fromas",
+    "body": "from ${1:module} import ${2:symbol} as ${3:alias}",
+    "description": "Import with alias"
+  },
+  "Defer": {
+    "prefix": "defer",
+    "body": "defer ${1:function()}",
+    "description": "Defer a function call"
+  },
+  "Async function": {
+    "prefix": "asyncfn",
+    "body": "async fn ${1:name}(${2:params})${3: ReturnType}:\n    ${4:body}",
+    "description": "Define an async function"
+  },
+  "Async spawn": {
+    "prefix": "async",
+    "body": "${1:task} = async ${2:function(${3:args})}",
+    "description": "Spawn an async task"
+  },
+  "Await": {
+    "prefix": "await",
+    "body": "${1:result} = await ${2:task}",
+    "description": "Await an async task"
+  },
+  "Println": {
+    "prefix": "println",
+    "body": "println(\"${1:text}\")",
+    "description": "Print with newline"
+  },
+  "Print": {
+    "prefix": "print",
+    "body": "print(\"${1:text}\")",
+    "description": "Print without newline"
+  },
+  "Ternary": {
+    "prefix": "ternary",
+    "body": "${1:condition} ? ${2:true_value} : ${3:false_value}",
+    "description": "Ternary expression"
+  },
+  "Optional type": {
+    "prefix": "opt",
+    "body": "${1:Type}?",
+    "description": "Optional type (Option<T>)"
+  },
+  "Error type": {
+    "prefix": "errtype",
+    "body": "${1:Type}!",
+    "description": "Error-returning type (Result<T, Error>)"
+  },
+  "Range": {
+    "prefix": "range",
+    "body": "${1:start}..${2:end}",
+    "description": "Range (exclusive end)"
+  },
+  "Range inclusive": {
+    "prefix": "rangeinc",
+    "body": "${1:start}..=${2:end}",
+    "description": "Range inclusive"
+  },
+  "Range exclusive": {
+    "prefix": "rangeexc",
+    "body": "${1:start}..<${2:end}",
+    "description": "Range exclusive of end (..<)"
+  },
+  "Destructure": {
+    "prefix": "destr",
+    "body": "(${1:x}, ${2:y}) = ${3:pair}",
+    "description": "Destructuring assignment"
+  },
+  "Destructure mutable": {
+    "prefix": "destrmut",
+    "body": "(${1:x}, ${2:y}) := ${3:pair}",
+    "description": "Mutable destructuring assignment"
+  },
+  "Array literal": {
+    "prefix": "arr",
+    "body": "[${1:1}, ${2:2}, ${3:3}]",
+    "description": "Native array literal [T; N]"
+  },
+  "Array type": {
+    "prefix": "arrtype",
+    "body": "[${1:i32}; ${2:3}]",
+    "description": "Fixed-size array type [T; N]"
+  },
+  "List literal": {
+    "prefix": "list",
+    "body": "{${1:1}, ${2:2}, ${3:3}}",
+    "description": "List literal (dynamic)"
+  },
+  "List type": {
+    "prefix": "listtype",
+    "body": "{${1:i32}}",
+    "description": "Dynamic list type {T}"
+  },
+  "Dict literal (quoted)": {
+    "prefix": "dict",
+    "body": "{\"${1:key}\": ${2:value}}",
+    "description": "Dict literal with quoted keys"
+  },
+  "Dict literal (unquoted)": {
+    "prefix": "dictid",
+    "body": "{${1:key}: ${2:value}}",
+    "description": "Dict literal with unquoted identifier keys"
+  },
+  "Dict type": {
+    "prefix": "dicttype",
+    "body": "{${1:str}: ${2:i64}}",
+    "description": "Dict type {K: V}"
+  },
+  "Extern fn": {
+    "prefix": "extern",
+    "body": "extern fn ${1:name}(${2:params}) ${3:type}",
+    "description": "Declare an external FFI function"
+  },
+  "Link directive": {
+    "prefix": "link",
+    "body": "@link \"${1:c}\"",
+    "description": "Link with a native library"
+  },
+  "Assert": {
+    "prefix": "assert",
+    "body": "assert(${1:condition})",
+    "description": "Assert condition is true"
+  },
+  "Assert equals": {
+    "prefix": "asserteq",
+    "body": "assert_eq(${1:expected}, ${2:actual})",
+    "description": "Assert two values are equal"
+  }
+}

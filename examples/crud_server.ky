@@ -1,0 +1,43 @@
+# CRUD API REST — Puerto 5050
+# from http.server import Router  (en desarrollo)
+# Por ahora usamos tcp_listen/respond que funciona.
+#
+#   curl http://localhost:5050/users
+#   curl http://localhost:5050/users/1
+#   curl -X POST http://localhost:5050/users
+#   curl -X PUT http://localhost:5050/users/1
+#   curl -X DELETE http://localhost:5050/users/1
+#
+from http.server import tcp_listen, tcp_accept, tcp_close
+from http.server import read_request, respond, Request
+
+USERS := "[\{\"id\":1,\"name\":\"Ana\",\"age\":30},\{\"id\":2,\"name\":\"Juan\",\"age\":25}]"
+USER1 := "\{\"id\":1,\"name\":\"Ana\",\"age\":30}"
+NOTFOUND := "\{\"error\":\"not found\"}"
+
+fn main():
+    fd = tcp_listen(5050)
+    if fd < 0:
+        print("Error")
+        return
+    print("Server: http://localhost:5050")
+    while true:
+        client = tcp_accept(fd)
+        if client >= 0:
+            req = read_request(client)
+            if req.path != "":
+                if req.method == "GET" and req.path == "/users":
+                    respond(client, 200, USERS, "application/json")
+                elif req.method == "GET" and req.path == "/users/1":
+                    respond(client, 200, USER1, "application/json")
+                elif req.method == "GET" and len(req.path) > 6:
+                    respond(client, 404, NOTFOUND, "application/json")
+                elif req.method == "POST" and req.path == "/users":
+                    respond(client, 201, "\{\"created\":true}", "application/json")
+                elif req.method == "PUT":
+                    respond(client, 200, "\{\"updated\":true}", "application/json")
+                elif req.method == "DELETE":
+                    respond(client, 200, "\{\"deleted\":true}", "application/json")
+                else:
+                    respond(client, 404, NOTFOUND, "application/json")
+            tcp_close(client)

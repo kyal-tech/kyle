@@ -1,0 +1,36 @@
+# HTTP API example — fetch posts from JSONPlaceholder
+# Run: ky run examples/http_api.ky
+
+@link "curl"
+
+extern fn system(cmd: ptr) i32
+
+fn parse_int(s: str) i32:
+    result: ^i32 = 0
+    i: ^i32 = 0
+    ZERO := 48
+    while i < len(s):
+        c = char_at(s, i)
+        if c >= ZERO and c <= 57:
+            result = result * 10 + (c - ZERO)
+        i = i + 1
+    result
+
+fn main() i32:
+    system("curl -s -o /tmp/ky_body.txt -w '%\{http_code\}' 'https://jsonplaceholder.typicode.com/posts' > /tmp/ky_status.txt 2>/dev/null" as ptr)
+
+    fd = open("/tmp/ky_status.txt", 0)
+    status_str = ""
+    if fd >= 0:
+        status_str = read_str(fd, 32)
+        close(fd)
+    status = parse_int(status_str)
+    println("status: {status}")
+
+    bd = open("/tmp/ky_body.txt", 0)
+    body = ""
+    if bd >= 0:
+        body = read_str(bd, 50000)
+        close(bd)
+    println("body: {body}")
+    0

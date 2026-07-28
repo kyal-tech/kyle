@@ -1,0 +1,10 @@
+name = "kyle-full-test"
+version = "0.1.0"
+edition = "2024"
+description = "Comprehensive test of all Kyle syntax"
+
+[compiler]
+optimization = "O2"
+target = "native"
+
+[dependencies]

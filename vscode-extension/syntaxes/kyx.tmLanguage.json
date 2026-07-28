@@ -1,0 +1,422 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Kyle UI",
+  "scopeName": "source.kyx",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#import_decl"
+    },
+    {
+      "include": "#link_directive"
+    },
+    {
+      "include": "#style_decl"
+    },
+    {
+      "include": "#theme_decl"
+    },
+    {
+      "include": "#kyle_block"
+    },
+    {
+      "include": "#at_directive"
+    },
+    {
+      "include": "#xml_element"
+    },
+    {
+      "include": "#xml_self_closing"
+    },
+    {
+      "include": "#xml_slot"
+    },
+    {
+      "include": "#kyle_inline"
+    },
+    {
+      "include": "#closing_tag"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-number-sign.kyx",
+          "match": "##.*$"
+        },
+        {
+          "name": "comment.line.number-sign.kyx",
+          "match": "#[^#].*$|#$"
+        }
+      ]
+    },
+    "import_decl": {
+      "name": "meta.import.kyx",
+      "match": "\\b(use|from)\\s+([a-zA-Z_.][a-zA-Z0-9_.{}]*)(?:\\s+(import|as)\\s+([a-zA-Z_][a-zA-Z0-9_]*))?",
+      "captures": {
+        "1": {
+          "name": "keyword.control.import.kyx"
+        },
+        "2": {
+          "name": "entity.name.module.kyx"
+        },
+        "3": {
+          "name": "keyword.control.import.kyx"
+        },
+        "4": {
+          "name": "entity.name.function.kyx"
+        }
+      }
+    },
+    "link_directive": {
+      "name": "meta.link-directive.kyx",
+      "match": "(@link)\\s+\"([^\"]*)\"",
+      "captures": {
+        "1": {
+          "name": "keyword.directive.link.kyx"
+        },
+        "2": {
+          "name": "string.quoted.double.kyx"
+        }
+      }
+    },
+    "style_decl": {
+      "name": "meta.style-declaration.kyx",
+      "begin": "\\b(style|layout|animation)\\s*<([^>]+)>\\s*([A-Za-z_]\\w*)\\s*:",
+      "end": "(?=^\\S|\\z)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.declaration.style.kyx"
+        },
+        "2": {
+          "name": "entity.name.type.component.kyx"
+        },
+        "3": {
+          "name": "entity.name.style-name.kyx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#kyle_expression"
+        },
+        {
+          "include": "#media_query"
+        }
+      ]
+    },
+    "theme_decl": {
+      "name": "meta.theme-declaration.kyx",
+      "begin": "\\b(theme)\\s+([A-Za-z_]\\w*)\\s*:",
+      "end": "(?=^\\S|\\z)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.declaration.theme.kyx"
+        },
+        "2": {
+          "name": "entity.name.theme.kyx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#kyle_expression"
+        }
+      ]
+    },
+    "kyle_block": {
+      "name": "meta.kyle-code-block.kyx",
+      "begin": "@\\(",
+      "end": "\\)",
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#numbers"
+        },
+        {
+          "include": "#keywords_control"
+        },
+        {
+          "include": "#keywords_declaration"
+        },
+        {
+          "include": "#keywords_operator"
+        },
+        {
+          "include": "#types_primitive"
+        },
+        {
+          "include": "#types_complex"
+        },
+        {
+          "include": "#builtins"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#variable_decl"
+        }
+      ]
+    },
+    "at_directive": {
+      "name": "meta.at-directive.kyx",
+      "begin": "@(if|for|match)\\s*\\(",
+      "end": "\\)\\s*:",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.kyx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#kyle_expression"
+        }
+      ]
+    },
+    "xml_element": {
+      "name": "meta.xml-element.kyx",
+      "begin": "<\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+      "end": "(</\\s*\\1\\s*>|/>)",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.tag.kyx"
+        }
+      },
+      "endCaptures": {
+        "1": {
+          "name": "entity.name.tag.kyx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#xml_attr"
+        },
+        {
+          "include": "#xml_attr_expr"
+        },
+        {
+          "include": "#import_decl"
+        },
+        {
+          "include": "#kyle_block"
+        },
+        {
+          "include": "#at_directive"
+        },
+        {
+          "include": "#xml_element"
+        },
+        {
+          "include": "#xml_self_closing"
+        },
+        {
+          "include": "#xml_slot"
+        },
+        {
+          "include": "#kyle_inline"
+        },
+        {
+          "include": "#strings"
+        }
+      ]
+    },
+    "closing_tag": {
+      "name": "entity.name.tag.kyx",
+      "match": "</([a-zA-Z_][a-zA-Z0-9_]*)>"
+    },
+    "xml_self_closing": {
+      "name": "meta.xml-self-closing.kyx",
+      "begin": "<\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\b(?=[^>]*/>)",
+      "end": "/>",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.tag.kyx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#xml_attr"
+        },
+        {
+          "include": "#xml_attr_expr"
+        }
+      ]
+    },
+    "xml_slot": {
+      "name": "entity.name.tag.slot.kyx",
+      "match": "<slot\\b[^>]*/?>"
+    },
+    "xml_attr": {
+      "name": "meta.xml-attribute.kyx",
+      "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*=\\s*\"([^\"]*)\"",
+      "captures": {
+        "1": {
+          "name": "entity.other.attribute-name.kyx"
+        },
+        "2": {
+          "name": "string.quoted.double.kyx"
+        }
+      }
+    },
+    "xml_attr_expr": {
+      "name": "meta.xml-attribute-expr.kyx",
+      "begin": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*=\\s*@",
+      "end": "(?=[\\s>])",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.other.attribute-name.kyx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#kyle_expression"
+        }
+      ]
+    },
+    "kyle_inline": {
+      "name": "meta.kyle-inline.kyx",
+      "begin": "@",
+      "end": "(?=[\\s>\\n])",
+      "patterns": [
+        {
+          "include": "#kyle_expression"
+        }
+      ]
+    },
+    "kyle_expression": {
+      "patterns": [
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#numbers"
+        },
+        {
+          "include": "#builtins"
+        },
+        {
+          "include": "#keywords_control"
+        },
+        {
+          "include": "#types_primitive"
+        },
+        {
+          "include": "#types_complex"
+        },
+        {
+          "include": "#operators"
+        },
+        {
+          "include": "#property_access"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.kyx",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.kyx",
+          "match": "\\\\[nrt0\"'\\\\]"
+        },
+        {
+          "name": "constant.character.escape.kyx",
+          "match": "\\\\x[0-9a-fA-F]{2}"
+        },
+        {
+          "name": "constant.character.escape.kyx",
+          "match": "\\\\u\\{[0-9a-fA-F]+\\}"
+        },
+        {
+          "name": "constant.character.escape.kyx",
+          "match": "\\\\u[0-9a-fA-F]{4}"
+        },
+        {
+          "include": "#interpolation"
+        }
+      ]
+    },
+    "interpolation": {
+      "name": "meta.interpolation.kyx",
+      "begin": "\\{",
+      "end": "\\}",
+      "patterns": [
+        {
+          "include": "#kyle_expression"
+        }
+      ]
+    },
+    "numbers": {
+      "name": "constant.numeric.kyx",
+      "match": "\\b(0[xX][0-9a-fA-F]+|0[bB][01]+|[0-9]+(\\.[0-9]+)?)\\b"
+    },
+    "media_query": {
+      "name": "meta.media-query.kyx",
+      "begin": "@media\\(",
+      "end": "\\)\\s*:",
+      "patterns": [
+        {
+          "include": "#kyle_expression"
+        }
+      ]
+    },
+    "keywords_control": {
+      "patterns": [
+        {
+          "name": "keyword.control.kyx",
+          "match": "\\b(if|elif|else|while|for|in|match|return|break|continue|defer|guard|unsafe|async|await)\\b|ok)\b"
+        },
+        {
+          "name": "keyword.control.kyx",
+          "match": "\\b(and|or|not|is|as)\\b|ok)\b"
+        }
+      ]
+    },
+    "keywords_declaration": {
+      "name": "keyword.declaration.kyx",
+      "match": "\\b(fn|class|final|abstract|enum|contract|type|static|prop|get|set|use|from|import)\\b|ok)\b"
+    },
+    "keywords_operator": {
+      "name": "keyword.operator.kyx",
+      "match": "\\b(mut|ref|box)\\b|ok)\b"
+    },
+    "types_primitive": {
+      "name": "storage.type.primitive.kyx",
+      "match": "\\b(i8|i16|i32|i64|u8|u16|u32|u64|f32|f64|bool|char|str|ptr|void|any|bytes)\\b"
+    },
+    "types_complex": {
+      "name": "storage.type.complex.kyx",
+      "match": "\\b(list|dict|set|Option|Result|future|channel|mutex|atomic|file_data|color|spacing)\\b"
+    },
+    "builtins": {
+      "name": "support.function.builtin.kyx",
+      "match": "\\b(print|println|input|error|ok|some|none|assert|range|len|to_str|to_i32|to_f64|str_builder|route_params|navigate|navigate_back|navigate_replace|set_title|set_meta|thread|parallel|color|spacing)\\b"
+    },
+    "operators": {
+      "name": "keyword.operator.kyx",
+      "match": "=>|\\+\\+|--|\\*\\*|->|::|\\+|-|\\*|/|%|==|!=|<|>|<=|>=|&&|\\|\\||!|~|&|\\||\\^|<<|>>|=|\\?\\?|\\."
+    },
+    "variable_decl": {
+      "name": "variable.other.kyx",
+      "match": "\\b([a-z_][a-zA-Z0-9_]*)\\s*(?=:=|:\\s*(i8|i16|i32|i64|u8|u16|u32|u64|f32|f64|bool|char|str|ptr|void|bytes|\\^|&))"
+    },
+    "property_access": {
+      "name": "variable.other.property.kyx",
+      "match": "\\bthis\\."
+    }
+  }
+}

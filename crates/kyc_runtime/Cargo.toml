@@ -1,0 +1,21 @@
+[package]
+name = "kyc_runtime"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["rlib", "staticlib"]
+
+[dependencies]
+libc = "0.2"
+ring = "0.17"
+base64 = "0.22"
+chrono = "0.4"
+uuid = { version = "1", features = ["v4"] }
+url = "2"
+regex = "1"
+num-bigint = "0.4"
+num-traits = "0.2"
+kyc_platform = { path = "../kyc_platform" }

@@ -1,0 +1,28 @@
+# Colecciones — listas, sets, dicts
+
+fn test_lists():
+    items: ^[i32] = [10, 20, 30]
+    items.push(40)
+    first = items[0]
+    items[0] = 99
+    len = items.len()
+    popped = items.pop()
+
+fn test_dicts():
+    scores: ^{str: i32} = {}
+    scores["ana"] = 100
+    scores["bob"] = 85
+    if scores.has("ana"):
+        val = scores.get("ana")
+    scores.remove("bob")
+
+fn test_sets():
+    nums: ^set<i32> = set{1, 2, 3}
+    nums.add(4)
+    has = nums.contains(2)
+    nums.remove(2)
+
+fn main():
+    test_lists()
+    test_dicts()
+    test_sets()

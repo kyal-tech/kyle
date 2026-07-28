@@ -1,0 +1,12 @@
+[package]
+name = "kyc_backend"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+kyc_core = { path = "../kyc_core" }
+kyc_mir = { path = "../kyc_mir" }
+inkwell = { version = "0.9", features = ["llvm18-1"] }
+llvm-sys = "181"

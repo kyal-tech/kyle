@@ -1,0 +1,42 @@
+# Kyle UI — Event Types
+# Tipos de evento para callbacks UI.
+
+final class MouseEvent:
+    x: f32
+    y: f32
+    button: i32
+    ctrl_key: bool
+    shift_key: bool
+    alt_key: bool
+    meta_key: bool
+    prevent_default: fn()
+    stop_propagation: fn()
+
+final class KeyboardEvent:
+    key: str
+    code: str
+    ctrl_key: bool
+    shift_key: bool
+    alt_key: bool
+    meta_key: bool
+    repeat: bool
+    prevent_default: fn()
+    stop_propagation: fn()
+
+final class TouchEvent:
+    x: f32
+    y: f32
+    touches: i32
+    prevent_default: fn()
+    stop_propagation: fn()
+
+final class FocusEvent:
+    related_target: ptr?
+    prevent_default: fn()
+    stop_propagation: fn()
+
+final class ScrollEvent:
+    scroll_x: f32
+    scroll_y: f32
+    delta_x: f32
+    delta_y: f32

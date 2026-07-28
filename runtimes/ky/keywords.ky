@@ -1,0 +1,49 @@
+# Keyword lookup for the Kyle lexer
+
+fn keyword(word: &str) TokenKind:
+    # Copy of TokenKind enum values to avoid import issues
+    # Returns the keyword kind or Identifier(word)
+    if word == "fn": return TokenKind.Fn
+    elif word == "class": return TokenKind.Class
+    elif word == "abstract": return TokenKind.Abstract
+    elif word == "final": return TokenKind.Final
+    elif word == "struct": return TokenKind.Struct
+    elif word == "enum": return TokenKind.Enum
+    elif word == "contract": return TokenKind.Contract
+    elif word == "if": return TokenKind.If
+    elif word == "elif": return TokenKind.Elif
+    elif word == "else": return TokenKind.Else
+    elif word == "while": return TokenKind.While
+    elif word == "for": return TokenKind.For
+    elif word == "in": return TokenKind.In
+    elif word == "match": return TokenKind.Match
+    elif word == "return": return TokenKind.Return
+    elif word == "break": return TokenKind.Break
+    elif word == "continue": return TokenKind.Continue
+    elif word == "defer": return TokenKind.Defer
+    elif word == "guard": return TokenKind.Guard
+    elif word == "unsafe": return TokenKind.Unsafe
+    elif word == "async": return TokenKind.Async
+    elif word == "await": return TokenKind.Await
+    elif word == "loop": return TokenKind.Loop
+    elif word == "type": return TokenKind.Type
+    elif word == "true": return TokenKind.True
+    elif word == "false": return TokenKind.False
+    elif word == "none": return TokenKind.KwNone
+    elif word == "null": return TokenKind.KwNull
+    elif word == "ok": return TokenKind.KwOk
+    elif word == "extern": return TokenKind.Extern
+    elif word == "import": return TokenKind.Import
+    elif word == "from": return TokenKind.From
+    elif word == "as": return TokenKind.As
+    elif word == "is": return TokenKind.Is
+    elif word == "super": return TokenKind.Super
+    elif word == "get": return TokenKind.Get
+    elif word == "set": return TokenKind.Set
+    elif word == "static": return TokenKind.Static
+    elif word == "const": return TokenKind.Const
+    elif word == "implements": return TokenKind.Implements
+    elif word == "and": return TokenKind.And
+    elif word == "or": return TokenKind.Or
+    elif word == "not": return TokenKind.Bang
+    return TokenKind.Identifier(word)

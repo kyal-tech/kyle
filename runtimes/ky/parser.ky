@@ -1,0 +1,216 @@
+# Parser Kyle — fully self-contained parse_expr
+# No external state, no globals. Pure function operating on a char list.
+
+fn is_digit(c: str) bool:
+    return c >= "0" and c <= "9"
+
+fn is_ident_start(c: str) bool:
+    return (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") or c == "_"
+
+fn is_ident_continue(c: str) bool:
+    return is_ident_start(c) or is_digit(c)
+
+fn parse_expr(src: ^&[str]) str:
+    # Returns s-expression string. Modifies src in place to track position:
+    # after parsing, src[0] is removed for each character consumed.
+    result = ""
+    # Skip whitespace
+    while src.len() > 0:
+        c = src[0]
+        if c == " " or c == "\t" or c == "\r":
+            src.pop_first()
+        elif c == "#":
+            src.pop_first()
+            while src.len() > 0 and src[0] != "\n":
+                src.pop_first()
+        else:
+            break
+
+    if src.len() == 0:
+        return ""
+
+    c = src[0]
+    # Delimiters that stop an expression
+    if c == ")" or c == "}" or c == "]" or c == "," or c == "\n" or c == ":" or c == "#":
+        return ""
+
+    if c == "(":
+        src.pop_first()
+        result = "("
+        n = 0
+        while true:
+            while src.len() > 0:
+                ch = src[0]
+                if ch == " " or ch == "\t" or ch == "\r":
+                    src.pop_first()
+                elif ch == "#":
+                    src.pop_first()
+                    while src.len() > 0 and src[0] != "\n":
+                        src.pop_first()
+                else:
+                    break
+            if src.len() == 0 or src[0] == ")":
+                if src.len() > 0 and src[0] == ")":
+                    src.pop_first()
+                break
+            if n > 0: result = result + " "
+            n = n + 1
+            sub = parse_expr(^&src)
+            result = result + sub
+            while src.len() > 0 and (src[0] == " " or src[0] == "\t" or src[0] == "\r"):
+                src.pop_first()
+            if src.len() > 0 and src[0] == ",":
+                src.pop_first()
+            elif src.len() > 0 and src[0] == ")":
+                src.pop_first()
+                break
+        result = result + ")"
+    elif c == "\"":
+        src.pop_first()
+        result = "\""
+        while src.len() > 0:
+            sc = src[0]
+            if sc == "\"":
+                src.pop_first()
+                break
+            elif sc == "\\":
+                src.pop_first()
+                if src.len() > 0:
+                    ec = src[0]
+                    src.pop_first()
+                    if ec == "n": result = result + "\n"
+                    elif ec == "t": result = result + "\t"
+                    elif ec == "\\": result = result + "\\"
+                    else: result = result + ec
+            else:
+                result = result + sc
+                src.pop_first()
+        result = result + "\""
+    elif c == "'":
+        src.pop_first()
+        result = "'"
+        if src.len() > 0:
+            result = result + src[0]
+            src.pop_first()
+        result = result + "'"
+    elif is_digit(c):
+        while src.len() > 0 and is_digit(src[0]):
+            result = result + src[0]
+            src.pop_first()
+    elif is_ident_start(c):
+        while src.len() > 0 and is_ident_continue(src[0]):
+            result = result + src[0]
+            src.pop_first()
+        while src.len() > 0 and (src[0] == " " or src[0] == "\t" or src[0] == "\r"):
+            src.pop_first()
+        if src.len() > 0 and src[0] == "(":
+            src.pop_first()
+            result = result + "("
+            n = 0
+            while true:
+                while src.len() > 0:
+                    ch = src[0]
+                    if ch == " " or ch == "\t" or ch == "\r":
+                        src.pop_first()
+                    elif ch == "#":
+                        src.pop_first()
+                        while src.len() > 0 and src[0] != "\n":
+                            src.pop_first()
+                    else:
+                        break
+                if src.len() == 0 or src[0] == ")":
+                    if src.len() > 0 and src[0] == ")":
+                        src.pop_first()
+                    break
+                if n > 0: result = result + " "
+                n = n + 1
+                sub = parse_expr(^&src)
+                result = result + sub
+                while src.len() > 0 and (src[0] == " " or src[0] == "\t" or src[0] == "\r"):
+                    src.pop_first()
+                if src.len() > 0 and src[0] == ",":
+                    src.pop_first()
+                elif src.len() > 0 and src[0] == ")":
+                    src.pop_first()
+                    break
+            result = result + ")"
+        elif src.len() > 0 and src[0] == ".":
+            src.pop_first()
+            result = result + "."
+            while src.len() > 0 and is_ident_continue(src[0]):
+                result = result + src[0]
+                src.pop_first()
+    elif c == "{":
+        src.pop_first()
+        result = "{"
+        n = 0
+        while true:
+            while src.len() > 0:
+                ch = src[0]
+                if ch == " " or ch == "\t" or ch == "\r":
+                    src.pop_first()
+                elif ch == "#":
+                    src.pop_first()
+                    while src.len() > 0 and src[0] != "\n":
+                        src.pop_first()
+                else:
+                    break
+            if src.len() == 0 or src[0] == "}":
+                if src.len() > 0 and src[0] == "}":
+                    src.pop_first()
+                break
+            if n > 0: result = result + ", "
+            n = n + 1
+            sub = parse_expr(^&src)
+            result = result + sub
+            while src.len() > 0 and (src[0] == " " or src[0] == "\t" or src[0] == "\r"):
+                src.pop_first()
+            if src.len() > 0 and src[0] == ",":
+                src.pop_first()
+            elif src.len() > 0 and src[0] == "}":
+                src.pop_first()
+                break
+        result = result + "}"
+    else:
+        return ""
+
+    return result
+
+fn tokenize(src: &str) ^[str]:
+    result: ^[str] = [""]
+    result.pop()
+    i: ^i32 = 0
+    while i < src.len():
+        c = src[i]
+        if c == " " or c == "\t" or c == "\r" or c == "\n":
+            result.push(c)
+            i = i + 1
+        elif c == "#":
+            while i < src.len() and src[i] != "\n":
+                result.push(src[i])
+                i = i + 1
+        elif c == "\"":
+            result.push(c)
+            i = i + 1
+            while i < src.len() and src[i] != "\"":
+                if src[i] == "\\":
+                    result.push(src[i])
+                    i = i + 1
+                if i < src.len():
+                    result.push(src[i])
+                    i = i + 1
+            if i < src.len():
+                result.push(src[i])
+                i = i + 1
+        else:
+            result.push(c)
+            i = i + 1
+    return result
+
+fn main():
+    tests: ^[str] = ["42", "a + b", "f(x, y)", "a.b", "\"hello world\""]
+    for test in tests:
+        chars = tokenize(&test)
+        result = parse_expr(^&chars)
+        print("\nInput: " + test)
+        print(" => " + result)

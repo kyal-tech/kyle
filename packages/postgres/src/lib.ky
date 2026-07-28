@@ -1,0 +1,88 @@
+# postgres v1.0 — Cliente PostgreSQL vía FFI directo a libpq
+# from postgres import postgres
+
+@link "pq"
+
+extern fn PQconnectdb(ptr) i64
+extern fn PQstatus(conn: i64) i32
+extern fn PQerrorMessage(conn: i64) i64
+extern fn PQfinish(conn: i64)
+extern fn PQexec(conn: i64, sql: i64) i64
+extern fn PQntuples(res: i64) i32
+extern fn PQnfields(res: i64) i32
+extern fn PQfname(res: i64, col: i32) i64
+extern fn PQgetvalue(res: i64, row: i32, col: i32) i64
+extern fn PQclear(res: i64)
+extern fn ky_clone_str(i64) i64
+
+fn pg_str(ptr: i64) str:
+    if ptr == 0: return ""
+    (ky_clone_str(ptr) as i64 as ptr) as str
+
+final class postgres:
+    conn: ^i64
+
+    static fn connect(conninfo: str) postgres:
+        c = PQconnectdb(conninfo as ptr)
+        if c == 0:
+            return postgres { conn: 0 }
+        if PQstatus(c) != 0:
+            PQfinish(c)
+            return postgres { conn: 0 }
+        postgres { conn: c }
+
+    fn query(sql: str) result:
+        r = PQexec(this.conn, sql as ptr)
+        if r == 0:
+            return result { res: 0, conn: this.conn }
+        result { res: r, conn: this.conn }
+
+    fn close():
+        if this.conn != 0:
+            PQfinish(this.conn)
+
+    fn error() str:
+        msg = PQerrorMessage(this.conn)
+        pg_str(msg)
+
+final class row:
+    res: ^i64
+    index: ^i32
+
+    fn get(name: str) str:
+        cols = PQnfields(this.res)
+        i: ^i32 = 0
+        while i < cols:
+            cn = PQfname(this.res, i)
+            if cn != 0:
+                cname = pg_str(cn)
+                if cname == name:
+                    val = PQgetvalue(this.res, this.index, i)
+                    return pg_str(val)
+            i = i + 1
+        ""
+
+final class result:
+    res: ^i64
+    conn: ^i64
+
+    fn rows() i32:
+        PQntuples(this.res)
+
+    fn cols() i32:
+        PQnfields(this.res)
+
+    fn get(r: i32, c: i32) str:
+        if r < 0: return ""
+        if r >= PQntuples(this.res): return ""
+        if c < 0: return ""
+        if c >= PQnfields(this.res): return ""
+        val = PQgetvalue(this.res, r, c)
+        pg_str(val)
+
+    fn free():
+        if this.res != 0:
+            PQclear(this.res)
+
+    fn data(r: i32) row:
+        row { res: this.res, index: r }

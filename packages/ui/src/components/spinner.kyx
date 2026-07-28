@@ -1,0 +1,6 @@
+# spinner — componente built-in
+# Props: standard UI props
+
+<spinner>
+    <slot />
+</spinner>

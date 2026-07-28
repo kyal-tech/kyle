@@ -1,0 +1,47 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/kyc_core",
+    "crates/kyc_frontend",
+    "crates/kyc_hir",
+    "crates/kyc_semantic",
+    "crates/kyc_mir",
+    "crates/kyc_backend",
+    "crates/kyc_driver",
+    "crates/kyc_cli",
+    "crates/kyc_runtime",
+    "crates/kyc_tools",
+    "crates/kyc_platform",
+    "crates/kyc_runtime_wasm",
+    "crates/kyc_ui",
+]
+default-members = [
+    "crates/kyc_core",
+    "crates/kyc_frontend",
+    "crates/kyc_hir",
+    "crates/kyc_semantic",
+    "crates/kyc_mir",
+    "crates/kyc_backend",
+    "crates/kyc_driver",
+    "crates/kyc_cli",
+    "crates/kyc_runtime",
+    "crates/kyc_tools",
+    "crates/kyc_platform",
+    "crates/kyc_ui",
+]
+
+[workspace.package]
+version = "0.8.7"
+edition = "2024"
+authors = ["Kynera"]
+license = "MIT"
+
+[profile.release]
+# LTO disabled for now — LLVM version mismatch between Kyle (18.1) and Rust
+# makes cross-boundary LTO unreliable. Inline list ops in codegen provide
+# the performance gain without LTO complexity.
+
+[workspace.dependencies]
+# LLVM bindings — enabled when Phase 3 begins
+# inkwell = { version = "0.11", features = ["llvm22-0"] }
+# llvm-sys = "220"

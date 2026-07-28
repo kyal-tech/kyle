@@ -1,0 +1,490 @@
+# ky2c.ky — Kyle→C compiler (bootstrap)
+# Uses bootstrap helpers that work in both Kyle runtime and C output
+
+extern fn str_len(s: &str) i32
+extern fn str_cat(a: &str, b: &str) str
+extern fn str_builder_new() str
+extern fn str_builder_append(sb: &str, s: &str)
+extern fn str_builder_to_str(sb: &str) str
+extern fn str_builder_free(sb: &str)
+extern fn _pl(s: &str)
+
+fn proc_methods(s: str) str:
+    sb = str_builder_new()
+    pi = 0
+    spos = 0
+    rs = 0
+    rj = 0
+    dp = 0
+    ti = 0
+    pfx = ""
+    while pi < s.len():
+        pn = s.len() - pi
+        m1 = 0
+        if pn >= 5 and s[pi] == "." and s[pi+1] == "l" and s[pi+2] == "e" and s[pi+3] == "n" and s[pi+4] == "(":
+            m1 = 1
+            spos = pi
+            rs = spos
+            while rs > 0 and s[rs-1] != " " and s[rs-1] != "," and s[rs-1] != "(" and s[rs-1] != "=" and s[rs-1] != "+" and s[rs-1] != "-":
+                rs = rs - 1
+            pfx = ""
+            ti = 0
+            while ti < rs:
+                pfx = str_cat(&pfx, &s[ti])
+                ti = ti + 1
+            str_builder_free(&sb)
+            sb = str_builder_new()
+            str_builder_append(&sb, &pfx)
+            str_builder_append(&sb, &"_len(")
+            rj = rs
+            while rj < spos:
+                str_builder_append(&sb, &s[rj])
+                rj = rj + 1
+            pi = spos + 5
+            dp = 1
+            while pi < s.len() and dp > 0:
+                if s[pi] == "(": dp = dp + 1
+                if s[pi] == ")": dp = dp - 1
+                pi = pi + 1
+            str_builder_append(&sb, &")")
+        if m1 == 0:
+            m2 = 0
+            if pn >= 8 and s[pi] == "." and s[pi+1] == "t" and s[pi+2] == "o" and s[pi+3] == "_" and s[pi+4] == "s" and s[pi+5] == "t" and s[pi+6] == "r" and s[pi+7] == "(":
+                m2 = 1
+                spos = pi
+                rs = spos
+                while rs > 0 and s[rs-1] != " " and s[rs-1] != "," and s[rs-1] != "(" and s[rs-1] != "=" and s[rs-1] != "+" and s[rs-1] != "-":
+                    rs = rs - 1
+                pfx = ""
+                ti = 0
+                while ti < rs:
+                    pfx = str_cat(&pfx, &s[ti])
+                    ti = ti + 1
+                str_builder_free(&sb)
+                sb = str_builder_new()
+                str_builder_append(&sb, &pfx)
+                str_builder_append(&sb, &"_s(")
+                rj = rs
+                while rj < spos:
+                    str_builder_append(&sb, &s[rj])
+                    rj = rj + 1
+                pi = spos + 8
+                dp = 1
+                while pi < s.len() and dp > 0:
+                    if s[pi] == "(": dp = dp + 1
+                    if s[pi] == ")": dp = dp - 1
+                    pi = pi + 1
+                str_builder_append(&sb, &")")
+            if m2 == 0:
+                str_builder_append(&sb, &s[pi])
+                pi = pi + 1
+    raw = str_builder_to_str(&sb)
+    str_builder_free(&sb)
+    # Apply keyword replacements (and, or, not, true, false)
+    result_sb = str_builder_new()
+    ri = 0
+    while ri < raw.len():
+        rn = raw.len() - ri
+        in_str = 0
+        sj = 0
+        while sj < ri:
+            if raw[sj] == "\"":
+                in_str = 1 - in_str
+            sj = sj + 1
+        if rn >= 3 and raw[ri] == "a" and raw[ri+1] == "n" and raw[ri+2] == "d" and in_str == 0:
+            str_builder_append(&result_sb, &"&&")
+            ri = ri + 3
+        elif rn >= 2 and raw[ri] == "o" and raw[ri+1] == "r" and in_str == 0:
+            str_builder_append(&result_sb, &"||")
+            ri = ri + 2
+        elif rn >= 3 and raw[ri] == "n" and raw[ri+1] == "o" and raw[ri+2] == "t" and in_str == 0:
+            str_builder_append(&result_sb, &"!")
+            ri = ri + 3
+        elif rn >= 4 and raw[ri] == "t" and raw[ri+1] == "r" and raw[ri+2] == "u" and raw[ri+3] == "e":
+            str_builder_append(&result_sb, &"1")
+            ri = ri + 4
+        elif rn >= 5 and raw[ri] == "f" and raw[ri+1] == "a" and raw[ri+2] == "l" and raw[ri+3] == "s" and raw[ri+4] == "e":
+            str_builder_append(&result_sb, &"0")
+            ri = ri + 5
+        else:
+            str_builder_append(&result_sb, &raw[ri])
+            ri = ri + 1
+    result = str_builder_to_str(&result_sb)
+    str_builder_free(&result_sb)
+    return result
+
+fn main():
+    sb = str_builder_new()
+    empty = 0
+    while empty < 3:
+        line = input()
+        if line == "":
+            empty = empty + 1
+            if empty >= 3: break
+            str_builder_append(&sb, &"\n")
+        else:
+            empty = 0
+            str_builder_append(&sb, &line)
+            str_builder_append(&sb, &"\n")
+    src = str_builder_to_str(&sb)
+    str_builder_free(&sb)
+
+    slen = str_len(&src)
+    pos = 0
+    indent = 0
+    in_fn = 0
+    declared = ""
+
+    println("// ky2c.ky")
+    println("#include <stdio.h>")
+    println("#include <string.h>")
+    println("#include <stdlib.h>")
+    println("")
+    println("extern char* ky_input();")
+    println("extern char* ky_list_new();")
+    _pl("extern void ky_list_push(void* list, long long val);")
+    _pl("extern void ky_list_free(void* list);")
+    println("extern char* ky_concat(char* a, int a_len, char* b, int b_len);")
+    println("extern int ky_strlen(char* s);")
+    println("extern int ky_eq_str(char* a, char* b);")
+    _pl("extern void ky_print(char* s, int len);")
+    _pl("extern void ky_println(char* s, int len);")
+    println("extern char* ky_i64_to_str(long long v);")
+    _pl("extern void* ky_alloc(long long size);")
+    println("")
+    println("// StringBuilder bootstrap helpers (defined in kyc_runtime)")
+    _pl("extern void* str_builder_new();")
+    _pl("extern void str_builder_append(void* sb, char* s);")
+    println("extern char* str_builder_to_str(void* sb);")
+    _pl("extern void str_builder_free(void* sb);")
+    println("// Bootstrap string helpers")
+    println("extern char* str_cat(char* a, char* b);")
+    println("extern int str_len(char* s);")
+    println("")
+    _pl("char* _s(long long v) \{ return ky_i64_to_str(v); }")
+    _pl("char* _c(char* a, char* b) \{ return ky_concat(a, ky_strlen(a), b, ky_strlen(b)); }")
+    _pl("int _eq(char* a, char* b) \{ return ky_eq_str(a, b); }")
+    _pl("int _ne(char* a, char* b) \{ return !ky_eq_str(a, b); }")
+    _pl("int _len(char* s) \{ return ky_strlen(s); }")
+    _pl("void _p(char* s) \{ ky_print(s, ky_strlen(s)); }")
+    _pl("void _pl(char* s) \{ ky_println(s, ky_strlen(s)); }")
+    println("")
+
+    while pos < slen:
+        ls = pos
+        while pos < slen and src[pos] != "\n":
+            pos = pos + 1
+        le = pos
+        if pos < slen: pos = pos + 1
+
+        sp = 0
+        i = ls
+        while i < le and src[i] == " ":
+            sp = sp + 1
+            i = i + 1
+        col = ls + sp
+
+        if col >= le or src[col] == "#":
+            println("")
+        elif in_fn == 0:
+            if le - ls >= 2 and src[ls] == "f" and src[ls+1] == "n":
+                in_fn = 1
+                declared = ""
+                idx = ls + 2
+                if idx < le and src[idx] == " ": idx = idx + 1
+                if idx + 3 < le and src[idx] == "m" and src[idx+1] == "a" and src[idx+2] == "i" and src[idx+3] == "n":
+                    println("void kyle_main() {")
+                else:
+                    sb_sig = str_builder_new()
+                    str_builder_append(&sb_sig, &"void ")
+                    while idx < le:
+                        c = src[idx]
+                        if c == "(" or c == ")" or c == ":": break
+                        str_builder_append(&sb_sig, &c)
+                        idx = idx + 1
+                    str_builder_append(&sb_sig, &"(")
+                    if idx < le and src[idx] == "(":
+                        idx = idx + 1
+                        first_param = 1
+                        while idx < le and src[idx] != ")" and src[idx] != ":":
+                            while idx < le and src[idx] == " ":
+                                idx = idx + 1
+                            if idx < le and (src[idx] == ")" or src[idx] == ":"):
+                                break
+                            pname_sb = str_builder_new()
+                            while idx < le and src[idx] != " " and src[idx] != ":" and src[idx] != "," and src[idx] != ")":
+                                str_builder_append(&pname_sb, &src[idx])
+                                idx = idx + 1
+                            while idx < le and (src[idx] == " " or src[idx] == ":"):
+                                idx = idx + 1
+                            pname = str_builder_to_str(&pname_sb)
+                            str_builder_free(&pname_sb)
+                            ptype_sb = str_builder_new()
+                            while idx < le and src[idx] != " " and src[idx] != "," and src[idx] != ")":
+                                str_builder_append(&ptype_sb, &src[idx])
+                                idx = idx + 1
+                            ptype = str_builder_to_str(&ptype_sb)
+                            str_builder_free(&ptype_sb)
+                            if first_param == 0:
+                                str_builder_append(&sb_sig, &", ")
+                            first_param = 0
+                            if ptype == "str":
+                                str_builder_append(&sb_sig, &"char* ")
+                            elif ptype == "i32" or ptype == "i64" or ptype == "int":
+                                str_builder_append(&sb_sig, &"long long ")
+                            else:
+                                str_builder_append(&sb_sig, &"long long ")
+                            declared = str_cat(&declared, &pname)
+                            declared = str_cat(&declared, &" ")
+                            str_builder_append(&sb_sig, &pname)
+                            while idx < le and (src[idx] == " " or src[idx] == ","):
+                                idx = idx + 1
+                    str_builder_append(&sb_sig, &")")
+                    # Parse return type between ) and :
+                    rt_end = idx
+                    while rt_end < le and src[rt_end] != ":":
+                        rt_end = rt_end + 1
+                    rt_name = ""
+                    rk = rt_end - 1
+                    while rk >= idx and src[rk] == " ":
+                        rk = rk - 1
+                    rt_end2 = rk + 1
+                    while rk >= idx and src[rk] != " " and src[rk] != ")":
+                        rk = rk - 1
+                    rk = rk + 1
+                    while rk < rt_end2:
+                        rt_name = rt_name + src[rk]
+                        rk = rk + 1
+                    # Replace "void " prefix with actual return type
+                    sig_str = str_builder_to_str(&sb_sig)
+                    str_builder_free(&sb_sig)
+                    full_sig = ""
+                    if rt_name == "str":
+                        full_sig = "char* "
+                    elif rt_name == "i32" or rt_name == "i64" or rt_name == "int":
+                        full_sig = "long long "
+                    else:
+                        full_sig = "void "
+                    si2 = 5
+                    while si2 < str_len(&sig_str):
+                        full_sig = str_cat(&full_sig, &sig_str[si2])
+                        si2 = si2 + 1
+                    full_sig = str_cat(&full_sig, &" {")
+                    println(full_sig)
+                indent = 1
+            else:
+                println("")
+        else:
+            ni = sp / 4
+            while ni < indent:
+                indent = indent - 1
+                println("}")
+                if indent == 0 and in_fn == 1:
+                    in_fn = 0
+            indent = ni
+
+            if indent > 0:
+                print("    ")
+
+                if le - ls >= 6 and src[col] == "r" and src[col+1] == "e" and src[col+2] == "t" and src[col+3] == "u" and src[col+4] == "r" and src[col+5] == "n":
+                    sb_c = str_builder_new()
+                    ci = col + 6
+                    while ci < le:
+                        str_builder_append(&sb_c, &src[ci])
+                        ci = ci + 1
+                    ret_val = str_builder_to_str(&sb_c)
+                    str_builder_free(&sb_c)
+                    print("return ")
+                    print(proc_methods(ret_val))
+                    println(";")
+                elif le - ls >= 2 and src[col] == "i" and src[col+1] == "f":
+                    sb_c = str_builder_new()
+                    ci = col + 2
+                    while ci < le and src[ci] == " ": ci = ci + 1
+                    while ci < le and src[ci] != ":":
+                        str_builder_append(&sb_c, &src[ci])
+                        ci = ci + 1
+                    cond = str_builder_to_str(&sb_c)
+                    str_builder_free(&sb_c)
+                    print("if (")
+                    print(proc_methods(cond))
+                    println(") {")
+                    indent = indent + 1
+                elif le - ls >= 4 and src[col] == "e" and src[col+1] == "l" and src[col+2] == "i" and src[col+3] == "f":
+                    # indent deja manejado por while ni < indent arriba
+                    print(" else if (")
+                    sb_c = str_builder_new()
+                    ci = col + 4
+                    while ci < le and src[ci] == " ": ci = ci + 1
+                    while ci < le and src[ci] != ":":
+                        str_builder_append(&sb_c, &src[ci])
+                        ci = ci + 1
+                    cond = str_builder_to_str(&sb_c)
+                    str_builder_free(&sb_c)
+                    print(proc_methods(cond))
+                    println(") {")
+                    indent = indent + 1
+                elif le - ls >= 4 and src[col] == "e" and src[col+1] == "l" and src[col+2] == "s" and src[col+3] == "e":
+                    print(" else {")
+                    println("")
+                elif le - ls >= 5 and src[col] == "w" and src[col+1] == "h" and src[col+2] == "i" and src[col+3] == "l" and src[col+4] == "e":
+                    sb_c = str_builder_new()
+                    ci = col + 5
+                    while ci < le and src[ci] == " ": ci = ci + 1
+                    while ci < le and src[ci] != ":":
+                        str_builder_append(&sb_c, &src[ci])
+                        ci = ci + 1
+                    cond = str_builder_to_str(&sb_c)
+                    str_builder_free(&sb_c)
+                    print("while (")
+                    print(proc_methods(cond))
+                    println(") {")
+                    indent = indent + 1
+                elif le - col >= 7 and src[col] == "p" and src[col+1] == "r" and src[col+2] == "i" and src[col+3] == "n" and src[col+4] == "t" and src[col+5] == "l" and src[col+6] == "n":
+                    sb_c = str_builder_new()
+                    ci = col + 7
+                    while ci < le:
+                        str_builder_append(&sb_c, &src[ci])
+                        ci = ci + 1
+                    arg = str_builder_to_str(&sb_c)
+                    str_builder_free(&sb_c)
+                    arg = proc_methods(arg)
+                    print("_pl")
+                    print(arg)
+                    println(";")
+                elif le - col >= 5 and src[col] == "p" and src[col+1] == "r" and src[col+2] == "i" and src[col+3] == "n" and src[col+4] == "t":
+                    sb_c = str_builder_new()
+                    ci = col + 5
+                    while ci < le:
+                        str_builder_append(&sb_c, &src[ci])
+                        ci = ci + 1
+                    arg = str_builder_to_str(&sb_c)
+                    str_builder_free(&sb_c)
+                    arg = proc_methods(arg)
+                    print("_p")
+                    print(arg)
+                    println(";")
+                else:
+                    # Collect the line into a buffer for transformation
+                    sb_line = str_builder_new()
+                    xi = col
+                    while xi < le:
+                        str_builder_append(&sb_line, &src[xi])
+                        xi = xi + 1
+                    line_buf = str_builder_to_str(&sb_line)
+                    str_builder_free(&sb_line)
+
+                    # Check for variable declaration
+                    new_var = ""
+                    eq_pos = 0
+                    while eq_pos < line_buf.len() and line_buf[eq_pos] != "=":
+                        eq_pos = eq_pos + 1
+                    if eq_pos > 0 and eq_pos < line_buf.len():
+                        vj = 0
+                        while vj < eq_pos and line_buf[vj] == " ":
+                            vj = vj + 1
+                        nv_sb = str_builder_new()
+                        while vj < eq_pos and line_buf[vj] != " " and line_buf[vj] != "(":
+                            str_builder_append(&nv_sb, &line_buf[vj])
+                            vj = vj + 1
+                        new_var = str_builder_to_str(&nv_sb)
+                        str_builder_free(&nv_sb)
+                        if new_var == "if" or new_var == "while" or new_var == "for" or new_var == "return" or new_var == "else":
+                            new_var = ""
+                        if new_var != "":
+                            found = 0
+                            dj = 0
+                            while dj < declared.len():
+                                matched = 1
+                                dk = 0
+                                while dk < new_var.len():
+                                    if dj + dk >= declared.len() or declared[dj + dk] != new_var[dk]:
+                                        matched = 0
+                                    dk = dk + 1
+                                if matched == 1:
+                                    # Check full word (space or end after new_var)
+                                    if dj + dk >= declared.len() or declared[dj + dk] == " ":
+                                        found = 1
+                                dj = dj + 1
+                            if found == 1:
+                                new_var = ""
+                            else:
+                                declared = str_cat(&declared, &new_var)
+                                declared = str_cat(&declared, &" ")
+
+                    if new_var != "":
+                        # Determine type prefix from line content
+                        type_prefix = ""
+                        ti = 0
+                        while ti < line_buf.len():
+                            if ti + 16 < line_buf.len() and line_buf[ti] == "s" and line_buf[ti+1] == "t" and line_buf[ti+2] == "r" and line_buf[ti+3] == "_" and line_buf[ti+4] == "b" and line_buf[ti+5] == "u" and line_buf[ti+6] == "i" and line_buf[ti+7] == "l" and line_buf[ti+8] == "d" and line_buf[ti+9] == "e" and line_buf[ti+10] == "r" and line_buf[ti+11] == "_" and line_buf[ti+12] == "n" and line_buf[ti+13] == "e" and line_buf[ti+14] == "w":
+                                type_prefix = "void* "
+                            if ti + 18 < line_buf.len() and line_buf[ti] == "s" and line_buf[ti+1] == "t" and line_buf[ti+2] == "r" and line_buf[ti+3] == "_" and line_buf[ti+4] == "b" and line_buf[ti+5] == "u" and line_buf[ti+6] == "i" and line_buf[ti+7] == "l" and line_buf[ti+8] == "d" and line_buf[ti+9] == "e" and line_buf[ti+10] == "r" and line_buf[ti+11] == "_" and line_buf[ti+12] == "t" and line_buf[ti+13] == "o" and line_buf[ti+14] == "_" and line_buf[ti+15] == "s" and line_buf[ti+16] == "t" and line_buf[ti+17] == "r":
+                                type_prefix = "char* "
+                            if line_buf[ti] == "\"":
+                                type_prefix = "char* "
+                            ti = ti + 1
+                        if type_prefix == "":
+                            type_prefix = "long long "
+                        print(type_prefix)
+
+                    # Process method calls (.len, .to_str) in line
+                    proc = proc_methods(line_buf)
+
+                    # Force void* prefix for str_builder_new even if new_var check failed
+                    needs_void = 0
+                    vi = 0
+                    while vi < str_len(&line_buf):
+                        if vi + 16 < str_len(&line_buf) and line_buf[vi] == "s" and line_buf[vi+1] == "t" and line_buf[vi+2] == "r" and line_buf[vi+3] == "_" and line_buf[vi+4] == "b" and line_buf[vi+5] == "u" and line_buf[vi+6] == "i" and line_buf[vi+7] == "l" and line_buf[vi+8] == "d" and line_buf[vi+9] == "e" and line_buf[vi+10] == "r" and line_buf[vi+11] == "_" and line_buf[vi+12] == "n" and line_buf[vi+13] == "e" and line_buf[vi+14] == "w":
+                            needs_void = 1
+                        vi = vi + 1
+                    # Now output the processed line with keyword replacements
+                    xi = 0
+                    in_str = 0
+                    while xi < proc.len():
+                        nn = proc.len() - xi
+                        if proc[xi] == "\"":
+                            in_str = 1 - in_str
+                        # Strip & before string literals (&"hello" → "hello")
+                        if proc[xi] == "&" and xi + 1 < proc.len() and proc[xi+1] == "\"":
+                            xi = xi + 1
+                        # Strip & before str_builder variable names (&sb → sb, &result → result)
+                        # These are str/void* variables where & is not needed in C
+                        if proc[xi] == "&" and xi + 1 < proc.len():
+                            nx = xi + 1
+                            if nx < proc.len() and proc[nx] == "s" and nx + 1 < proc.len() and proc[nx+1] == "b":
+                                xi = xi + 1
+                            elif nx < proc.len() and proc[nx] == "r" and nx + 5 < proc.len() and proc[nx] == "r" and proc[nx+1] == "e" and proc[nx+2] == "s" and proc[nx+3] == "u" and proc[nx+4] == "l" and proc[nx+5] == "t":
+                                xi = xi + 1
+                        if nn >= 5 and proc[xi] == "i" and proc[xi+1] == "n" and proc[xi+2] == "p" and proc[xi+3] == "u" and proc[xi+4] == "t":
+                            print("ky_input")
+                            xi = xi + 5
+                        elif nn >= 2 and proc[xi] == "o" and proc[xi+1] == "r" and in_str == 0:
+                            print("||")
+                            xi = xi + 2
+                        elif nn >= 3 and proc[xi] == "a" and proc[xi+1] == "n" and proc[xi+2] == "d" and in_str == 0:
+                            print("&&")
+                            xi = xi + 3
+                        elif nn >= 3 and proc[xi] == "n" and proc[xi+1] == "o" and proc[xi+2] == "t" and in_str == 0:
+                            print("!")
+                            xi = xi + 3
+                        elif nn >= 4 and proc[xi] == "t" and proc[xi+1] == "r" and proc[xi+2] == "u" and proc[xi+3] == "e":
+                            print("1")
+                            xi = xi + 4
+                        elif nn >= 5 and proc[xi] == "f" and proc[xi+1] == "a" and proc[xi+2] == "l" and proc[xi+3] == "s" and proc[xi+4] == "e":
+                            print("0")
+                            xi = xi + 5
+                        else:
+                            print(proc[xi])
+                            xi = xi + 1
+                    println(";")
+
+    println("")
+    println("int main() {")
+    println("    kyle_main();")
+    println("    return 0;")
+    println("}")
+
+    while indent > 0:
+        indent = indent - 1
+        if in_fn == 1: println("}")

@@ -1,0 +1,144 @@
+# http v4.0 — Tipos compartidos + Cliente
+
+@link "curl"
+
+extern fn system(ptr) i32
+
+# ── HttpMethod ──
+
+enum HttpMethod:
+    GET
+    POST
+    PUT
+    DELETE
+    PATCH
+    HEAD
+    OPTIONS
+
+# ── HttpStatus ──
+
+final class HttpStatus:
+    code: i32
+    text: str
+
+HttpStatusOk                  = HttpStatus { code: 200 text: "OK" }
+HttpStatusCreated             = HttpStatus { code: 201 text: "Created" }
+HttpStatusNoContent           = HttpStatus { code: 204 text: "No Content" }
+HttpStatusMovedPermanently    = HttpStatus { code: 301 text: "Moved Permanently" }
+HttpStatusNotFound            = HttpStatus { code: 404 text: "Not Found" }
+HttpStatusInternalServerError = HttpStatus { code: 500 text: "Internal Server Error" }
+
+# ── Response ──
+
+final class Response:
+    status_code: i32
+    status_text: str
+    body: str
+    is_ok: bool
+    elapsed_ms: i64
+
+# ── Client ──
+
+final class Client:
+    timeout: ^i32
+
+    Client(timeout: i32 = 30):
+        if timeout <= 0:
+            this.timeout = 30
+        else:
+            this.timeout = timeout
+
+    fn get(url: &str) Response:
+        do_request(&"GET", &url, &"")
+
+    fn post(url: &str, body: &str) Response:
+        do_request(&"POST", &url, &body)
+
+    fn put(url: &str, body: &str) Response:
+        do_request(&"PUT", &url, &body)
+
+    fn patch(url: &str, body: &str) Response:
+        do_request(&"PATCH", &url, &body)
+
+    fn delete(url: &str) Response:
+        do_request(&"DELETE", &url, &"")
+
+# ── Internal ──
+
+ZERO := 48
+
+fn parse_int(s: &str) i32:
+    result: ^i32 = 0
+    i: ^i32 = 0
+    while i < len(s):
+        c = char_at(&(s as ptr), i)
+        if c >= ZERO and c <= 57:
+            result = result * 10 + (c - ZERO)
+        i = i + 1
+    result
+
+fn read_file(path: &str) str:
+    fd = open(&(path as ptr), &(0 as ptr))
+    s = ""
+    if fd >= 0:
+        s = read_str(fd, 65536)
+        close(fd)
+    s
+
+fn build_cmd(method: &str, url: &str, body: &str) str:
+    cmd = &"curl -s -o /tmp/ky_body.txt -w '%\{http_code\}:%\{time_total\}' --dump-header /tmp/ky_headers.txt"
+    if method == &"POST" or method == &"PUT" or method == &"PATCH":
+        cmd = cmd + &" -X " + method + &" -d '" + body + &"'"
+    elif method == &"DELETE":
+        cmd = cmd + &" -X DELETE"
+    elif method == &"HEAD":
+        cmd = cmd + &" -X HEAD"
+    cmd = cmd + &" -L --max-redirs 10"
+    cmd = cmd + &" '" + url + &"' > /tmp/ky_status.txt 2>/dev/null"
+    cmd
+
+fn do_request(method: &str, url: &str, body: &str) Response:
+    system(&(build_cmd(&method, &url, &body) as ptr))
+    raw = read_file(&"/tmp/ky_status.txt")
+    body_s = read_file(&"/tmp/ky_body.txt")
+    headers_raw = read_file(&"/tmp/ky_headers.txt")
+
+    sc = 0
+    hdr_mode: ^i32 = 0
+    j: ^i32 = 0
+    while j < len(&headers_raw):
+        c = char_at(&(headers_raw as ptr), j)
+        if hdr_mode == 0:
+            if c == 32:
+                hdr_mode = 1
+        elif hdr_mode == 1 and c >= 48 and c <= 57:
+            sc = sc * 10 + (c - 48)
+        elif hdr_mode == 1:
+            hdr_mode = 2
+        j = j + 1
+
+    ok_flag = sc < 400
+    st = &"Unknown"
+    match sc:
+        200: st = &"OK"
+        201: st = &"Created"
+        204: st = &"No Content"
+        301: st = &"Moved Permanently"
+        404: st = &"Not Found"
+        500: st = &"Internal Server Error"
+
+    ms: ^i64 = 0
+    if len(&raw) > 0:
+        colon = 0
+        while colon < len(&raw) and char_at(&(raw as ptr), colon) != 58:
+            colon = colon + 1
+        elap = substr(&raw, colon + 1, len(&raw) - colon - 1)
+        dot = 0
+        while dot < len(&elap) and char_at(&(elap as ptr), dot) != 46:
+            dot = dot + 1
+        if dot > 0 and dot < len(&elap):
+            w = substr(&elap, 0, dot)
+            f = substr(&elap, dot + 1, 3)
+            ms = parse_int(&w) * 1000 + parse_int(&f)
+
+    Response { status_code: sc status_text: st body: body_s is_ok: ok_flag elapsed_ms: ms }

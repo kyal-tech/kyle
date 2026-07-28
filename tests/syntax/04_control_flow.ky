@@ -1,0 +1,43 @@
+# Control flow — if/elif/else, while, for, match, break/continue
+
+fn test_if(x: i32) str:
+    if x > 0:
+        return "positive"
+    elif x < 0:
+        return "negative"
+    else:
+        return "zero"
+
+fn test_while():
+    i: ^i32 = 0
+    while i < 5:
+        i += 1
+
+fn test_for():
+    items = [10, 20, 30]
+    for item in items:
+        print(item.to_str())
+    i: ^i32 = 0
+    for item in items:
+        print(i.to_str() + ": " + item.to_str())
+        i += 1
+
+fn test_break_continue():
+    for i in 0..10:
+        if i % 2 == 0: continue
+        if i > 7: break
+        print(i.to_str())
+
+fn test_match_guard(n: i32) str:
+    match n:
+        m if m < 0: "negative"
+        0: "zero"
+        m if m < 10: "small"
+        _: "large"
+
+fn main():
+    print(test_if(5))
+    test_while()
+    test_for()
+    test_break_continue()
+    print(test_match_guard(7))

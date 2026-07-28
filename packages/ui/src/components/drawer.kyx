@@ -1,0 +1,6 @@
+# drawer — componente built-in
+# Props: standard UI props
+
+<drawer>
+    <slot />
+</drawer>

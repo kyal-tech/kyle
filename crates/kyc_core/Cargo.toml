@@ -1,0 +1,9 @@
+[package]
+name = "kyc_core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+semver = "1"

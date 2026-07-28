@@ -1,0 +1,10 @@
+# Funciones — basicas, return types, borrow params, recursion
+fn add(a: i32, b: i32) i32:
+    return a + b
+
+fn greet(name: &str):
+    print("Hola " + name)
+
+fn main():
+    result = add(1, 2)
+    greet(&"test")

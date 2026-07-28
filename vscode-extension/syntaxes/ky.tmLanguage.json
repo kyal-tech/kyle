@@ -1,0 +1,599 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Kyle",
+  "scopeName": "source.ky",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#link_directive"
+    },
+    {
+      "include": "#char_literals"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#attributes"
+    },
+    {
+      "include": "#class_def"
+    },
+    {
+      "include": "#contract_def"
+    },
+    {
+      "include": "#enum_def"
+    },
+    {
+      "include": "#type_alias"
+    },
+    {
+      "include": "#extern_decl"
+    },
+    {
+      "include": "#function_def"
+    },
+    {
+      "include": "#import_path"
+    },
+    {
+      "include": "#constructor_call"
+    },
+    {
+      "include": "#keywords_control"
+    },
+    {
+      "include": "#keywords_declaration"
+    },
+    {
+      "include": "#keywords_operator"
+    },
+    {
+      "include": "#keywords_other"
+    },
+    {
+      "include": "#storage_modifiers"
+    },
+    {
+      "include": "#types_primitive"
+    },
+    {
+      "include": "#types_complex"
+    },
+    {
+      "include": "#types_special"
+    },
+    {
+      "include": "#builtins"
+    },
+    {
+      "include": "#constants"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#variable_decl"
+    },
+    {
+      "include": "#property_access"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-number-sign.ky",
+          "match": "##.*$"
+        },
+        {
+          "name": "comment.line.number-sign.ky",
+          "match": "#[^#].*$|#$"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.ky",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.ky",
+          "match": "\\\\[nrt0\"'\\\\]"
+        },
+        {
+          "name": "constant.character.escape.ky",
+          "match": "\\\\x[0-9a-fA-F]{2}"
+        },
+        {
+          "name": "constant.character.escape.ky",
+          "match": "\\\\u\\{[0-9a-fA-F]+\\}"
+        },
+        {
+          "name": "constant.character.escape.ky",
+          "match": "\\\\u[0-9a-fA-F]{4}"
+        },
+        {
+          "include": "#interpolation"
+        }
+      ]
+    },
+    "interpolation": {
+      "name": "string.interpolated.ky",
+      "begin": "\\{",
+      "end": "\\}",
+      "patterns": [
+        {
+          "include": "#expression"
+        }
+      ]
+    },
+    "expression": {
+      "patterns": [
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#numbers"
+        },
+        {
+          "include": "#keywords_control"
+        },
+        {
+          "include": "#types_primitive"
+        },
+        {
+          "include": "#operators"
+        }
+      ]
+    },
+    "link_directive": {
+      "name": "keyword.control.link.ky",
+      "match": "@link\\s+\"(.*?)\""
+    },
+    "char_literals": {
+      "name": "string.quoted.single.ky",
+      "begin": "'",
+      "end": "'",
+      "patterns": [
+        {
+          "name": "constant.character.escape.ky",
+          "match": "\\\\[nrt0\"'\\\\]"
+        },
+        {
+          "name": "constant.character.escape.ky",
+          "match": "\\\\x[0-9a-fA-F]{2}"
+        }
+      ]
+    },
+    "numbers": {
+      "name": "constant.numeric.ky",
+      "match": "\\b(0[xX][0-9a-fA-F_]+|0[bB][01_]+|\\d[\\d_]*(\\.[\\d_]*)?([eE][+-]?\\d+)?)[iIlLfF]?(?:8|16|32|64)?\\b"
+    },
+    "keywords_control": {
+      "name": "keyword.control.ky",
+      "match": "\\b(if|elif|else|while|for|in|match|return|break|continue|loop|defer|guard|unsafe|async|await|pass|empty)\\b"
+    },
+    "keywords_declaration": {
+      "patterns": [
+        {
+          "match": "\\b(final\\s+class|abstract\\s+class|class)\\b"
+        },
+        {
+          "match": "\\benum\\b"
+        },
+        {
+          "match": "\\bcontract\\b"
+        },
+        {
+          "match": "\\bfn\\b"
+        },
+        {
+          "match": "\\buse\\b"
+        },
+        {
+          "match": "\\bimport\\b"
+        },
+        {
+          "match": "\\bfrom\\b"
+        },
+        {
+          "match": "\\bas\\b"
+        },
+        {
+          "match": "\\btype\\b"
+        },
+        {
+          "match": "\\bextern\\b"
+        },
+        {
+          "match": "\\b(static|override|const|abstract|get|set)\\b"
+        }
+      ]
+    },
+    "storage_modifiers": {
+      "patterns": [
+        {
+          "name": "storage.modifier.move.ky",
+          "match": "\\^(?=[A-Za-z_])"
+        },
+        {
+          "name": "storage.modifier.borrow.ky",
+          "match": "&(?=[A-Za-z_])"
+        }
+      ]
+    },
+    "keywords_operator": {
+      "name": "keyword.operator.ky",
+      "match": "\\b(and|or|not|is)\\b"
+    },
+    "keywords_other": {
+      "patterns": [
+        {
+          "name": "constant.language.ky",
+          "match": "\\b(true|false|None|null)\\b"
+        },
+        {
+          "name": "variable.language.ky",
+          "match": "\\b(this|super)\\b"
+        }
+      ],
+      "match": "\\b(true|false|None|null|ok)\\b"
+    },
+    "types_primitive": {
+      "name": "storage.type.ky",
+      "match": "\\b(i8|i16|i32|i64|u8|u16|u32|u64|f32|f64|bool|str|char|void|any|ptr)\\b"
+    },
+    "types_complex": {
+      "patterns": [
+        {
+          "name": "storage.type.list.ky",
+          "match": "\\[[A-Za-z_][A-Za-z0-9_]*\\](?!\\s*;)"
+        },
+        {
+          "name": "storage.type.array.ky",
+          "match": "\\[[A-Za-z_][A-Za-z0-9_]*\\s*,\\s*\\d+\\]"
+        },
+        {
+          "name": "storage.type.dict.ky",
+          "match": "\\{[A-Za-z_][A-Za-z0-9_]*\\s*:\\s*[A-Za-z_][A-Za-z0-9_]*\\}"
+        },
+        {
+          "name": "storage.type.collection.ky",
+          "match": "\\b(set|queue|stack|deque|linked_list)\\s*<[A-Za-z_][A-Za-z0-9_]*>"
+        },
+        {
+          "name": "storage.type.generic.ky",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*<[A-Za-z_][A-Za-z0-9_]*>"
+        }
+      ]
+    },
+    "types_special": {
+      "patterns": [
+        {
+          "name": "storage.type.optional.ky",
+          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\?\\b"
+        },
+        {
+          "name": "storage.type.error.ky",
+          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\!\\b"
+        }
+      ]
+    },
+    "builtins": {
+      "name": "support.function.ky",
+      "match": "\\b(print|println|print_err|len|int|float|bool|str|assert|assert_eq|assert_ne|range|clone|input|open|read_str|write_str|close|sleep|now|char_at|ord|substr|contains|starts_with|ends_with|to_upper|to_lower|trim|replace|is_digit|is_alpha|is_alnum|is_whitespace|is_upper|is_lower|json_parse|json_stringify|stringify|serialize|deserialize|error|type|to_str|to_int|to_float|to_bool|to_list|to_array|to_set|to_queue|to_stack|push|pop|peek|add|remove|sum|product|max|min|reverse|map|filter|fold|reduce|collect|extend|clear|union|intersection|difference)\\b"
+    },
+    "constants": {
+      "name": "variable.other.constant.ky",
+      "match": "\\b[A-Z][A-Z0-9_]{2,}\\b"
+    },
+    "operators": {
+      "name": "keyword.operator.ky",
+      "patterns": [
+        {
+          "match": "::"
+        },
+        {
+          "match": ":="
+        },
+        {
+          "match": "(\\.\\.<|\\.\\.=|\\.\\.\\.|\\.\\.)"
+        },
+        {
+          "match": "(==|!=|<=|>=|->|=>|\\?|\\|)"
+        },
+        {
+          "match": "(\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>=)"
+        },
+        {
+          "match": "(<<|>>)"
+        },
+        {
+          "match": "(&&|\\|\\|)"
+        },
+        {
+          "match": "(\\+|\\-|\\*|/|%|&|\\^|~|=|<|>|!)"
+        }
+      ]
+    },
+    "class_def": {
+      "patterns": [
+        {
+          "name": "meta.class.ky",
+          "begin": "\\b(final\\s+class|abstract\\s+class|class)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.class.ky"
+            },
+            "2": {
+              "name": "entity.name.type.ky"
+            }
+          },
+          "end": "(?=(?:[^:]):|$|\\n)",
+          "patterns": [
+            {
+              "include": "#types_primitive"
+            },
+            {
+              "match": "<",
+              "name": "punctuation.bracket.ky"
+            },
+            {
+              "match": ">",
+              "name": "punctuation.bracket.ky"
+            },
+            {
+              "match": ",",
+              "name": "punctuation.separator.ky"
+            },
+            {
+              "match": "::",
+              "name": "keyword.operator.inheritance.ky"
+            }
+          ]
+        }
+      ]
+    },
+    "enum_def": {
+      "patterns": [
+        {
+          "name": "meta.enum.ky",
+          "begin": "\\b(enum)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.enum.ky"
+            },
+            "2": {
+              "name": "entity.name.type.ky"
+            }
+          },
+          "end": "(?=:|\n)",
+          "patterns": [
+            {
+              "match": "<",
+              "name": "punctuation.bracket.ky"
+            },
+            {
+              "match": ">",
+              "name": "punctuation.bracket.ky"
+            }
+          ]
+        }
+      ]
+    },
+    "contract_def": {
+      "patterns": [
+        {
+          "name": "meta.contract.ky",
+          "begin": "\\b(contract)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.contract.ky"
+            },
+            "2": {
+              "name": "entity.name.type.ky"
+            }
+          },
+          "end": "(?=:|\n)"
+        }
+      ]
+    },
+    "type_alias": {
+      "patterns": [
+        {
+          "begin": "\\b(type)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.type.ky"
+            },
+            "2": {
+              "name": "entity.name.type.ky"
+            }
+          },
+          "end": "(?=\n)"
+        }
+      ]
+    },
+    "extern_decl": {
+      "patterns": [
+        {
+          "begin": "\\b(extern)\\s+(fn)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.declaration.extern.ky"
+            },
+            "2": {
+              "name": "keyword.declaration.fn.ky"
+            },
+            "3": {
+              "name": "entity.name.function.ky"
+            }
+          },
+          "end": "(?=:|\n)",
+          "patterns": [
+            {
+              "include": "#types_primitive"
+            },
+            {
+              "match": "<",
+              "name": "punctuation.bracket.ky"
+            },
+            {
+              "match": ">",
+              "name": "punctuation.bracket.ky"
+            },
+            {
+              "match": ",",
+              "name": "punctuation.separator.ky"
+            },
+            {
+              "match": "\\(",
+              "name": "punctuation.bracket.round.ky"
+            },
+            {
+              "match": "\\)",
+              "name": "punctuation.bracket.round.ky"
+            }
+          ]
+        }
+      ]
+    },
+    "function_def": {
+      "patterns": [
+        {
+          "name": "meta.function.ky",
+          "begin": "(?:(const|async|abstract|static)\\s+)?(fn)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.modifier.ky"
+            },
+            "2": {
+              "name": "keyword.declaration.fn.ky"
+            },
+            "3": {
+              "name": "entity.name.function.ky"
+            }
+          },
+          "end": "(?=:|\n|{)",
+          "patterns": [
+            {
+              "include": "#types_primitive"
+            },
+            {
+              "include": "#types_complex"
+            },
+            {
+              "include": "#types_special"
+            },
+            {
+              "match": "<",
+              "name": "punctuation.bracket.ky"
+            },
+            {
+              "match": ">",
+              "name": "punctuation.bracket.ky"
+            },
+            {
+              "match": ",",
+              "name": "punctuation.separator.ky"
+            },
+            {
+              "match": "\\(",
+              "name": "punctuation.bracket.round.ky"
+            },
+            {
+              "match": "\\)",
+              "name": "punctuation.bracket.round.ky"
+            },
+            {
+              "match": "\\b([A-Za-z_][a-zA-Z0-9_]*)(?=\\s*:)",
+              "name": "variable.parameter.ky"
+            },
+            {
+              "match": ":",
+              "name": "punctuation.separator.colon.ky"
+            }
+          ]
+        }
+      ]
+    },
+    "import_path": {
+      "patterns": [
+        {
+          "name": "string.unquoted.import-path.ky",
+          "match": "(?<=\\b(?:use|import|from)\\s+)([a-zA-Z_][a-zA-Z0-9_.{},]*)"
+        }
+      ]
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "name": "meta.annotation.ky",
+          "begin": "#\\[",
+          "end": "\\]",
+          "patterns": [
+            {
+              "name": "entity.name.function.ky",
+              "match": "\\b([a-z_][a-zA-Z0-9_]+)\\b"
+            }
+          ]
+        }
+      ]
+    },
+    "constructor_call": {
+      "patterns": [
+        {
+          "match": "\\b(set|queue|stack|deque|linked_list)\\s*\\{",
+          "captures": {
+            "1": {
+              "name": "keyword.declaration.collection.ky"
+            }
+          }
+        },
+        {
+          "match": "\\b([A-Z][a-zA-Z0-9_]*)\\s*\\{",
+          "captures": {
+            "1": {
+              "name": "entity.name.type.ky"
+            }
+          }
+        },
+        {
+          "match": "\\b([A-Z][a-zA-Z0-9_]*)\\s*\\(",
+          "captures": {
+            "1": {
+              "name": "entity.name.type.ky"
+            }
+          }
+        }
+      ]
+    },
+    "property_access": {
+      "name": "variable.other.property.ky",
+      "match": "(?<=\\.)([a-zA-Z_][a-zA-Z0-9_]*)"
+    },
+    "variable_decl": {
+      "patterns": [
+        {
+          "name": "variable.other.constant.ky",
+          "match": "([A-Z_][A-Z0-9_]*)(?=\\s*:=)"
+        },
+        {
+          "name": "variable.other.mutable.ky",
+          "match": "([a-zA-Z_][a-zA-Z0-9_]*)(?=\\s*:\\s*&)"
+        },
+        {
+          "name": "variable.other.ky",
+          "match": "([a-zA-Z_][a-zA-Z0-9_]*)(?=\\s*=(?!=))"
+        }
+      ]
+    }
+  }
+}

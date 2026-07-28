@@ -1,0 +1,11 @@
+[project]
+name = "postgres"
+version = "0.1.0"
+edition = "2024"
+description = "PostgreSQL client for Kyle"
+
+[compiler]
+optimization = "O2"
+target = "native"
+
+[dependencies]

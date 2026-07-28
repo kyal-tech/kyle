@@ -1,0 +1,17 @@
+[package]
+name = "kyc_driver"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+kyc_core = { path = "../kyc_core" }
+kyc_frontend = { path = "../kyc_frontend" }
+kyc_hir = { path = "../kyc_hir" }
+kyc_semantic = { path = "../kyc_semantic" }
+kyc_mir = { path = "../kyc_mir" }
+kyc_backend = { path = "../kyc_backend" }
+kyc_ui = { path = "../kyc_ui" }
+kyc_tools = { path = "../kyc_tools" }
+inkwell = { version = "0.9", features = ["llvm18-1"] }

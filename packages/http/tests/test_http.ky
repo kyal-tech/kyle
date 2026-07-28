@@ -1,0 +1,8 @@
+# http package tests
+use http.src.lib.{Client}
+
+#[test]
+fn test_client_get():
+    c = Client()
+    result = c.get("https://example.com")
+    assert(result != "")

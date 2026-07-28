@@ -1,0 +1,31 @@
+# Enums — con payload, sin payload, match
+
+enum Color:
+    Red(i32)
+    Green
+    Blue(i32, i32)
+
+enum TokenKind:
+    Ident(str)
+    Number(i64)
+    LParen
+    RParen
+    EOF
+
+fn token_name(t: TokenKind) str:
+    match t:
+        TokenKind.Ident(n): n
+        TokenKind.Number(v): v.to_str()
+        TokenKind.LParen: "("
+        TokenKind.RParen: ")"
+        TokenKind.EOF: "EOF"
+
+fn is_paren(t: TokenKind) bool:
+    match t:
+        TokenKind.LParen: true
+        TokenKind.RParen: true
+        _: false
+
+fn main():
+    t = TokenKind.Number(42)
+    print(token_name(t))

@@ -1,0 +1,20 @@
+# Runtime Kyle — Memory allocation
+# Reemplaza kyc_runtime/src/memory.rs
+# Nota: las funciones ky_* extern están declaradas en el prelude.
+# Nuestras definiciones deben coincidir en tipos.
+
+@link "c"
+extern fn malloc(size: i64) ptr
+extern fn free(ptr)
+
+fn ky_alloc(size: i64) ptr:
+    return malloc(size)
+
+fn ky_free(p: ptr):
+    free(p)
+
+fn ky_retain(p: ptr):
+    none
+
+fn ky_release(p: ptr):
+    free(p)

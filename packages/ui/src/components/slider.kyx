@@ -1,0 +1,6 @@
+# slider — componente built-in
+# Props: standard UI props
+
+<slider>
+    <slot />
+</slider>

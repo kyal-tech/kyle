@@ -1,0 +1,259 @@
+{
+  "name": "ky",
+  "displayName": "Kyle Language Support",
+  "description": "Kyle programming language \u2014 syntax highlighting, LSP, snippets, and language support",
+  "version": "0.8.7",
+  "publisher": "kynera",
+  "icon": "icons/ky_128.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IT-KYNERA/KYLE.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Debuggers",
+    "Themes"
+  ],
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "echo 'OK'",
+    "compile": "echo 'Using pre-built JS'",
+    "package": "npx @vscode/vsce package"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "activationEvents": [
+    "onLanguage:kl",
+    "onLanguage:kyx",
+    "onCommand:ky.run",
+    "onCommand:ky.build",
+    "onCommand:ky.check",
+    "onCommand:ky.test",
+    "onCommand:ky.runTest",
+    "onDebugInitialConfigurations",
+    "onDebugResolve:kl"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "kl",
+        "aliases": [
+          "Kyle",
+          "kl"
+        ],
+        "extensions": [
+          ".ky"
+        ],
+        "filenames": [
+          "ky.toml"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/ky.png",
+          "dark": "./icons/ky.png"
+        }
+      },
+      {
+        "id": "kyx",
+        "aliases": [
+          "Kyle UI",
+          "kyx"
+        ],
+        "extensions": [
+          ".kyx"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/ky.png",
+          "dark": "./icons/ky.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "kl",
+        "scopeName": "source.ky",
+        "path": "./syntaxes/ky.tmLanguage.json"
+      },
+      {
+        "language": "kyx",
+        "scopeName": "source.kyx",
+        "path": "./syntaxes/kyx.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "ky.run",
+        "title": "Kyle: Run current file"
+      },
+      {
+        "command": "ky.build",
+        "title": "Kyle: Build current file"
+      },
+      {
+        "command": "ky.check",
+        "title": "Kyle: Type-check current file"
+      },
+      {
+        "command": "ky.test",
+        "title": "Kyle: Run tests in current file"
+      },
+      {
+        "command": "ky.runTest",
+        "title": "Kyle: Run specific test"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "kl",
+        "path": "./snippets/ky.json"
+      },
+      {
+        "language": "kyx",
+        "path": "./snippets/kyx.json"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "kl",
+        "required": [
+          "subcommand"
+        ],
+        "properties": {
+          "subcommand": {
+            "type": "string",
+            "description": "The KL subcommand \u2014 run, build, or check"
+          }
+        }
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "ky",
+        "label": "Kyle compiler errors",
+        "owner": "kl",
+        "source": "ky",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(?:.*:)?(?:error|warning)\\[([^\\]]+)\\]:\\s*(.+)$",
+          "message": 2,
+          "code": 1,
+          "file": 0,
+          "location": 0
+        }
+      },
+      {
+        "name": "kyx",
+        "label": "Kyle UI compiler errors",
+        "owner": "kyx",
+        "source": "ky",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(?:.*:)?(?:error|warning)\\[([^\\]]+)\\]:\\s*(.+)$",
+          "message": 2,
+          "code": 1,
+          "file": 0,
+          "location": 0
+        }
+      }
+    ],
+    "configuration": {
+      "title": "KL",
+      "properties": {
+        "ky.kycPath": {
+          "type": "string",
+          "default": "ky",
+          "description": "Path to the ky compiler binary"
+        },
+        "ky.semanticHighlighting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable semantic highlighting for variables, types, functions, etc."
+        }
+      }
+    },
+    "debuggers": [
+      {
+        "type": "kl",
+        "label": "Kyle Debugger",
+        "languages": [
+          "kl"
+        ],
+        "program": "./out/debugger.js",
+        "runtime": "node",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Absolute path to a .ky file.",
+                "default": "${workspaceFolder}/src/main.ky"
+              },
+              "klcPath": {
+                "type": "string",
+                "description": "Path to the ky compiler binary",
+                "default": "ky"
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Command line arguments passed to the program"
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "name": "KL: Launch",
+            "type": "kl",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.ky",
+            "klcPath": "ky"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "KL: Launch Current File",
+            "description": "Launch the currently open KL file",
+            "body": {
+              "name": "KL: Launch",
+              "type": "kl",
+              "request": "launch",
+              "program": "^\"\\${file}\""
+            }
+          }
+        ]
+      }
+    ],
+    "themes": [
+      {
+        "id": "kl-color-theme",
+        "label": "Kyle Pastel",
+        "uiTheme": "vs-dark",
+        "path": "./themes/kl-color-theme.json"
+      }
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.2",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,11 @@
+[project]
+name = "http"
+version = "0.1.0"
+edition = "2024"
+description = "HTTP client for Kyle — wraps libcurl"
+
+[compiler]
+optimization = "O2"
+target = "native"
+
+[dependencies]

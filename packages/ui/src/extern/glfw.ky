@@ -1,0 +1,77 @@
+@link "-framework Cocoa"
+@link "-framework OpenGL"
+@link "-framework IOKit"
+@link "glfw"
+
+# ── Window Lifecycle ──
+
+extern fn glfw_init() i32
+extern fn glfw_terminate()
+
+extern fn glfw_create_window(width: i32, height: i32, title: ptr, monitor: ptr, share: ptr) ptr
+extern fn glfw_destroy_window(window: ptr)
+
+extern fn glfw_make_context_current(window: ptr)
+extern fn glfw_swap_buffers(window: ptr)
+extern fn glfw_poll_events()
+extern fn glfw_window_should_close(window: ptr) i32
+extern fn glfw_set_window_title(window: ptr, title: ptr)
+extern fn glfw_get_framebuffer_size(window: ptr, width: ptr, height: ptr)
+
+# ── Callbacks ──
+
+extern fn glfw_set_key_callback(window: ptr, callback: ptr)
+extern fn glfw_set_mouse_button_callback(window: ptr, callback: ptr)
+extern fn glfw_set_cursor_pos_callback(window: ptr, callback: ptr)
+extern fn glfw_set_scroll_callback(window: ptr, callback: ptr)
+extern fn glfw_set_window_size_callback(window: ptr, callback: ptr)
+extern fn glfw_set_char_callback(window: ptr, callback: ptr)
+
+# ── Input ──
+
+extern fn glfw_get_key(window: ptr, key: i32) i32
+extern fn glfw_get_mouse_button(window: ptr, button: i32) i32
+extern fn glfw_get_cursor_pos(window: ptr, x: ptr, y: ptr)
+
+# ── Time ──
+
+extern fn glfw_get_time() f64
+
+# ── OpenGL ──
+
+extern fn gl_clear_color(r: f32, g: f32, b: f32, a: f32)
+extern fn gl_clear(mask: i32)
+extern fn gl_viewport(x: i32, y: i32, width: i32, height: i32)
+
+# ── Texture rendering (for Skia raster blit) ──
+
+extern fn gl_gen_texture(n: i32, textures: ptr)
+extern fn gl_bind_texture(target: i32, texture: i32)
+extern fn gl_tex_image_2d(target: i32, level: i32, internal_format: i32,
+    width: i32, height: i32, border: i32, format: i32, type_: i32, pixels: ptr)
+extern fn gl_tex_parameter_i(target: i32, pname: i32, param: i32)
+extern fn gl_enable(cap: i32)
+extern fn gl_disable(cap: i32)
+extern fn gl_begin(mode: i32)
+extern fn gl_end()
+extern fn gl_tex_coord_2f(s: f32, t: f32)
+extern fn gl_vertex_2f(x: f32, y: f32)
+extern fn gl_color_4f(r: f32, g: f32, b: f32, a: f32)
+
+# ── Constants ──
+
+final class Gl:
+    ColorBufferBit = 0x00004000
+    TriangleFan = 0x0006
+    Texture2d = 0x0DE1
+    Rgba = 0x1908
+    UnsignedByte = 0x1401
+    Linear = 0x2601
+    Nearest = 0x2600
+    TextureMinFilter = 0x2801
+    TextureMagFilter = 0x2800
+    Blend = 0x0BE2
+    SrcAlpha = 0x0302
+    OneMinusSrcAlpha = 0x0303
+    BlendSrcAlpha = 0x0302
+    BlendOneMinusSrcAlpha = 0x0303

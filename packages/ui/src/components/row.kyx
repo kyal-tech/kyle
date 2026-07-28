@@ -1,0 +1,16 @@
+# Row — contenedor flex horizontal
+# Props: layout, align, justify, spacing, padding
+
+layout<row> SpaceBetween:
+    justify_content = Alignment.SpaceBetween
+    align_items = Alignment.Center
+    gap = 8
+
+layout<row> End:
+    justify_content = Alignment.End
+    align_items = Alignment.Center
+    gap = 8
+
+<row layout=@layout>
+    <slot />
+</row>

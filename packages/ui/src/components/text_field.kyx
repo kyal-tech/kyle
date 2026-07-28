@@ -1,0 +1,23 @@
+# TextField — campo de texto con label y error
+# Props: bind, label, placeholder, error, disabled, type
+
+style<text_field> Default:
+    border = Border(1, Color("#CCCCCC"), BorderStyle.Solid)
+    border_radius = 6
+    font_size = 14
+    padding = Spacing.all(10)
+    color = Color("#1A1A1A")
+
+style<text_field> Error:
+    border = Border(1, Color("#DC3545"), BorderStyle.Solid)
+    border_radius = 6
+    font_size = 14
+    padding = Spacing.all(10)
+
+<view>
+    @if label != none:
+        <text value=@label typography=Caption color=@theme.on_surface />
+    <text_field bind=@bind placeholder=@placeholder disabled=@disabled />
+    @if error != none:
+        <text value=@error color=Color("#DC3545") font_size=12 />
+</view>

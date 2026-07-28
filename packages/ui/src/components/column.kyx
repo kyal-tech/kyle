@@ -1,0 +1,16 @@
+# Column — contenedor flex vertical
+# Props: layout, align, justify, spacing, padding
+
+layout<column> Center:
+    align_items = Alignment.Center
+    justify_content = Alignment.Center
+    gap = 16
+
+layout<column> TopLeft:
+    align_items = Alignment.Start
+    justify_content = Alignment.Start
+    gap = 8
+
+<column layout=@layout>
+    <slot />
+</column>

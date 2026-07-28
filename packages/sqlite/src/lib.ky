@@ -1,0 +1,46 @@
+# sqlite — SQLite database bindings for Kyle
+#
+# Pure Kyle FFI to libsqlite3. No Rust required.
+# Usage:
+#   @link "sqlite3"
+#   db = sqlite_open("data.db")
+#   sqlite_exec(db, "CREATE TABLE IF NOT EXISTS users (id INTEGER, name TEXT)")
+#   sqlite_close(db)
+
+@link "sqlite3"
+
+# SQLite result codes
+SQLITE_OK := 0
+SQLITE_ROW := 100
+SQLITE_DONE := 101
+SQLITE_INTEGER := 1
+SQLITE_TEXT := 3
+
+# Core API
+extern fn sqlite3_open(ptr, ptr) i32
+extern fn sqlite3_close(ptr) i32
+extern fn sqlite3_exec(ptr, ptr, ptr, ptr, ptr) i32
+extern fn sqlite3_errmsg(ptr) ptr
+extern fn sqlite3_prepare_v2(ptr, ptr, i32, ptr, ptr) i32
+extern fn sqlite3_step(ptr) i32
+extern fn sqlite3_finalize(ptr) i32
+extern fn sqlite3_column_count(ptr) i32
+extern fn sqlite3_column_type(ptr, i32) i32
+extern fn sqlite3_column_int(ptr, i32) i32
+extern fn sqlite3_column_text(ptr, i32) ptr
+extern fn sqlite3_bind_int(ptr, i32, i32) i32
+extern fn sqlite3_bind_text(ptr, i32, ptr, i32, ptr) i32
+
+fn sqlite_open(path: &str) ptr:
+    ppdb: ^ptr = 0 as ptr
+    rc = sqlite3_open(path as ptr, ^&ppdb)
+    if rc == 0:
+        ppdb as ptr
+    else:
+        0 as ptr
+
+fn sqlite_close(db: &ptr):
+    sqlite3_close(db as ptr)
+
+fn sqlite_exec(db: &ptr, sql: &str) i32:
+    sqlite3_exec(db as ptr, sql as ptr, 0 as ptr, 0 as ptr, 0 as ptr)

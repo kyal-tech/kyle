@@ -1,0 +1,20 @@
+# Operator overloading
+
+final class Vec2:
+    x: f64
+    y: f64
+
+    fn op_add(this, other: Vec2) Vec2:
+        return Vec2{x: this.x + other.x, y: this.y + other.y}
+
+    fn op_sub(this, other: Vec2) Vec2:
+        return Vec2{x: this.x - other.x, y: this.y - other.y}
+
+    fn op_eq(this, other: Vec2) bool:
+        return this.x == other.x and this.y == other.y
+
+fn main():
+    a = Vec2{x: 1, y: 2}
+    b = Vec2{x: 3, y: 4}
+    c = a + b
+    print(a == b)

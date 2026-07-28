@@ -1,0 +1,42 @@
+# CRUD API REST — Puerto 5050
+#   curl http://localhost:5050/users
+#   curl http://localhost:5050/users/1
+#   curl -X POST http://localhost:5050/users
+#   curl -X DELETE http://localhost:5050/users/1
+#
+from http.server import send_json, send_404, code_from_raw, path_from_raw
+from http.server import ky_tcp_listen, ky_tcp_accept, ky_tcp_read, ky_tcp_write, ky_tcp_close
+
+USERS := "[\{\"id\":1,\"name\":\"Ana\",\"age\":30},\{\"id\":2,\"name\":\"Juan\",\"age\":25}]"
+USER1 := "\{\"id\":1,\"name\":\"Ana\",\"age\":30}"
+NOTFOUND := "\{\"error\":\"not found\"}"
+
+fn main():
+    fd = ky_tcp_listen(5050)
+    if fd < 0:
+        print("Error\n")
+        return
+    print("Listening on 5050\n")
+    while true:
+        client = ky_tcp_accept(fd)
+        if client >= 0:
+            raw = ky_tcp_read(client, 4096)
+            if raw != 0 as ptr:
+                serve(client, raw as str)
+            ky_tcp_close(client)
+
+fn serve(client: i32, raw: str):
+    mcode = code_from_raw(raw)
+    path = path_from_raw(raw)
+    if mcode == 0 and path == "/users":
+        send_json(client, USERS, 200)
+    elif mcode == 0 and path == "/users/1":
+        send_json(client, USER1, 200)
+    elif mcode == 1 and path == "/users":
+        send_json(client, "\{\"created\":true}", 201)
+    elif mcode == 2 and path == "/users/1":
+        send_json(client, "\{\"updated\":true}", 200)
+    elif mcode == 3 and path == "/users/1":
+        send_json(client, "\{\"deleted\":true}", 200)
+    else:
+        send_404(client)

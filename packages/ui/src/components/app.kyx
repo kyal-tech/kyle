@@ -1,0 +1,12 @@
+# App — entry point de la aplicación UI
+# Props: theme
+#
+# <App theme=Dark>
+#     <Router>
+#         <home_view />
+#     </Router>
+# </App>
+
+<app>
+    <slot />
+</app>

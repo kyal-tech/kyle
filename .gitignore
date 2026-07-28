@@ -1,0 +1,59 @@
+# === Rust / Cargo ===
+target/
+
+# Cargo.lock should be committed for binaries (Kyle is a binary, not a library)
+# Do NOT ignore Cargo.lock
+
+# === KL build artifacts ===
+*.o
+*.ll
+*.bc
+*.kyc
+*.klc
+.kyc-build/
+klc-build/
+.klc-build/
+build/
+
+# === Examples — only .ky source files are tracked ===
+/examples/*
+!/examples/*.ky
+!/examples/**/*.ky
+!/examples/ky.toml
+
+*.js.map
+
+# === IDE / Editor ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# === OS ===
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# === Root build artifacts ===
+/ky
+/ky-macos-arm64.tar.gz
+/libkyc_runtime.a
+
+# === Distribution / Release artifacts ===
+dist/
+
+# === Removed — now in kyle-packages repo ===
+# packages/, docs/, registry/ moved to ../kyle-packages/
+
+# === Temporary / Logs ===
+tmp/
+*.log
+*.env
+*.old
+core
+node_modules/
+kyle-benchmarks
+kyle-benchmarks

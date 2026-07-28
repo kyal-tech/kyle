@@ -1,0 +1,128 @@
+# Token types for the Kyle lexer
+
+enum TokenKind:
+    Identifier(str)
+    Integer(str)
+    Float(str)
+    String(str)
+    Char(str)
+
+    # Keywords
+    Fn
+    Class
+    Abstract
+    Final
+    Struct
+    Enum
+    Contract
+    If
+    Elif
+    Else
+    While
+    For
+    In
+    Match
+    Return
+    Break
+    Continue
+    Defer
+    Guard
+    Unsafe
+    Async
+    Await
+    Loop
+    Type
+    True
+    False
+    KwNone
+    KwNull
+    KwOk
+    Extern
+    Import
+    From
+    As
+    Is
+    Super
+    Get
+    Set
+    Static
+    Const
+    Implements
+
+    # Special
+    At
+    Hash
+
+    # Logical
+    And
+    Or
+
+    # Operators (1-2 char)
+    Plus
+    Minus
+    Star
+    Slash
+    Percent
+    StarStar
+    Equals
+    EqualsEquals
+    Bang
+    BangEquals
+    Less
+    Greater
+    LessEquals
+    GreaterEquals
+    Ampersand
+    Pipe
+    Caret
+    Tilde
+    LessLess
+    GreaterGreater
+
+    # Compound assignment
+    PlusEquals
+    MinusEquals
+    StarEquals
+    SlashEquals
+    PercentEquals
+    AmpersandEquals
+    PipeEquals
+    CaretEquals
+    LessLessEquals
+    GreaterGreaterEquals
+
+    # Declaration
+    Walrus
+
+    # Delimiters
+    Dot
+    DotDot
+    DotDotDot
+    DotDotEquals
+    DotDotLess
+    Comma
+    Colon
+    Semicolon
+    Arrow
+    FatArrow
+    Question
+    QuestionQuestion
+
+    # Brackets
+    LParen
+    RParen
+    LBracket
+    RBracket
+    LBrace
+    RBrace
+
+    # Special whitespace
+    Indent
+    Dedent
+    Newline
+    Eof
+    LexError(str)
+
+final class Token:
+    kind: TokenKind
+    text: str

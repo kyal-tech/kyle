@@ -1,0 +1,9 @@
+# Router — sistema de navegación client-side
+# Props: transition, transition_duration, lazy
+#
+# Auto-routing: los componentes hijos con view("/path") se registran
+# automáticamente. <route> solo para casos especiales (guards, lazy).
+
+<router>
+    <slot />
+</router>

@@ -1,0 +1,6 @@
+# surface — componente built-in
+# Props: standard UI props
+
+<surface>
+    <slot />
+</surface>

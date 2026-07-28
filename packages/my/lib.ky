@@ -1,0 +1,4 @@
+# my — a simple custom module
+
+fn hello(name: str) str:
+    return "hello " + name

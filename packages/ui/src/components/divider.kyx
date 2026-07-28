@@ -1,0 +1,6 @@
+# divider — componente built-in
+# Props: standard UI props
+
+<divider>
+    <slot />
+</divider>

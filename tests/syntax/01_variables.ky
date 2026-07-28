@@ -1,0 +1,22 @@
+# Variables — inmutable, mutable (^T), borrow (&T), mutable borrow (^&T)
+fn main():
+    # Inmutable por defecto
+    name = "KYLE"
+    # name = "otro"  # ERROR: name es inmutable
+
+    # Mutable con ^
+    count: ^i32 = 0
+    count += 1
+
+    # Tipos basicos
+    b: bool = true
+    i: i32 = 42
+    j: i64 = 9999999999
+    f: f64 = 3.14
+    s: str = "hola"
+
+    # Casting
+    x = 42 as f64
+
+    # String interpolation
+    msg = "count is {count}"

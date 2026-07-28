@@ -1,0 +1,110 @@
+# http v4.0 — WebSocket
+# from http.websocket import ws_upgrade, ws_read_text, ws_send_text, ws_close
+#
+# Uso:
+#   from http.server import listen, accept, read_request, close
+#   from http.websocket import ws_upgrade, ws_read_text, ws_send_text, ws_close
+#
+#   fd = listen(8080)
+#   while true:
+#       client = accept(fd)
+#       if client >= 0:
+#           req = read_request(client)
+#           if req.method == "GET" and ws_upgrade(client, req):
+#               while true:
+#                   text = ws_read_text(client)
+#                   if text == "":
+#                       close(client)
+#                       return
+#                   ws_send_text(client, text)   # echo
+#           close(client)
+
+@link "c"
+
+extern fn ky_ws_accept(ptr) ptr
+extern fn ky_ws_read_frame(fd: i32) ptr
+extern fn ky_ws_send_frame(i32, i32, ptr, i32) i32
+extern fn ky_tcp_write(i32, ptr, i32) i32
+extern fn ky_ptr_read_i32(ptr) i32
+extern fn ky_ptr_read_ptr(ptr) ptr
+extern fn ky_free(ptr)
+
+# ═══════════════════════════════════════════════════════════
+# Handshake
+# ═══════════════════════════════════════════════════════════
+
+fn ws_upgrade(client_fd: i32, raw_request: str) bool:
+    key = extract_header(&raw_request, &"Sec-WebSocket-Key")
+    if len(key) == 0:
+        return false
+
+    accept_ptr = ky_ws_accept(key as ptr)
+    if accept_ptr == 0 as ptr:
+        return false
+    accept_val = accept_ptr as str
+
+    response = "HTTP/1.1 101 Switching Protocols\r\n"
+    response = response + "Upgrade: websocket\r\n"
+    response = response + "Connection: Upgrade\r\n"
+    response = response + "Sec-WebSocket-Accept: " + accept_val + "\r\n"
+    response = response + "\r\n"
+    n = ky_tcp_write(client_fd, response as ptr, len(response))
+    n >= 0
+
+fn extract_header(raw: str, name: str) str:
+    lower = to_lower(raw)
+    name_lower = to_lower(name)
+    pos: ^i32 = 0
+    while pos < len(lower):
+        nl = 0
+        while pos + nl < len(lower) and char_at(lower, pos + nl) != 10:
+            nl = nl + 1
+        line = substr(lower, pos, nl)
+        trim_line = trim(line)
+        i: ^i32 = 0
+        while i < len(trim_line) and char_at(trim_line, i) != 58:
+            i = i + 1
+        if i == len(name_lower) and substr(trim_line, 0, i) == name_lower:
+            val = trim(substr(trim_line, i + 1, len(trim_line) - i - 1))
+            return val
+        pos = pos + nl + 1
+    ""
+
+# ═══════════════════════════════════════════════════════════
+# Frame read/write
+# ═══════════════════════════════════════════════════════════
+
+fn ws_read_text(client_fd: i32) str:
+    frame_ptr = ky_ws_read_frame(client_fd)
+    if frame_ptr == 0 as ptr:
+        return ""
+    opcode = ky_ptr_read_i32(frame_ptr)
+    plen = ky_ptr_read_i32(frame_ptr + 8 as ptr)
+    payload_ptr = ky_ptr_read_ptr(frame_ptr + 16 as ptr)
+
+    result = ""
+    if opcode == 8:
+        result = ""
+    elif payload_ptr != 0 as ptr:
+        result = payload_ptr as str
+        if len(result) > plen:
+            result = substr(result, 0, plen)
+
+    ky_free(frame_ptr)
+    if payload_ptr != 0 as ptr:
+        ky_free(payload_ptr)
+    result
+
+fn ws_send_text(client_fd: i32, text: str):
+    ky_ws_send_frame(client_fd, 1, text as ptr, len(text))
+
+fn ws_send_binary(client_fd: i32, data: str):
+    ky_ws_send_frame(client_fd, 2, data as ptr, len(data))
+
+fn ws_send_pong(client_fd: i32):
+    ky_ws_send_frame(client_fd, 10, 0 as ptr, 0)
+
+fn ws_close(client_fd: i32):
+    ky_ws_send_frame(client_fd, 8, 0 as ptr, 0)
+
+

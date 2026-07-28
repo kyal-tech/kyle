@@ -1,0 +1,237 @@
+{
+  "View": {
+    "prefix": "view",
+    "body": "<view>\n\t$0\n</view>",
+    "description": "View container (generic div equivalent)"
+  },
+  "VStack": {
+    "prefix": "vstack",
+    "body": "<vstack alignment=alignment.center spacing=16>\n\t$0\n</vstack>",
+    "description": "Vertical stack layout"
+  },
+  "HStack": {
+    "prefix": "hstack",
+    "body": "<hstack alignment=alignment.center spacing=8>\n\t$0\n</hstack>",
+    "description": "Horizontal stack layout"
+  },
+  "ZStack": {
+    "prefix": "zstack",
+    "body": "<zstack alignment=alignment.center>\n\t$0\n</zstack>",
+    "description": "Z-axis stack (overlay)"
+  },
+  "Text": {
+    "prefix": "text",
+    "body": "<text value=\"$1\" />",
+    "description": "Text element"
+  },
+  "Text with children": {
+    "prefix": "textblock",
+    "body": "<text>\n\t$0\n</text>",
+    "description": "Text block with children"
+  },
+  "Button": {
+    "prefix": "button",
+    "body": "<button style=Primary text=\"$1\" click=@${2:handler} />",
+    "description": "Button element"
+  },
+  "Image": {
+    "prefix": "image",
+    "body": "<image src=\"$1\" width=${2:300} />",
+    "description": "Image element"
+  },
+  "Link": {
+    "prefix": "link",
+    "body": "<link to=\"$1\">$2</link>",
+    "description": "Navigation link"
+  },
+  "TextField": {
+    "prefix": "text_field",
+    "body": "<text_field bind=@${1:variable} label=\"${2:Label}\" />",
+    "description": "Text input field"
+  },
+  "PasswordField": {
+    "prefix": "password_field",
+    "body": "<password_field bind=@${1:variable} label=\"${2:Contraseña}\" />",
+    "description": "Password input field"
+  },
+  "TextArea": {
+    "prefix": "text_area",
+    "body": "<text_area bind=@${1:variable} label=\"${2:Label}\" />",
+    "description": "Multi-line text input"
+  },
+  "Checkbox": {
+    "prefix": "checkbox",
+    "body": "<checkbox bind=@${1:variable} label=\"${2:Label}\" />",
+    "description": "Checkbox input"
+  },
+  "Radio": {
+    "prefix": "radio",
+    "body": "<radio bind=@${1:variable} value=\"${2:value}\" />",
+    "description": "Radio button"
+  },
+  "Switch": {
+    "prefix": "switch",
+    "body": "<switch bind=@${1:variable} />",
+    "description": "Toggle switch"
+  },
+  "Slider": {
+    "prefix": "slider",
+    "body": "<slider bind=@${1:variable} min=${2:0} max=${3:100} />",
+    "description": "Range slider"
+  },
+  "Spacer": {
+    "prefix": "spacer",
+    "body": "<spacer />",
+    "description": "Flexible spacer"
+  },
+  "Divider": {
+    "prefix": "divider",
+    "body": "<divider />",
+    "description": "Horizontal divider line"
+  },
+  "Scroll": {
+    "prefix": "scroll",
+    "body": "<scroll direction=vertical>\n\t$0\n</scroll>",
+    "description": "Scrollable container"
+  },
+  "Modal": {
+    "prefix": "modal",
+    "body": "<modal visible=@${1:visible}>\n\t$0\n</modal>",
+    "description": "Modal dialog overlay"
+  },
+  "Sheet": {
+    "prefix": "sheet",
+    "body": "<sheet visible=@${1:visible}>\n\t$0\n</sheet>",
+    "description": "Bottom sheet"
+  },
+  "Alert": {
+    "prefix": "alert",
+    "body": "<alert visible=@${1:visible} title=\"${2:Título}\" message=\"${3:Mensaje}\" />",
+    "description": "Alert dialog"
+  },
+  "Form": {
+    "prefix": "form",
+    "body": "<form model=@${1:form} submit=@${2:handle_submit}>\n\t$0\n</form>",
+    "description": "Form with model binding"
+  },
+  "Form field (text)": {
+    "prefix": "field",
+    "body": "<text_field field=\"${1:name}\" label=\"${2:Label}\" />",
+    "description": "Form field with model binding"
+  },
+  "FilePicker": {
+    "prefix": "file_picker",
+    "body": "<file_picker accept=\"${1:image/*}\" field=\"${2:photo}\" on_select=@${3:handle_file} />",
+    "description": "Native file picker"
+  },
+  "FilePicker with callback": {
+    "prefix": "file_picker_cb",
+    "body": "<file_picker accept=\"${1:image/*}\" on_select=@${2:fn (file):\n\t$0\n} />",
+    "description": "File picker with inline callback"
+  },
+  "Router": {
+    "prefix": "router",
+    "body": "<router>\n\t$0\n</router>",
+    "description": "Router container"
+  },
+  "Route": {
+    "prefix": "route",
+    "body": "<route path=\"${1:/}\" component=${2:home} layout=${3:main} title=\"${4:Title}\" />",
+    "description": "Route definition"
+  },
+  "Layout": {
+    "prefix": "layout",
+    "body": "<layout>\n\t<navbar title=\"${1:App}\" />\n\t<main>\n\t\t<slot />\n\t</main>\n\t<footer>\n\t\t<text value=\"${2:Footer}\" />\n\t</footer>\n</layout>",
+    "description": "Persistent layout with slot"
+  },
+  "Slot": {
+    "prefix": "slot",
+    "body": "<slot />",
+    "description": "Content insertion point"
+  },
+  "Navbar": {
+    "prefix": "navbar",
+    "body": "<navbar title=\"${1:App}\" />",
+    "description": "Navigation bar"
+  },
+  "Sidebar": {
+    "prefix": "sidebar",
+    "body": "<sidebar>\n\t$0\n</sidebar>",
+    "description": "Sidebar panel"
+  },
+  "App template": {
+    "prefix": "app",
+    "body": "from views.${1:home} import ${1}\nfrom layouts.${2:main} import ${2}\n\n<app title=\"${3:App}\">\n\t<router>\n\t\t<route path=\"/\" component=${1} layout=${2} title=\"${4:Home}\" />\n\t\t<route path=\"*\" component=not_found layout=${2} title=\"404\" />\n\t</router>\n</app>",
+    "description": "App entry point with imports and router"
+  },
+  "Imports": {
+    "prefix": "import",
+    "body": "from ${1:views}.${2:name} import ${2}",
+    "description": "Import a .kyx component"
+  },
+  "Style declaration": {
+    "prefix": "style",
+    "body": "style<${1:text}> ${2:Name}:\n\t${3:prop} = ${4:value}",
+    "description": "Style declaration"
+  },
+  "Code block": {
+    "prefix": "code",
+    "body": "@(\n\t$0\n)",
+    "description": "Kyle code block @(...)"
+  },
+  "If directive": {
+    "prefix": "@if",
+    "body": "@if(${1:condition}):\n\t$0\n@else:\n\t\n",
+    "description": "Conditional template directive"
+  },
+  "For directive": {
+    "prefix": "@for",
+    "body": "@for(${1:item} in ${2:list}):\n\t$0\n",
+    "description": "Loop template directive"
+  },
+  "Match directive": {
+    "prefix": "@match",
+    "body": "@match(${1:expr}):\n\t${2:Pattern}:\n\t\t$0\n",
+    "description": "Pattern matching directive"
+  },
+  "Click handler": {
+    "prefix": "click",
+    "body": "click=@${1:handler}",
+    "description": "Click event handler attribute"
+  },
+  "Bind attribute": {
+    "prefix": "bind",
+    "body": "bind=@${1:variable}",
+    "description": "Two-way binding attribute"
+  },
+  "Field attribute": {
+    "prefix": "field",
+    "body": "field=\"${1:name}\"",
+    "description": "Form model field binding"
+  },
+  "Model attribute": {
+    "prefix": "model",
+    "body": "model=@${1:form}",
+    "description": "Form model attribute"
+  },
+  "Accept attribute": {
+    "prefix": "accept",
+    "body": "accept=\"${1:image/*}\"",
+    "description": "File picker accept filter"
+  },
+  "Target config": {
+    "prefix": "target",
+    "body": "target(Target.${1:web}):\n\t${2:port} = ${3:8080}",
+    "description": "Platform-specific config block"
+  },
+  "Function": {
+    "prefix": "fn",
+    "body": "fn ${1:name}(${2:args}):\n\t$0",
+    "description": "Function definition"
+  },
+  "EventHandler inline": {
+    "prefix": "on_click",
+    "body": "click=@fn ():\n\t$0",
+    "description": "Inline click event handler"
+  }
+}

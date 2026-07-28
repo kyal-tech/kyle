@@ -1,0 +1,12 @@
+# Bootstrap test - generates LLVM IR, outputs line by line
+
+fn main():
+    println("define i32 @add(i32 %a, i32 %b) {")
+    println("  %t0 = add i32 %a, %b")
+    println("  ret i32 %t0")
+    println("}")
+    println("")
+    println("define i32 @main() {")
+    println("  %r = call i32 @add(i32 2, i32 3)")
+    println("  ret i32 %r")
+    println("}")

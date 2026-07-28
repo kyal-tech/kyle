@@ -1,0 +1,6 @@
+# radio — componente built-in
+# Props: standard UI props
+
+<radio>
+    <slot />
+</radio>

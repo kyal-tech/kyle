@@ -1,0 +1,26 @@
+# Error handling — T!, ! operator, T?, ??
+
+fn safe_div(a: i32, b: i32) i32!:
+    if b == 0:
+        return error("division by zero")
+    return ok(a / b)
+
+fn use_safe_div(a: i32, b: i32) i32!:
+    result = safe_div(a, b)!
+    return ok(result * 2)
+
+fn test_optional():
+    x: i32? = none
+    y: i32? = some(42)
+    if y:
+        print(y.to_str())
+
+fn test_coalescing():
+    name: str? = none
+    display = name ?? "anonymous"
+    print(display)
+
+fn main():
+    _ = use_safe_div(10, 2)
+    test_optional()
+    test_coalescing()

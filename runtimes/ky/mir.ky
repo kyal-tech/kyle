@@ -1,0 +1,92 @@
+# MIR Kyle — Mid-level Intermediate Representation
+# TODO textual, variables globales, sin structs en listas
+
+MIR_OUT: ^str = ""
+MIR_BLOCKS: ^{str} = {"entry"}
+MIR_BLOCKS.pop()
+MIR_TEMP: ^i32 = 0
+
+OP: ^str = ""
+ARGS: ^str = ""
+
+fn mir_clear():
+    MIR_OUT = ""
+    MIR_BLOCKS = {"entry"}
+    MIR_BLOCKS.pop()
+    MIR_TEMP = 0
+
+fn mir_block():
+    MIR_OUT.set(MIR_OUT.get() + "\n" + OP.get() + ":\n")
+
+fn mir_inst():
+    t = MIR_TEMP.get()
+    MIR_TEMP.set(t + 1)
+    MIR_OUT.set(MIR_OUT.get() + "  %t" + t.to_str() + " = " + OP.get() + " " + ARGS.get() + "\n")
+    MIR_BLOCKS.push("%t" + t.to_str())
+
+fn mir_store():
+    MIR_OUT.set(MIR_OUT.get() + "  " + OP.get() + " = " + ARGS.get() + "\n")
+
+fn mir_br():
+    MIR_OUT.set(MIR_OUT.get() + "  br " + OP.get() + "\n")
+
+fn mir_condbr():
+    MIR_OUT.set(MIR_OUT.get() + "  br " + OP.get() + ", " + ARGS.get() + "\n")
+
+fn mir_ret():
+    MIR_OUT.set(MIR_OUT.get() + "  ret " + OP.get() + "\n")
+
+# ─── Dominance computation ──────────────────────────────────
+
+BLOCKS: ^{str} = {""}
+BLOCKS.pop()
+
+fn compute_dominance() ^{str}:
+    doms: ^{str} = {""}
+    doms.pop()
+    n = BLOCKS.len()
+    for i in 0..n:
+        doms.push("?")
+    if n > 0:
+        doms[0] = BLOCKS[0]
+    changed: ^bool = true
+    while changed:
+        changed = false
+        for i in 1..n:
+            for j in 0..i:
+                pred = doms[j]
+                if pred != "?" and pred != BLOCKS[i]:
+                    doms[i] = pred
+                    changed = true
+    return doms
+
+# ─── Tests ──────────────────────────────────────────────────
+
+fn test_lower():
+    mir_clear()
+    OP = "fun add(a: i32, b: i32)"
+    MIR_OUT.set(OP.get() + ":\n")
+    OP = "entry"
+    mir_block()
+    OP = "add"
+    ARGS = "a, b"
+    mir_inst()
+    OP = "%t0"
+    ARGS = "%result"
+    mir_store()
+    OP = "%t0"
+    mir_ret()
+    print("=== Lowered MIR ===")
+    print(MIR_OUT.get())
+
+fn test_dominance():
+    BLOCKS = {"entry", "loop", "exit"}
+    doms = compute_dominance()
+    print("=== Dominators ===")
+    for i in 0..BLOCKS.len():
+        print(BLOCKS[i] + " dom by " + doms[i])
+
+fn main():
+    test_lower()
+    print("")
+    test_dominance()

@@ -1,0 +1,11 @@
+# sqlite package tests
+use sqlite.src.lib.{open, close, exec}
+
+#[test]
+fn test_sqlite_create():
+    db = open(":memory:")
+    result = exec(db, "CREATE TABLE test (id INTEGER, name TEXT)")
+    assert(result == 0)
+    result = exec(db, "INSERT INTO test VALUES (1, 'hello')")
+    assert(result == 0)
+    close(db)

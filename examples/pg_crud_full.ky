@@ -1,0 +1,70 @@
+from http.server import Router
+from postgres import postgres
+
+CONNSTR := "host=localhost port=5433 dbname=kyle_test user=postgres password=test123"
+
+app = Router()
+
+app.get("/authors", (req, res):
+    conn = postgres.connect(CONNSTR)
+    q = conn.query("SELECT id, name, email FROM authors ORDER BY id")
+    i: ^i32 = 0
+    json = "["
+    while i < q.rows():
+        if i > 0:
+            json = json + ","
+        json = json + "{\"id\":" + q.get(i, 0) + ",\"name\":\"" + q.get(i, 1) + "\",\"email\":\"" + q.get(i, 2) + "\"}"
+        i = i + 1
+    json = json + "]"
+    q.free()
+    conn.close()
+    res.json(json, 200)
+)
+
+app.get("/authors/{id}", (req, res):
+    conn = postgres.connect(CONNSTR)
+    q = conn.query("SELECT id, name, email FROM authors WHERE id = " + req.param("id"))
+    if q.rows() == 0:
+        res.json("{\"error\":\"not found\"}", 404)
+    else:
+        res.json("{\"id\":" + q.get(0, 0) + ",\"name\":\"" + q.get(0, 1) + "\",\"email\":\"" + q.get(0, 2) + "\"}", 200)
+    q.free()
+    conn.close()
+)
+
+app.post("/authors", (req, res):
+    b = json_parse(req.body())
+    conn = postgres.connect(CONNSTR)
+    q = conn.query("INSERT INTO authors (name, email) VALUES ('" + (b["name"] as str) + "', '" + (b["email"] as str) + "') RETURNING id")
+    if q.rows() > 0:
+        res.json("{\"created\":true,\"id\":" + q.get(0, 0) + "}", 201)
+    else:
+        res.json("{\"error\":\"insert failed\"}", 500)
+    q.free()
+    conn.close()
+)
+
+app.put("/authors/{id}", (req, res):
+    b = json_parse(req.body())
+    conn = postgres.connect(CONNSTR)
+    q = conn.query("UPDATE authors SET name='" + (b["name"] as str) + "', email='" + (b["email"] as str) + "' WHERE id=" + req.param("id") + " RETURNING id")
+    if q.rows() > 0:
+        res.json("{\"id\":" + req.param("id") + ",\"name\":\"" + (b["name"] as str) + "\",\"email\":\"" + (b["email"] as str) + "\"}", 200)
+    else:
+        res.json("{\"error\":\"not found\"}", 404)
+    q.free()
+    conn.close()
+)
+
+app.delete("/authors/{id}", (req, res):
+    conn = postgres.connect(CONNSTR)
+    q = conn.query("DELETE FROM authors WHERE id = " + req.param("id") + " RETURNING id")
+    if q.rows() > 0:
+        res.json("{\"deleted\":true}", 200)
+    else:
+        res.json("{\"error\":\"not found\"}", 404)
+    q.free()
+    conn.close()
+)
+
+app.listen(5050)

@@ -1,0 +1,777 @@
+# codegen_c.ky — Kyle→C transpiler (AST-based)
+# Self-contained: includes inline lexer and parser
+
+# ─── Bootstrap helpers ─────────────────────────────────
+extern fn str_len(s: &str) i32
+extern fn ky_i64_to_str(v: i64) str
+
+fn in_alpha(c: str) bool:
+    abet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+    i: ^i32 = 0
+    while i.get() < abet.len():
+        if c == abet[i.get()]:
+            return true
+        i.set(i.get() + 1)
+    return false
+
+fn in_alnum(c: str) bool:
+    abet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789"
+    i: ^i32 = 0
+    while i.get() < abet.len():
+        if c == abet[i.get()]:
+            return true
+        i.set(i.get() + 1)
+    return false
+
+fn in_digit(c: str) bool:
+    digits = "0123456789"
+    i: ^i32 = 0
+    while i.get() < digits.len():
+        if c == digits[i.get()]:
+            return true
+        i.set(i.get() + 1)
+    return false
+extern fn str_cat(a: &str, b: &str) str
+extern fn str_builder_new() ptr
+extern fn str_builder_append(sb: ptr, s: &str)
+extern fn str_builder_to_str(sb: ptr) str
+extern fn str_builder_free(sb: ptr)
+extern fn ky_i64_to_str(v: i64) str
+
+# ─── Inline Lexer ───────────────────────────────────────
+enum TokenKind:
+    Identifier(str) Integer(str) Float(str) String(str)
+    Fn If Else While Return True False KwNone
+    Plus Minus Star Slash Equals EqualsEquals Bang BangEquals
+    Less Greater PlusEquals MinusEquals Arrow StarEquals StarStar
+    SlashEquals FatArrow LessEquals LessLess LessLessEquals
+    GreaterEquals GreaterGreater GreaterGreaterEquals
+    Comma Colon Walrus LParen RParen LBrace RBrace
+    Newline Indent Dedent Eof LexError(str)
+
+final class Token:
+    kind: TokenKind
+    text: str
+
+fn tokenize(source: &str, kinds: ^[str], texts: ^[str]):
+    if kinds.len() > 0: kinds.clear()
+    if texts.len() > 0: texts.clear()
+    
+    pos: ^i32 = 0
+    indent_stack: ^[i32] = [0]
+    pkinds: ^[str] = [""]
+    pkinds.clear()
+    ptexts: ^[str] = [""]
+    ptexts.clear()
+    pidx: ^i32 = 0
+    at_bol: ^i32 = 1
+    slen = source.len()
+
+    while true:
+        while pidx.get() < pkinds.len():
+            k = pkinds[pidx.get()]
+            t = ptexts[pidx.get()]
+            pidx.set(pidx.get() + 1)
+            kinds.push(k)
+            texts.push(t)
+            if k == "Eof":
+                break
+            continue
+        if pidx.get() >= pkinds.len() and pkinds.len() > 0:
+            pkinds.clear()
+            ptexts.clear()
+            pidx.set(0)
+
+        while true:
+            if pos.get() >= slen: break
+            c = source[pos.get()]
+            if c == " " or c == "\t" or c == "\r":
+                pos.set(pos.get() + 1)
+            elif c == "#":
+                pos.set(pos.get() + 1)
+                while true:
+                    if pos.get() >= slen: break
+                    if source[pos.get()] == "\n": break
+                    pos.set(pos.get() + 1)
+            else: break
+
+        if pos.get() >= slen:
+            while indent_stack.len() > 1:
+                indent_stack.pop()
+                kinds.push("Dedent")
+                texts.push("")
+            kinds.push("Eof")
+            texts.push("")
+            break
+
+        c = source[pos.get()]
+
+        if c == "\n":
+            pos.set(pos.get() + 1)
+            if at_bol:
+                continue
+            at_bol = 1
+            pkinds.push("Newline")
+            ptexts.push("")
+            ind: ^i32 = 0
+            p: ^i32 = pos.get()
+            while p.get() < slen:
+                ch = source[p.get()]
+                if ch == " ":
+                    ind.set(ind.get() + 1)
+                    p.set(p.get() + 1)
+                elif ch == "\t":
+                    ind.set(ind.get() + 4)
+                    p.set(p.get() + 1)
+                elif ch == "#":
+                    while p.get() < slen:
+                        if source[p.get()] == "\n": break
+                        p.set(p.get() + 1)
+                elif ch == "\n":
+                    ind.set(0)
+                    p.set(p.get() + 1)
+                elif ch == "\r":
+                    p.set(p.get() + 1)
+                else: break
+            ci = indent_stack[indent_stack.len() - 1]
+            if ind.get() > ci:
+                indent_stack.push(ind.get())
+                pkinds.push("Indent")
+                ptexts.push("")
+            elif ind.get() < ci:
+                while ind.get() < indent_stack[indent_stack.len() - 1]:
+                    indent_stack.pop()
+                    pkinds.push("Dedent")
+                    ptexts.push("")
+            continue
+
+        if c == "+":
+            if pos.get() + 1 < slen and source[pos.get() + 1] == "=":
+                pos.set(pos.get() + 2)
+                kinds.push("PlusEquals")
+                texts.push("+=")
+            else:
+                pos.set(pos.get() + 1)
+                kinds.push("Plus")
+                texts.push("+")
+        elif c == "=":
+            if pos.get() + 1 < slen and source[pos.get() + 1] == "=":
+                pos.set(pos.get() + 2)
+                kinds.push("EqualsEquals")
+                texts.push("==")
+            else:
+                pos.set(pos.get() + 1)
+                kinds.push("Equals")
+                texts.push("=")
+        elif c == "!":
+            if pos.get() + 1 < slen and source[pos.get() + 1] == "=":
+                pos.set(pos.get() + 2)
+                kinds.push("BangEquals")
+                texts.push("!=")
+            else:
+                pos.set(pos.get() + 1)
+                kinds.push("Bang")
+                texts.push("!")
+        elif c == "(":
+            pos.set(pos.get() + 1)
+            kinds.push("LParen")
+            texts.push("(")
+        elif c == ")":
+            pos.set(pos.get() + 1)
+            kinds.push("RParen")
+            texts.push(")")
+        elif c == ",":
+            pos.set(pos.get() + 1)
+            kinds.push("Comma")
+            texts.push(",")
+        elif c == ":":
+            pos.set(pos.get() + 1)
+            kinds.push("Colon")
+            texts.push(":")
+        elif c == "*":
+            pos.set(pos.get() + 1)
+            kinds.push("Star")
+            texts.push("*")
+        elif c == "/":
+            pos.set(pos.get() + 1)
+            kinds.push("Slash")
+            texts.push("/")
+        elif c == ">":
+            pos.set(pos.get() + 1)
+            kinds.push("Greater")
+            texts.push(">")
+        elif c == "<":
+            pos.set(pos.get() + 1)
+            kinds.push("Less")
+            texts.push("<")
+        elif c == "[":
+            pos.set(pos.get() + 1)
+            kinds.push("LBrace")
+            texts.push("[")
+        elif c == "]":
+            pos.set(pos.get() + 1)
+            kinds.push("RBrace")
+            texts.push("]")
+        elif c == "{":
+            pos.set(pos.get() + 1)
+            kinds.push("Brace")
+            texts.push("{")
+        elif c == "}":
+            pos.set(pos.get() + 1)
+            kinds.push("Brace2")
+            texts.push("}")
+
+        elif in_alpha(c):
+            word = ""
+            word = word + c
+            pos.set(pos.get() + 1)
+            while pos.get() < slen:
+                nc = source[pos.get()]
+                if in_alnum(nc):
+                    word = word + nc
+                    pos.set(pos.get() + 1)
+                else: break
+            w = word
+            if w == "fn":
+                kinds.push("Fn")
+                texts.push(w)
+            elif w == "if":
+                kinds.push("If")
+                texts.push(w)
+            elif w == "else":
+                kinds.push("Else")
+                texts.push(w)
+            elif w == "while":
+                kinds.push("While")
+                texts.push(w)
+            elif w == "return":
+                kinds.push("Return")
+                texts.push(w)
+            elif w == "true":
+                kinds.push("True")
+                texts.push(w)
+            elif w == "false":
+                kinds.push("False")
+                texts.push(w)
+            else:
+                kinds.push("Identifier")
+                texts.push(w)
+
+        elif in_digit(c):
+            num = ""
+            num = num + c
+            pos.set(pos.get() + 1)
+            while pos.get() < slen:
+                nc = source[pos.get()]
+                if in_digit(nc):
+                    num = num + nc
+                    pos.set(pos.get() + 1)
+                else: break
+            kinds.push("Integer")
+            texts.push(num)
+
+        elif c == "\"" or c == "'":
+            quote = c
+            s = ""
+            pos.set(pos.get() + 1)
+            while pos.get() < slen:
+                sc = source[pos.get()]
+                if sc == quote:
+                    pos.set(pos.get() + 1)
+                    kinds.push("String")
+                    texts.push(s)
+                    break
+                elif sc == "\\":
+                    pos.set(pos.get() + 1)
+                    if pos.get() < slen:
+                        ec = source[pos.get()]
+                        if ec == "n": s = s + "\n"
+                        elif ec == "t": s = s + "\t"
+                        elif ec == "\\": s = s + "\\"
+                        elif ec == quote: s = s + quote
+                        else: s = s + ec
+                        pos.set(pos.get() + 1)
+                else:
+                    s = s + sc
+                    pos.set(pos.get() + 1)
+            if pos.get() >= slen:
+                kinds.push("LexError")
+                texts.push("unterm str")
+
+        else:
+            pos.set(pos.get() + 1)
+            kinds.push("LexError")
+            texts.push("unexpected: " + c)
+
+    return Tokens{kinds: kinds, texts: texts}
+
+# ─── Codegen ────────────────────────────────────────────
+
+fn c_type(t: str) str:
+    result = "long long"
+    if t == "str":
+        result = "char*"
+    return result
+
+fn is_binop(k: TokenKind) bool:
+    if k == TokenKind.Plus: return true
+    if k == TokenKind.Minus: return true
+    if k == TokenKind.Star: return true
+    if k == TokenKind.Slash: return true
+    if k == TokenKind.EqualsEquals: return true
+    if k == TokenKind.BangEquals: return true
+    if k == TokenKind.Less: return true
+    if k == TokenKind.Greater: return true
+    if k == TokenKind.LessEquals: return true
+    if k == TokenKind.GreaterEquals: return true
+    return false
+
+fn binop_to_c(k: TokenKind) str:
+    if k == TokenKind.Plus: return "+"
+    elif k == TokenKind.Minus: return "-"
+    elif k == TokenKind.Star: return "*"
+    elif k == TokenKind.Slash: return "/"
+    elif k == TokenKind.EqualsEquals: return "=="
+    elif k == TokenKind.BangEquals: return "!="
+    elif k == TokenKind.Less: return "<"
+    elif k == TokenKind.Greater: return ">"
+    elif k == TokenKind.LessEquals: return "<="
+    elif k == TokenKind.GreaterEquals: return ">="
+    else: return ""
+
+fn resolve_c_type(annot: str) str:
+    if annot.index_of("str") >= 0:
+        return "char*"
+    if annot.index_of("bool") >= 0:
+        return "int"
+    return "long long"
+
+fn gen_c(source: str) str:
+    tkinds: ^[str] = [""]
+    tkinds.clear()
+    ttexts: ^[str] = [""]
+    ttexts.clear()
+    print("tokenizing")
+    tokenize(&source, &tkinds, &ttexts)
+    if tkinds.len() > 0:
+        print("first kind: " + tkinds[0])
+    sb = str_builder_new()
+    i: ^i32 = 0
+    tl = tkinds.len()
+    
+    str_builder_append(sb, &"// Generated by codegen_c.ky\n")
+    str_builder_append(sb, &"#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n\n")
+    str_builder_append(sb, &"extern char* ky_input();\n")
+    str_builder_append(sb, &"extern int ky_strlen(char* s);\n")
+    str_builder_append(sb, &"extern void ky_print(char* s, int len);\n")
+    str_builder_append(sb, &"extern char* ky_concat(char* a, int a_len, char* b, int b_len);\n")
+    str_builder_append(sb, &"extern char* ky_i64_to_str(long long v);\n\n")
+    str_builder_append(sb, &"char* _s(long long v) \{ return ky_i64_to_str(v); }\n")
+    str_builder_append(sb, &"char* _c(char* a, char* b) \{ return ky_concat(a, ky_strlen(a), b, ky_strlen(b)); }\n")
+    str_builder_append(sb, &"int _len(char* s) \{ return ky_strlen(s); }\n")
+    str_builder_append(sb, &"void _p(char* s) \{ ky_print(s, ky_strlen(s)); }\n")
+    str_builder_append(sb, &"void _pl(char* s) \{ ky_println(s, ky_strlen(s)); }\n\n")
+    
+    syms: {str: str} = {"": ""}
+    syms.clear()
+    
+    print("before loop")
+    
+    print("entering while")
+    lim: ^i32 = 200
+    while i.get() < tl:
+        print("loop")
+        if lim.get() <= 0:
+            print("break")
+            break
+        lim.set(lim.get() - 1)
+        k = tkinds[i.get()]
+        
+        if k == "Fn":
+            i.set(i.get() + 1)
+            fn_name = ttexts[i.get()]
+            i.set(i.get() + 1)
+            
+            str_builder_append(sb, &"void ")
+            str_builder_append(sb, &fn_name)
+            str_builder_append(sb, &"(")
+            
+            if i.get() < tl and tkinds[i.get()] == "LParen":
+                i.set(i.get() + 1)
+            
+            first = 1
+            while i.get() < tl and tkinds[i.get()] != "RParen":
+                if first == 0:
+                    str_builder_append(sb, &", ")
+                first = 0
+                pname = ttexts[i.get()]
+                i.set(i.get() + 1)
+                if i.get() < tl and tkinds[i.get()] == "Colon":
+                    i.set(i.get() + 1)
+                    ptype = ttexts[i.get()]
+                    i.set(i.get() + 1)
+                    str_builder_append(sb, &c_type(ptype))
+                    str_builder_append(sb, &" ")
+                    str_builder_append(sb, &pname)
+                if i.get() < tl and tkinds[i.get()] == "Comma":
+                    i.set(i.get() + 1)
+            
+            if i.get() < tl:
+                i.set(i.get() + 1)  # RParen
+            
+            # Skip return type and colon
+            while i.get() < tl and tkinds[i.get()] != "Colon" and tkinds[i.get()] != "Newline":
+                i.set(i.get() + 1)
+            if i.get() < tl and tkinds[i.get()] == "Colon":
+                i.set(i.get() + 1)
+            
+            str_builder_append(sb, &")\{ \n")
+            
+            if i.get() < tl and tkinds[i.get()] == "Newline":
+                i.set(i.get() + 1)
+            if i.get() < tl and tkinds[i.get()] == "Indent":
+                i.set(i.get() + 1)
+            
+            # Parse function body with statement-aware translator
+            depth = 1
+            while depth > 0 and i.get() < tl:
+                k2 = tkinds[i.get()]
+                if k2 == "Indent":
+                    depth = depth + 1
+                    i.set(i.get() + 1)
+                elif k2 == "Dedent":
+                    depth = depth - 1
+                    if depth > 0:
+                        i.set(i.get() + 1)
+                elif k2 == "Newline":
+                    str_builder_append(sb, &"\n")
+                    i.set(i.get() + 1)
+                elif depth > 0:
+                    str_builder_append(sb, &"    ")
+                    k3 = tkinds[i.get()]
+                    
+                    if k3 == "Else":
+                        i.set(i.get() + 1)
+                        while i.get() < tl and tkinds[i.get()] != "Colon":
+                            i.set(i.get() + 1)
+                        if i.get() < tl:
+                            i.set(i.get() + 1)
+                        while i.get() < tl:
+                            kk = tkinds[i.get()]
+                            if kk == "Newline": i.set(i.get() + 1)
+                            elif kk == "Indent": i.set(i.get() + 1)
+                            else: break
+                        str_builder_append(sb, &"} else \{ \n")
+                    elif k3 == "If":
+                        i.set(i.get() + 1)
+                        cond = ""
+                        while i.get() < tl:
+                            kk = tkinds[i.get()]
+                            if kk == "Newline": break
+                            if kk == "Dedent": break
+                            if kk == "Eof": break
+                            if kk == "Colon": break
+                            txt = ttexts[i.get()]
+                            kk2 = tkinds[i.get()]
+                            i.set(i.get() + 1)
+                            if kk2 == "Identifier" or kk2 == "Integer":
+                                cond = cond + txt
+                            elif kk2 == "String": cond = cond + "\"" + txt + "\""
+                            elif kk2 == "Minus": cond = cond + "-"
+                            elif kk2 == "Plus": cond = cond + " + "
+                            elif kk2 == "Bang": cond = cond + "!"
+                            elif kk2 == "EqualsEquals": cond = cond + " == "
+                            elif kk2 == "BangEquals": cond = cond + " != "
+                            elif kk2 == "Less": cond = cond + " < "
+                            elif kk2 == "Greater": cond = cond + " > "
+                            elif kk2 == "LParen": cond = cond + "("
+                            elif kk2 == "RParen": cond = cond + ")"
+                            elif kk2 == "LessEquals": cond = cond + " <= "
+                            elif kk2 == "GreaterEquals": cond = cond + " >= "
+                            elif kk2 == "True": cond = cond + "1"
+                            elif kk2 == "False": cond = cond + "0"
+                            elif kk2 == "KwNone": cond = cond + "NULL"
+                            else: cond = cond + txt
+                        while i.get() < tl and tkinds[i.get()] == "Colon":
+                            i.set(i.get() + 1)
+                        while i.get() < tl:
+                            kk = tkinds[i.get()]
+                            if kk == "Newline": i.set(i.get() + 1)
+                            elif kk == "Indent": i.set(i.get() + 1)
+                            else: break
+                        str_builder_append(sb, &"if (")
+                        str_builder_append(sb, &cond)
+                        str_builder_append(sb, &")\{ \n")
+                    elif k3 == "While":
+                        i.set(i.get() + 1)
+                        cond = ""
+                        while i.get() < tl:
+                            kk = tkinds[i.get()]
+                            if kk == "Newline": break
+                            if kk == "Dedent": break
+                            if kk == "Eof": break
+                            if kk == "Colon": break
+                            txt = ttexts[i.get()]
+                            kk2 = tkinds[i.get()]
+                            i.set(i.get() + 1)
+                            if kk2 == "Identifier" or kk2 == "Integer":
+                                cond = cond + txt
+                            elif kk2 == "String": cond = cond + "\"" + txt + "\""
+                            elif kk2 == "Minus": cond = cond + "-"
+                            elif kk2 == "Plus": cond = cond + " + "
+                            elif kk2 == "Bang": cond = cond + "!"
+                            elif kk2 == "EqualsEquals": cond = cond + " == "
+                            elif kk2 == "BangEquals": cond = cond + " != "
+                            elif kk2 == "Less": cond = cond + " < "
+                            elif kk2 == "Greater": cond = cond + " > "
+                            elif kk2 == "LParen": cond = cond + "("
+                            elif kk2 == "RParen": cond = cond + ")"
+                            elif kk2 == "LessEquals": cond = cond + " <= "
+                            elif kk2 == "GreaterEquals": cond = cond + " >= "
+                            elif kk2 == "True": cond = cond + "1"
+                            elif kk2 == "False": cond = cond + "0"
+                            elif kk2 == "KwNone": cond = cond + "NULL"
+                            else: cond = cond + txt
+                        while i.get() < tl and tkinds[i.get()] == "Colon":
+                            i.set(i.get() + 1)
+                        while i.get() < tl:
+                            kk = tkinds[i.get()]
+                            if kk == "Newline": i.set(i.get() + 1)
+                            elif kk == "Indent": i.set(i.get() + 1)
+                            else: break
+                        str_builder_append(sb, &"while (")
+                        str_builder_append(sb, &cond)
+                        str_builder_append(sb, &")\{ \n")
+                    elif k3 == "Return":
+                        i.set(i.get() + 1)
+                        expr = ""
+                        while i.get() < tl:
+                            kk = tkinds[i.get()]
+                            if kk == "Newline": break
+                            if kk == "Dedent": break
+                            if kk == "Eof": break
+                            txt = ttexts[i.get()]
+                            kk2 = tkinds[i.get()]
+                            i.set(i.get() + 1)
+                            if kk2 == "Identifier" or kk2 == "Integer":
+                                expr = expr + txt
+                            elif kk2 == "String": expr = expr + "\"" + txt + "\""
+                            elif kk2 == "Minus": expr = expr + "-"
+                            elif kk2 == "Plus": expr = expr + " + "
+                            elif kk2 == "Bang": expr = expr + "!"
+                            elif kk2 == "EqualsEquals": expr = expr + " == "
+                            elif kk2 == "BangEquals": expr = expr + " != "
+                            elif kk2 == "Less": expr = expr + " < "
+                            elif kk2 == "Greater": expr = expr + " > "
+                            elif kk2 == "LParen": expr = expr + "("
+                            elif kk2 == "RParen": expr = expr + ")"
+                            elif kk2 == "LessEquals": expr = expr + " <= "
+                            elif kk2 == "GreaterEquals": expr = expr + " >= "
+                            elif kk2 == "True": expr = expr + "1"
+                            elif kk2 == "False": expr = expr + "0"
+                            elif kk2 == "KwNone": expr = expr + "NULL"
+                            else: expr = expr + txt
+                        while i.get() < tl and tkinds[i.get()] == "Newline":
+                            i.set(i.get() + 1)
+                        str_builder_append(sb, &"return ")
+                        str_builder_append(sb, &expr)
+                        str_builder_append(sb, &";\n")
+                    elif k3 == "Identifier":
+                        name = ttexts[i.get()]
+                        i.set(i.get() + 1)
+                        nk = "Newline"
+                        if i.get() < tl:
+                            nk = tkinds[i.get()]
+                        
+                        if nk == "Colon":
+                            i.set(i.get() + 1)
+                            ptype = ""
+                            if i.get() < tl:
+                                ptype = ttexts[i.get()]
+                                i.set(i.get() + 1)
+                            syms.set(name, ptype)
+                            ct = resolve_c_type(ptype)
+                            str_builder_append(sb, &ct)
+                            str_builder_append(sb, &" ")
+                            str_builder_append(sb, &name)
+                            if i.get() < tl and tkinds[i.get()] == "Equals":
+                                i.set(i.get() + 1)
+                                rhs = ""
+                                while i.get() < tl:
+                                    kk = tkinds[i.get()]
+                                    if kk == "Newline": break
+                                    if kk == "Dedent": break
+                                    if kk == "Eof": break
+                                    txt2 = ttexts[i.get()]
+                                    kk2 = tkinds[i.get()]
+                                    i.set(i.get() + 1)
+                                    if kk2 == "Identifier" or kk2 == "Integer":
+                                        rhs = rhs + txt2
+                                    elif kk2 == "String": rhs = rhs + "\"" + txt2 + "\""
+                                    elif kk2 == "Minus": rhs = rhs + "-"
+                                    elif kk2 == "Plus": rhs = rhs + " + "
+                                    elif kk2 == "Bang": rhs = rhs + "!"
+                                    elif kk2 == "EqualsEquals": rhs = rhs + " == "
+                                    elif kk2 == "BangEquals": rhs = rhs + " != "
+                                    elif kk2 == "Less": rhs = rhs + " < "
+                                    elif kk2 == "Greater": rhs = rhs + " > "
+                                    elif kk2 == "LParen": rhs = rhs + "("
+                                    elif kk2 == "RParen": rhs = rhs + ")"
+                                    elif kk2 == "LessEquals": rhs = rhs + " <= "
+                                    elif kk2 == "GreaterEquals": rhs = rhs + " >= "
+                                    elif kk2 == "True": rhs = rhs + "1"
+                                    elif kk2 == "False": rhs = rhs + "0"
+                                    elif kk2 == "KwNone": rhs = rhs + "NULL"
+                                    else: rhs = rhs + txt2
+                                while i.get() < tl and tkinds[i.get()] == "Newline":
+                                    i.set(i.get() + 1)
+                                str_builder_append(sb, &" = ")
+                                str_builder_append(sb, &rhs)
+                                str_builder_append(sb, &";\n")
+                            else:
+                                while i.get() < tl:
+                                    kk = tkinds[i.get()]
+                                    if kk == "Newline": break
+                                    if kk == "Dedent": break
+                                    if kk == "Eof": break
+                                    i.set(i.get() + 1)
+                                if i.get() < tl and tkinds[i.get()] == "Newline":
+                                    i.set(i.get() + 1)
+                                str_builder_append(sb, &";\n")
+                        elif nk == "Equals":
+                            i.set(i.get() + 1)
+                            rhs = ""
+                            while i.get() < tl:
+                                kk = tkinds[i.get()]
+                                if kk == "Newline": break
+                                if kk == "Dedent": break
+                                if kk == "Eof": break
+                                txt2 = ttexts[i.get()]
+                                kk2 = tkinds[i.get()]
+                                i.set(i.get() + 1)
+                                if kk2 == "Identifier" or kk2 == "Integer":
+                                    rhs = rhs + txt2
+                                elif kk2 == "String": rhs = rhs + "\"" + txt2 + "\""
+                                elif kk2 == "Minus": rhs = rhs + "-"
+                                elif kk2 == "Plus": rhs = rhs + " + "
+                                elif kk2 == "Bang": rhs = rhs + "!"
+                                elif kk2 == "EqualsEquals": rhs = rhs + " == "
+                                elif kk2 == "BangEquals": rhs = rhs + " != "
+                                elif kk2 == "Less": rhs = rhs + " < "
+                                elif kk2 == "Greater": rhs = rhs + " > "
+                                elif kk2 == "LParen": rhs = rhs + "("
+                                elif kk2 == "RParen": rhs = rhs + ")"
+                                elif kk2 == "LessEquals": rhs = rhs + " <= "
+                                elif kk2 == "GreaterEquals": rhs = rhs + " >= "
+                                elif kk2 == "True": rhs = rhs + "1"
+                                elif kk2 == "False": rhs = rhs + "0"
+                                elif kk2 == "KwNone": rhs = rhs + "NULL"
+                                else: rhs = rhs + txt2
+                            while i.get() < tl and tkinds[i.get()] == "Newline":
+                                i.set(i.get() + 1)
+                            str_builder_append(sb, &name)
+                            str_builder_append(sb, &" = ")
+                            str_builder_append(sb, &rhs)
+                            str_builder_append(sb, &";\n")
+                        elif nk == "LParen":
+                            i.set(i.get() - 1)  # backtrack to identifier
+                            func_name = ttexts[i.get()]
+                            i.set(i.get() + 1)  # skip identifier
+                            i.set(i.get() + 1)  # skip LParen
+                            args: ^[str] = [""]
+                            args.pop()
+                            first_arg = 1
+                            while i.get() < tl and tkinds[i.get()] != "RParen":
+                                if first_arg == 0:
+                                    if i.get() < tl and tkinds[i.get()] == "Comma":
+                                        i.set(i.get() + 1)
+                                first_arg = 0
+                                arg = ""
+                                while i.get() < tl:
+                                    kk = tkinds[i.get()]
+                                    if kk == "Comma": break
+                                    if kk == "RParen": break
+                                    if kk == "Newline": break
+                                    atxt = ttexts[i.get()]
+                                    ak = tkinds[i.get()]
+                                    i.set(i.get() + 1)
+                                    if ak == "Identifier" or ak == "Integer":
+                                        arg = arg + atxt
+                                    elif ak == "String": arg = arg + "\"" + atxt + "\""
+                                    elif ak == "Minus": arg = arg + "-"
+                                    elif ak == "Plus": arg = arg + " + "
+                                    elif ak == "EqualsEquals": arg = arg + " == "
+                                    elif ak == "BangEquals": arg = arg + " != "
+                                    elif ak == "Less": arg = arg + " < "
+                                    elif ak == "Greater": arg = arg + " > "
+                                    elif ak == "LParen": arg = arg + "("
+                                    elif ak == "RParen": arg = arg + ")"
+                                    elif ak == "True": arg = arg + "1"
+                                    elif ak == "False": arg = arg + "0"
+                                    elif ak == "KwNone": arg = arg + "NULL"
+                                    else: arg = arg + atxt
+                                args.push(arg)
+                            if i.get() < tl:
+                                i.set(i.get() + 1)  # skip RParen
+                            if func_name == "print":
+                                expr = "_p(" + args[0] + ")"
+                            elif func_name == "println":
+                                expr = "_pl(" + args[0] + ")"
+                            elif func_name == "len":
+                                expr = "_len(" + args[0] + ")"
+                            elif func_name == "str":
+                                expr = "_s(" + args[0] + ")"
+                            elif func_name == "concat":
+                                expr = "_c(" + args[0] + ", " + args[1] + ")"
+                            else:
+                                expr = func_name + "(" + args[0]
+                                for j in range(1, args.len()):
+                                    expr = expr + ", " + args[j]
+                                expr = expr + ")"
+                            while i.get() < tl and tkinds[i.get()] == "Newline":
+                                i.set(i.get() + 1)
+                            str_builder_append(sb, &expr)
+                            str_builder_append(sb, &";\n")
+                        else:
+                            while i.get() < tl:
+                                kk = tkinds[i.get()]
+                                if kk == "Newline": break
+                                if kk == "Dedent": break
+                                if kk == "Eof": break
+                                i.set(i.get() + 1)
+                            if i.get() < tl and tkinds[i.get()] == "Newline":
+                                i.set(i.get() + 1)
+                            str_builder_append(sb, &name)
+                            str_builder_append(sb, &";\n")
+                    else:
+                        while i.get() < tl:
+                            kk = tkinds[i.get()]
+                            if kk == "Newline": break
+                            if kk == "Dedent": break
+                            if kk == "Eof": break
+                            i.set(i.get() + 1)
+                        if i.get() < tl and tkinds[i.get()] == "Newline":
+                            i.set(i.get() + 1)
+                        str_builder_append(sb, &";\n")
+            
+            str_builder_append(sb, &"}\n\n")
+        elif k == "Newline" or k == "Indent" or k == "Dedent":
+            i.set(i.get() + 1)
+        else:
+            i.set(i.get() + 1)
+    
+    str_builder_append(sb, &"int main() \{ kyle_main(); return 0; }\n")
+    
+    result = str_builder_to_str(sb)
+    str_builder_free(sb)
+    return result
+
+fn main():
+    print("start")
+    source = "fn test():\n    x = 1\n\n\n\n"
+    
+    print("calling gen_c")
+    output = gen_c(source)
+    print("gen_c done")
+    print(output)
+    print("done")

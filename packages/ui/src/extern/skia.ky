@@ -1,0 +1,78 @@
+@link "-framework Skia"
+@link "skia"
+
+# ── Skia Surface ──
+
+extern fn sk_surface_new_raster(image_info: ptr, row_bytes: i64, pixels: ptr) ptr
+extern fn sk_surface_get_canvas(surface: ptr) ptr
+extern fn sk_surface_make_image_snapshot(surface: ptr) ptr
+extern fn sk_surface_unref(surface: ptr)
+
+# ── Skia Canvas ──
+
+extern fn sk_canvas_clear(canvas: ptr, color: i32)
+extern fn sk_canvas_save(canvas: ptr)
+extern fn sk_canvas_restore(canvas: ptr)
+extern fn sk_canvas_translate(canvas: ptr, dx: f32, dy: f32)
+extern fn sk_canvas_scale(canvas: ptr, sx: f32, sy: f32)
+extern fn sk_canvas_rotate_degrees(canvas: ptr, degrees: f32)
+extern fn sk_canvas_draw_rect(canvas: ptr, rect: ptr, paint: ptr)
+extern fn sk_canvas_draw_round_rect(canvas: ptr, rect: ptr, rx: f32, ry: f32, paint: ptr)
+extern fn sk_canvas_draw_circle(canvas: ptr, cx: f32, cy: f32, radius: f32, paint: ptr)
+extern fn sk_canvas_draw_line(canvas: ptr, x1: f32, y1: f32, x2: f32, y2: f32, paint: ptr)
+extern fn sk_canvas_draw_simple_text(canvas: ptr, text: ptr, len: i64, x: f32, y: f32, font: ptr, paint: ptr)
+extern fn sk_canvas_draw_image(canvas: ptr, image: ptr, x: f32, y: f32, sampling: ptr, paint: ptr)
+extern fn sk_canvas_clip_rect(canvas: ptr, rect: ptr)
+extern fn sk_canvas_get_device_clip_bounds(canvas: ptr, bounds: ptr) i32
+
+# ── Skia Paint ──
+
+extern fn sk_paint_new() ptr
+extern fn sk_paint_unref(paint: ptr)
+extern fn sk_paint_set_color(paint: ptr, color: i32)
+extern fn sk_paint_set_alpha(paint: ptr, alpha: f32)
+extern fn sk_paint_set_stroke(paint: ptr, stroke: i32)
+extern fn sk_paint_set_stroke_width(paint: ptr, width: f32)
+extern fn sk_paint_set_anti_alias(paint: ptr, aa: i32)
+extern fn sk_paint_set_style(paint: ptr, style: i32)
+extern fn sk_paint_get_color(paint: ptr) i32
+
+# ── Skia Font ──
+
+extern fn sk_font_new(typeface: ptr, size: f32) ptr
+extern fn sk_font_unref(font: ptr)
+extern fn sk_font_set_size(font: ptr, size: f32)
+extern fn sk_font_get_size(font: ptr) f32
+extern fn sk_font_set_bold(font: ptr, bold: i32)
+
+# ── Skia Typeface ──
+
+extern fn sk_typeface_create_from_name(name: ptr, style: i32) ptr
+extern fn sk_typeface_unref(typeface: ptr)
+
+# ── Skia Image ──
+
+extern fn sk_image_unref(image: ptr)
+extern fn sk_image_get_width(image: ptr) i32
+extern fn sk_image_get_height(image: ptr) i32
+
+# ── Skia Image Info ──
+
+extern fn sk_image_info_new(width: i32, height: i32, color_type: i32, alpha_type: i32) ptr
+
+# ── Constants ──
+
+final class Skia:
+    # Color types
+    Rgba8888ColorType = 0
+    # Alpha types
+    PremulAlphaType = 1
+    UnpremulAlphaType = 0
+    # Paint styles
+    FillStyle = 0
+    StrokeStyle = 1
+    FillAndStrokeStyle = 2
+    # Font styles
+    NormalFontStyle = 0
+    BoldFontStyle = 1
+    ItalicFontStyle = 2

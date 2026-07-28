@@ -1,0 +1,6 @@
+# icon — componente built-in
+# Props: standard UI props
+
+<icon>
+    <slot />
+</icon>

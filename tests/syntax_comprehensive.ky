@@ -1,0 +1,591 @@
+# ═══════════════════════════════════════════════════════════════
+# KYLE SYNTAX COMPREHENSIVE TEST
+# Priorizado por lo que mas se usara al portar Rust → Kyle
+# ═══════════════════════════════════════════════════════════════
+# Compilar: ky check tests/syntax_comprehensive.ky
+# ═══════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════
+# NIVEL 1: Parser (kyc_frontend) — strings, match, chars, list
+# ═══════════════════════════════════════════════════════════════
+
+# --- Strings (el parser trabaja con caracteres todo el tiempo) ---
+fn test_strings():
+    s = "hello world"
+    len = s.len()
+    c = s.char_at(0)        # 'h'
+    upper = s.upper()
+    lower = s.lower()
+    contains = s.contains("hello")
+    trimmed = s.trim()
+    replaced = s.replace("world", "kyle")
+    substr = s.substr(0, 5) # "hello"
+    first = s[0]            # indexing (maybe not supported)
+
+fn test_string_interpolation():
+    name = "Kyle"
+    msg = "Hello, {name}!"
+    calc = "2+2 = {2 + 2}"
+    multi = """
+line 1
+line 2
+"""
+
+# --- Character operations (critical for lexer) ---
+fn test_chars():
+    s = "Hello"
+    for c in s:
+        is_digit = ky_is_digit(c)
+        is_alpha = ky_is_alpha(c)
+        is_alnum = ky_is_alnum(c)
+        is_space = ky_is_whitespace(c)
+        is_upper = ky_is_upper(c)
+        is_lower = ky_is_lower(c)
+
+# --- Pattern matching (parser usa match constantemente) ---
+enum TokenKind:
+    Ident(name: str)
+    Number(val: i64)
+    String(val: str)
+    LParen
+    RParen
+    Comma
+    Plus
+    Minus
+    Star
+    Slash
+    EOF
+
+fn token_name(t: TokenKind) str:
+    match t:
+        TokenKind.Ident(n): n
+        TokenKind.Number(v): v.to_str()
+        TokenKind.String(v): v
+        TokenKind.LParen: "("
+        TokenKind.RParen: ")"
+        TokenKind.Comma: ","
+        TokenKind.Plus: "+"
+        TokenKind.Minus: "-"
+        TokenKind.Star: "*"
+        TokenKind.Slash: "/"
+        TokenKind.EOF: "EOF"
+
+fn is_binary_op(t: TokenKind) bool:
+    match t:
+        TokenKind.Plus: true
+        TokenKind.Minus: true
+        TokenKind.Star: true
+        TokenKind.Slash: true
+        _: false
+
+# --- Match como expresion ---
+fn op_precedence(t: TokenKind) i32:
+    match t:
+        TokenKind.Plus | TokenKind.Minus: 1
+        TokenKind.Star | TokenKind.Slash: 2
+        _: 0
+
+# --- Match con guardias ---
+fn describe_number(n: i32) str:
+    match n:
+        m if m < 0: "negative"
+        0: "zero"
+        m if m < 10: "small"
+        _: "large"
+
+# --- Lists (parser las usa para todo) ---
+fn test_lists():
+    items: ^[i32] = []     # mutable list
+    items.push(1)
+    items.push(2)
+    items.push(3)
+    first = items[0]
+    items[0] = 99
+    len = items.len()
+    popped = items.pop()
+    contains = items.contains(99)
+
+    # Iteracion
+    for item in items:
+        print(item)
+
+    # map/filter/fold
+    doubled = items.map(fn(x): x * 2)
+    evens = items.filter(fn(x): x % 2 == 0)
+    sum = items.fold(0, fn(acc, x): acc + x)
+
+# --- Dicts (scopes, type environments) ---
+fn test_dicts():
+    env: ^{str: i32} = {}
+    env.set("x", 10)
+    env.set("y", 20)
+    if env.has("x"):
+        val = env.get("x")
+    env.remove("y")
+
+    # Type environment para type checker
+    type_env: ^{str: str} = {}
+    type_env.set("x", "i32")
+    type_env.set("y", "str")
+    type_env.set("add", "fn(i32, i32) i32")
+
+# --- Enums con payload (AST nodes) ---
+enum Expr:
+    IntLiteral(val: i64)
+    StrLiteral(val: str)
+    Ident(name: str)
+    BinaryOp(left: box Expr?, op: TokenKind, right: box Expr?)
+    Call(callee: box Expr?, args: ^{Expr})
+    If(cond: box Expr?, then: box Expr?, else_: box Expr?)
+
+enum Stmt:
+    Let(name: str, type_annot: str?, value: Expr?)
+    If(cond: Expr, then: ^{Stmt}, else_: ^{Stmt}?)
+    While(cond: Expr, body: ^{Stmt})
+    Return(val: Expr?)
+    ExprStmt(expr: Expr)
+
+# --- Recursion (parser es recursivo) ---
+fn fib(n: i32) i32:
+    if n <= 1: return n
+    return fib(n - 1) + fib(n - 2)
+
+fn parse_expr(tokens: &[TokenKind], pos: ^i32) Expr:
+    token = tokens[pos.get()]
+    pos.set(pos.get() + 1)
+    match token:
+        TokenKind.Number(v): Expr.IntLiteral(val: v)
+        TokenKind.Ident(n): Expr.Ident(name: n)
+        _: Expr.IntLiteral(val: 0)
+
+# --- Option T? (parser ops returning optional) ---
+fn peek_token(tokens: &[TokenKind], pos: i32) TokenKind?:
+    if pos < tokens.len():
+        return tokens[pos]
+    return none
+
+fn expect_token(tokens: &[TokenKind], pos: ^i32, kind: TokenKind) bool:
+    token = peek_token(tokens, pos.get())
+    match token:
+        t: if t == kind:
+            pos.set(pos.get() + 1)
+            return true
+        none: return false
+
+# --- Result T! (fallible operations) ---
+fn safe_divide(a: i32, b: i32) i32!:
+    if b == 0:
+        return error("division by zero")
+    return ok(a / b)
+
+fn parse_number(s: &str) i64!:
+    val = ky_str_to_i64(ky_ptr_read_ptr(s as ptr))
+    if val == 0 and s != "0":
+        return error("invalid number")
+    return ok(val)
+
+# ═══════════════════════════════════════════════════════════════
+# NIVEL 2: Type Checker (kyc_semantic) — tipos, scopes, generics
+# ═══════════════════════════════════════════════════════════════
+
+# --- Clases (tipos compuestos) ---
+final class Type:
+    name: str
+    kind: TypeKind
+
+enum TypeKind:
+    Primitive(name: str)
+    Function(params: ^{Type}, ret: box Type?)
+    List(elem: box Type?)
+    Dict(key: box Type?, val: box Type?)
+    Optional(inner: box Type?)
+    Named(name: str, params: ^{Type})
+
+final class Scope:
+    parent: Scope?
+    symbols: ^{str: Type}
+
+fn scope_lookup(scope: Scope, name: &str) Type?:
+    if scope.symbols.has(name):
+        return scope.symbols.get(name)
+    match scope.parent:
+        p: return scope_lookup(p, name)
+        none: return none
+
+fn scope_declare(scope: ^Scope, name: str, type: Type):
+    scope.symbols.set(name, type)
+
+# --- Genericos ---
+final class Box<T>:
+    value: T
+
+    fn get(self) T:
+        return self.value
+
+final class Pair<A, B>:
+    first: A
+    second: B
+
+# --- Funciones como tipo ---
+final class FunctionType:
+    params: ^{Type}
+    return_type: Type
+    is_fallible: bool
+
+    fn matches(self, arg_types: ^{Type}) bool:
+        if self.params.len() != arg_types.len():
+            return false
+        for i in 0..self.params.len():
+            if self.params[i] != arg_types[i]:
+                return false
+        return true
+
+# --- Sets (para tracking, analisis) ---
+fn test_sets():
+    used_names: ^set<str> = set()
+    used_names.add("x")
+    used_names.add("y")
+    if used_names.contains("x"):
+        used_names.remove("x")
+
+# ═══════════════════════════════════════════════════════════════
+# NIVEL 3: MIR (kyc_mir) — basic blocks, grafos, optimizaciones
+# ═══════════════════════════════════════════════════════════════
+
+# --- Basic blocks (grafo de control flow) ---
+final class BasicBlock:
+    id: i32
+    instructions: ^{Inst}
+    terminator: Terminator?
+
+enum Terminator:
+    Return(val: i64?)
+    Branch(target: i32)
+    CondBranch(cond: i64, true_target: i32, false_target: i32)
+
+enum Inst:
+    Alloca(name: str, type: Type)
+    Store(name: str, val: i64)
+    Load(dest: str, source: str)
+    Call(dest: str?, fn_name: str, args: ^{i64})
+    BinaryOp(dest: str, op: BinaryOp, lhs: i64, rhs: i64)
+
+enum BinaryOp:
+    Add
+    Sub
+    Mul
+    Div
+    Eq
+    Ne
+    Lt
+    Gt
+
+# --- Grafo de control flow ---
+final class CFGGraph:
+    blocks: ^{BasicBlock}
+    entry: BasicBlock?
+
+fn cfg_add_block(graph: ^CFGGraph, block: BasicBlock):
+    graph.blocks.push(block)
+    if graph.entry == none:
+        graph.entry = block
+
+fn cfg_successors(block: BasicBlock) ^{i32}:
+    result: ^{i32} = {}
+    match block.terminator:
+        Terminator.Branch(target): result.push(target)
+        Terminator.CondBranch(cond, t, f):
+            result.push(t)
+            result.push(f)
+        _: none
+    return result
+
+# --- Algoritmo de dominadores (MIR usa esto) ---
+fn find_dominators(cfg: &CFGGraph) ^{i32}:
+    dom: ^{i32} = {}
+    return dom
+
+# ═══════════════════════════════════════════════════════════════
+# NIVEL 4: Codegen / Runtime — FFI, @link, punteros
+# ═══════════════════════════════════════════════════════════════
+
+# --- FFI a C (codegen necesita LLVM C API) ---
+@link "c"
+extern fn malloc(size: i64) ptr
+extern fn free(ptr)
+extern fn write(fd: i32, buf: ptr, count: i64) i64
+extern fn read(fd: i32, buf: ptr, count: i64) i64
+extern fn open(path: ptr, flags: i32, mode: i32) i32
+extern fn close(fd: i32) i32
+extern fn strlen(s: ptr) i64
+extern fn memcpy(dest: ptr, src: ptr, n: i64) ptr
+extern fn memcmp(s1: ptr, s2: ptr, n: i64) i32
+
+# --- Punteros ---
+fn test_pointers():
+    extern fn ky_ptr_read_i32(p: ptr) i32
+    extern fn ky_ptr_write_i32(p: ptr, val: i32)
+    extern fn ky_ptr_read_ptr(p: ptr) ptr
+    addr: ptr = 0 as ptr
+    val = ky_ptr_read_i32(addr)
+    ky_ptr_write_i32(addr, 42)
+
+# --- Runtime functions (las que usa el compilador) ---
+@link "c"
+extern fn ky_alloc(size: i64) ptr
+extern fn ky_free(ptr)
+extern fn ky_print(ptr, i32)
+extern fn ky_println(ptr, i32)
+extern fn ky_strlen(ptr) i32
+extern fn ky_concat(ptr, i32, ptr, i32) ptr
+extern fn ky_str_to_i64(ptr) i64
+extern fn ky_i64_to_str(val: i64) ptr
+extern fn ky_char_at(ptr, i32) i8
+extern fn ky_substr(ptr, i64, i64) ptr
+extern fn ky_str_contains(ptr, ptr) i32
+extern fn ky_str_to_upper(ptr) ptr
+extern fn ky_str_to_lower(ptr) ptr
+extern fn ky_str_trim(ptr) ptr
+extern fn ky_str_replace(ptr, ptr, ptr) ptr
+extern fn ky_is_digit(c: i8) i32
+extern fn ky_is_alpha(c: i8) i32
+extern fn ky_is_alnum(c: i8) i32
+extern fn ky_is_whitespace(c: i8) i32
+extern fn ky_is_upper(c: i8) i32
+extern fn ky_is_lower(c: i8) i32
+
+# List operations
+extern fn ky_list_new() ptr
+extern fn ky_list_free(ptr)
+extern fn ky_list_push(ptr, i64)
+extern fn ky_list_pop(ptr) i64
+extern fn ky_list_get(ptr, i64) i64
+extern fn ky_list_set(ptr, i64, i64)
+extern fn ky_list_len(ptr) i64
+extern fn ky_list_contains(ptr, i64) i32
+extern fn ky_list_map(ptr, ptr) ptr
+extern fn ky_list_filter(ptr, ptr) ptr
+extern fn ky_list_fold(ptr, i64, ptr) i64
+
+# Dict operations
+extern fn ky_dict_new() ptr
+extern fn ky_dict_set(ptr, ptr, i64)
+extern fn ky_dict_get(ptr, ptr) i64
+extern fn ky_dict_has(ptr, ptr) i32
+extern fn ky_dict_remove(ptr, ptr) i64
+extern fn ky_dict_free(ptr)
+extern fn ky_dict_len(ptr) i64
+
+# DateTime
+extern fn ky_datetime_now() i64
+extern fn ky_datetime_year(i64) i32
+extern fn ky_datetime_month(i64) i32
+extern fn ky_datetime_day(i64) i32
+extern fn ky_datetime_hour(i64) i32
+extern fn ky_datetime_minute(i64) i32
+extern fn ky_datetime_second(i64) i32
+extern fn ky_datetime_format(i64, ptr) ptr
+extern fn ky_datetime_parse(ptr) i64
+extern fn ky_datetime_from_ymdhms(i32, i32, i32, i32, i32, i32) i64
+
+# Set operations
+extern fn ky_set_new() ptr
+extern fn ky_set_add(ptr, i64)
+extern fn ky_set_contains(ptr, i64) i32
+extern fn ky_set_remove(ptr, i64) i32
+extern fn ky_set_len(ptr) i64
+extern fn ky_set_free(ptr)
+
+# IO operations
+extern fn ky_open(ptr, ptr) i32
+extern fn ky_read_str(i32, i32) ptr
+extern fn ky_write_str(i32, ptr) i32
+extern fn ky_close(i32) i32
+extern fn ky_sleep(i32)
+
+# Thread operations
+extern fn ky_spawn_thread(ptr, i64) i64
+extern fn ky_join_thread(i64) i64
+
+# File system
+extern fn ky_fs_exists(ptr) i32
+extern fn ky_fs_is_dir(ptr) i32
+extern fn ky_fs_is_file(ptr) i32
+extern fn ky_fs_read_to_string(ptr) ptr
+extern fn ky_fs_write_string(ptr, ptr) i32
+extern fn ky_fs_copy(ptr, ptr) i32
+extern fn ky_fs_remove(ptr) i32
+extern fn ky_fs_create_dir(ptr) i32
+extern fn ky_fs_list_dir(ptr) i64
+
+# Decimal
+extern fn ky_decimal_from_str(ptr) i64
+extern fn ky_decimal_to_str(i64) ptr
+extern fn ky_decimal_round(i64, i32) i64
+extern fn ky_decimal_truncate(i64) i64
+
+# UUID
+extern fn ky_uuid_v4() ptr
+extern fn ky_uuid_parse(ptr) ptr
+
+# Crypto
+extern fn ky_sha256(ptr, i32, ptr) ptr
+extern fn ky_random_bytes(ptr, i64) i32
+
+# ═══════════════════════════════════════════════════════════════
+# NIVEL 5: Features adicionales del lenguaje
+# ═══════════════════════════════════════════════════════════════
+
+# --- Compound assignment ---
+fn test_compound_assign():
+    count: ^i32 = 0
+    count += 1
+    count -= 1
+    count *= 2
+    count /= 2
+    count %= 2
+
+# --- While loop ---
+fn test_while():
+    i: ^i32 = 0
+    while i < 10:
+        i += 1
+
+# --- For-else ---
+fn test_for_else():
+    items = {1, 2, 3}
+    for item in items:
+        if item == 99:
+            print("found")
+            break
+    else:
+        print("not found")
+
+# --- Break/continue ---
+fn test_break_continue():
+    for i in 0..10:
+        if i % 2 == 0: continue
+        if i > 7: break
+        print(i)
+
+# --- Defer ---
+fn test_defer():
+    f = ky_open("/tmp/test", "w")
+    defer ky_close(f)
+    ky_write_str(f, "data")
+
+# --- Guard ---
+fn test_guard(val: i32?) i32:
+    guard val else: return 0
+    return val
+
+# --- Option/Result operations ---
+fn test_optional():
+    x: i32? = none
+    if x:
+        print(x)
+
+    y: i32? = 42
+    if y:
+        val = y
+        print(val)
+
+# --- Null-coalescing ---
+fn test_null_coalescing():
+    name: str? = none
+    display = name ?? "anonymous"
+
+# --- Operator overloading ---
+final class Vec2:
+    x: f64
+    y: f64
+
+    fn op_add(this, other: Vec2) Vec2:
+        return Vec2(x: this.x + other.x, y: this.y + other.y)
+
+    fn op_sub(this, other: Vec2) Vec2:
+        return Vec2(x: this.x - other.x, y: this.y - other.y)
+
+    fn op_eq(this, other: Vec2) bool:
+        return this.x == other.x and this.y == other.y
+
+# --- Tuple destructuring ---
+fn test_tuples():
+    pair = (1, "hello")
+    a, b = pair
+    print(a.to_str() + b)
+
+    fn divmod(a: i32, b: i32) (i32, i32):
+        return (a / b, a % b)
+    q, r = divmod(10, 3)
+
+# --- Array fijo ---
+fn test_arrays():
+    arr: [i32, 3] = [10, 20, 30]
+    first = arr[0]
+
+# --- Async/Channel ---
+fn test_async():
+    extern fn ky_spawn_task(ptr, i64) i64
+    extern fn ky_await_task(i64) i64
+
+# --- Math ---
+extern fn ky_pow(base: i64, exp: i64) i64
+fn test_math():
+    p = ky_pow(2, 10)
+
+# --- Bytes ---
+fn test_bytes():
+    extern fn ky_bytes_new(size: i32) ptr
+    extern fn ky_bytes_get(ptr, i32) i32
+    extern fn ky_bytes_set(ptr, i32, i32)
+    extern fn ky_bytes_to_hex(ptr, i32) ptr
+    buf = ky_bytes_new(16)
+    ky_bytes_set(buf, 0, 0xFF)
+    b = ky_bytes_get(buf, 0)
+    hex = ky_bytes_to_hex(buf, 16)
+
+# --- UUID ---
+fn test_uuid():
+    u = ky_uuid_v4()
+
+# --- Crypto ---
+fn test_crypto():
+    buf = ky_alloc(32)
+    ky_random_bytes(buf, 32)
+    hash = ky_sha256(buf, 32, ky_alloc(32))
+
+# ───────────────────────────────────────────────────────────────
+# MAIN — ejecutar todos los tests
+# ───────────────────────────────────────────────────────────────
+fn main():
+    test_strings()
+    test_string_interpolation()
+    test_chars()
+    test_lists()
+    test_dicts()
+    test_sets()
+    test_compound_assign()
+    test_while()
+    test_for_else()
+    test_break_continue()
+    test_optional()
+    test_null_coalescing()
+    test_tuples()
+    test_arrays()
+    test_math()
+    test_bytes()
+    test_uuid()
+    test_crypto()
+    test_pointers()
+
+    # Test parsing expressions
+    tokens: ^TokenKind = {}
+    tokens.push(TokenKind.Number(val: 42))
+    tokens.push(TokenKind.Plus)
+    tokens.push(TokenKind.Number(val: 10))
+    pos: ^i32 = 0
+    expr = parse_expr(tokens.as_ref(), pos)
+    name = token_name(TokenKind.Plus)
+
+    print("All tests passed!")

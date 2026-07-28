@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-24.04
+          - macos-15
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Install LLVM 18 (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq llvm-18-dev libpolly-18-dev libzstd-dev pkg-config
+          # Verify Polly is findable
+          ls /usr/lib/llvm-18/lib/libPolly* 2>/dev/null || echo "No Polly static lib found"
+          echo "LLVM_SYS_181_PREFIX=/usr/lib/llvm-18" >> $GITHUB_ENV
+
+      - name: Install LLVM 18 (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install llvm@18
+          brew link --overwrite llvm@18
+          echo "LLVM_SYS_181_PREFIX=$(brew --prefix llvm@18)" >> $GITHUB_ENV
+          echo "$(brew --prefix llvm@18)/bin" >> $GITHUB_PATH
+
+      - name: Verify LLVM
+        run: |
+          llvm-config --version || llvm-config-18 --version || echo "No llvm-config found"
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --bin ky
+
+      - name: Test
+        run: cargo test -p kyc_core -p kyc_frontend -p kyc_hir -p kyc_semantic -p kyc_mir -p kyc_backend -p kyc_driver -p kyc_cli -p kyc_tools -p kyc_ui
+
+      - name: Clippy
+        run: cargo clippy --workspace -- -D warnings 2>&1 || true
+
+      - name: Build release
+        run: cargo build --release --bin ky
+
+      - name: Smoke test
+        run: |
+          ./target/release/ky --version
+          ./target/release/ky help
+
+  test-arm:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install LLVM 18 (ARM)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq llvm-18-dev libpolly-18-dev libzstd-dev pkg-config || \
+            sudo apt-get install -y -qq llvm-18-dev libzstd-dev pkg-config
+          ls /usr/lib/llvm-18/lib/libPolly* 2>/dev/null || echo "No Polly static lib found"
+          echo "LLVM_SYS_181_PREFIX=/usr/lib/llvm-18" >> $GITHUB_ENV
+
+      - name: Verify LLVM
+        run: llvm-config-18 --version || echo "No llvm-config found"
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --bin ky
+
+      - name: Test
+        run: cargo test -p kyc_core -p kyc_frontend -p kyc_hir -p kyc_semantic -p kyc_mir -p kyc_backend -p kyc_driver -p kyc_cli -p kyc_tools -p kyc_ui
+
+      - name: Build release
+        run: cargo build --release --bin ky
+

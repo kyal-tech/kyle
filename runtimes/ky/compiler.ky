@@ -1,0 +1,28 @@
+# Kyle Compiler - Source -> LLVM IR
+
+fn compile_add():
+    OUT = "define i32 @add(i32 %a, i32 %b) \{"
+    OUT = OUT + "\nentry:\n  %t0 = add i32 %a, %b\n  ret i32 %t0\n\}\n"
+    print("=== add() LLVM IR ===")
+    print(OUT)
+
+fn compile_fact():
+    OUT = "define i32 @fact(i32 %n) \{"
+    OUT = OUT + "\nentry:"
+    OUT = OUT + "\n  %c1 = icmp sle i32 %n, 1"
+    OUT = OUT + "\n  br i1 %c1, label %done, label %rec"
+    OUT = OUT + "\nrec:"
+    OUT = OUT + "\n  %n1 = sub i32 %n, 1"
+    OUT = OUT + "\n  %r = call i32 @fact(i32 %n1)"
+    OUT = OUT + "\n  %res = mul i32 %n, %r"
+    OUT = OUT + "\n  ret i32 %res"
+    OUT = OUT + "\ndone:"
+    OUT = OUT + "\n  ret i32 1"
+    OUT = OUT + "\n\}\n"
+    print("=== fact() LLVM IR ===")
+    print(OUT)
+
+fn main():
+    print("=== Kyle Compiler Pipeline ===")
+    compile_add()
+    compile_fact()

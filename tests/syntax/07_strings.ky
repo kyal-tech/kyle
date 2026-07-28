@@ -1,0 +1,17 @@
+# Strings — operaciones, interpolacion, char ops
+
+fn test_string_ops():
+    s = "hello world"
+    len = s.len()
+    c = s.char_at(0)
+    upper = s.upper()
+    lower = s.lower()
+    contains = s.contains("hello")
+
+fn test_string_build():
+    result = "hello" + " " + "world"
+    print(result)
+
+fn main():
+    test_string_ops()
+    test_string_build()

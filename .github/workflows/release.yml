@@ -1,0 +1,221 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Delete existing release if any (supports force-pushed tags)
+          gh release delete ${{ github.ref_name }} --yes 2>/dev/null || true
+          gh release create ${{ github.ref_name }} \
+            --title "Kyle ${{ github.ref_name }}" \
+            --notes "See commit history for changes." \
+            --repo ${{ github.repository }}
+
+  build-linux-arm64:
+    needs: create-release
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LLVM 18
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq llvm-18-dev libpolly-18-dev libzstd-dev
+          echo "LLVM_SYS_181_PREFIX=/usr/lib/llvm-18" >> $GITHUB_ENV
+      - name: Build ky
+        run: cargo build --bin ky --release
+      - name: Build runtime
+        run: cargo build -p kyc_runtime --release
+      - name: Package
+        run: |
+          mkdir -p dist
+          cp target/release/ky dist/
+          cp target/release/libkyc_runtime.a dist/
+          cp LICENSE dist/
+          cd dist && tar czf ky-linux-arm64.tar.gz ky libkyc_runtime.a LICENSE && cd ..
+          cd dist && shasum -a 256 ky-linux-arm64.tar.gz > ky-linux-arm64.tar.gz.sha256
+      - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist && gh release upload ${{ github.ref_name }} ky-linux-arm64.tar.gz ky-linux-arm64.tar.gz.sha256 --clobber
+
+  build-linux-x64:
+    needs: create-release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LLVM 18
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq llvm-18-dev libpolly-18-dev libzstd-dev
+          echo "LLVM_SYS_181_PREFIX=/usr/lib/llvm-18" >> $GITHUB_ENV
+      - name: Build ky
+        run: cargo build --bin ky --release
+      - name: Build runtime
+        run: cargo build -p kyc_runtime --release
+      - name: Package
+        run: |
+          mkdir -p dist
+          cp target/release/ky dist/
+          cp target/release/libkyc_runtime.a dist/
+          cp LICENSE dist/
+          cd dist && tar czf ky-linux-x64.tar.gz ky libkyc_runtime.a LICENSE && cd ..
+          cd dist && shasum -a 256 ky-linux-x64.tar.gz > ky-linux-x64.tar.gz.sha256
+      - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist && gh release upload ${{ github.ref_name }} ky-linux-x64.tar.gz ky-linux-x64.tar.gz.sha256 --clobber
+
+  build-macos-arm64:
+    needs: create-release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LLVM 18
+        run: |
+          brew install llvm@18
+          echo "LLVM_SYS_181_PREFIX=$(brew --prefix llvm@18)" >> $GITHUB_ENV
+          echo "$(brew --prefix llvm@18)/bin" >> $GITHUB_PATH
+      - name: Build ky
+        run: |
+          # Static link LLVM + zstd + unwind to avoid code signing issues
+          export LLVM_LINK_SHARED=0
+          cargo build --bin ky --release
+      - name: Build runtime
+        run: cargo build -p kyc_runtime --release
+      - name: Package
+        run: |
+          mkdir -p dist/lib
+          cp target/release/ky dist/ky
+          # Bundle dylibs + fix library search paths (avoids Gatekeeper code signing kills)
+          for lib in /opt/homebrew/opt/zstd/lib/libzstd.1.dylib /opt/homebrew/opt/llvm@18/lib/libunwind.1.dylib; do
+            if [ -f "$lib" ]; then
+              cp -L "$lib" dist/lib/
+              install_name_tool -change "$lib" "@executable_path/../lib/$(basename $lib)" dist/ky
+            fi
+          done
+          # Ad-hoc sign binary + bundled libs together
+          codesign -f -s - dist/ky 2>/dev/null || true
+          for f in dist/lib/*.dylib; do
+            codesign -f -s - "$f" 2>/dev/null || true
+          done
+          cp target/release/libkyc_runtime.a dist/
+          cp LICENSE dist/
+          cd dist && tar czf ky-macos-arm64.tar.gz ky lib/ libkyc_runtime.a LICENSE && cd ..
+          cd dist && shasum -a 256 ky-macos-arm64.tar.gz > ky-macos-arm64.tar.gz.sha256
+      - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist && gh release upload ${{ github.ref_name }} ky-macos-arm64.tar.gz ky-macos-arm64.tar.gz.sha256 --clobber
+
+  build-windows-x64:
+    needs: create-release
+    runs-on: windows-2025
+    env:
+      LLVM_SYS_181_PREFIX: ${{ github.workspace }}\llvm-18
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install LLVM 18 (Windows x64)
+        shell: pwsh
+        run: |
+          # Download full clang+llvm tarball (936 MB) — includes headers, libs, and tools.
+          $url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/clang+llvm-18.1.8-x86_64-pc-windows-msvc.tar.xz"
+          $out = "$env:TEMP\llvm-18.tar.xz"
+          $dest = "$env:LLVM_SYS_181_PREFIX"
+          Write-Host "Downloading LLVM 18 (936 MB)..."
+          Invoke-WebRequest -Uri $url -OutFile $out
+          Write-Host "Extracting LLVM 18 to $dest..."
+
+          # 7z on Windows extracts .tar.xz in 2 steps: .xz -> .tar, then .tar -> files
+          $tmpDir = "$env:TEMP\llvm-extract"
+          New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
+
+          # Step 1: decompress .xz -> .tar
+          & "C:\Program Files\7-Zip\7z.exe" x $out -o"$tmpDir" -y
+          if ($LASTEXITCODE -ne 0) { Write-Error "7z xz decompress failed"; exit 1 }
+
+          # Step 2: unpack .tar -> files
+          $tarFile = Get-ChildItem "$tmpDir\*.tar" | Select-Object -First 1
+          if (-not $tarFile) { Write-Error "No .tar file found after xz decompress"; Get-ChildItem $tmpDir; exit 1 }
+          & "C:\Program Files\7-Zip\7z.exe" x $tarFile.FullName -o"$dest" -y
+          if ($LASTEXITCODE -ne 0) { Write-Error "7z tar unpack failed"; exit 1 }
+
+          # The tarball wraps everything in a top-level clang+llvm-.../ directory.
+          # Move its contents up one level to $dest directly.
+          $topDir = Get-ChildItem $dest -Directory | Select-Object -First 1
+          if ($topDir) {
+            Get-ChildItem $topDir.FullName | Move-Item -Destination $dest -Force
+            Remove-Item $topDir.FullName -Recurse -Force
+          }
+
+          # Cleanup
+          Remove-Item -Recurse $tmpDir -Force -ErrorAction SilentlyContinue
+          Remove-Item $out -Force
+          Remove-Item $tarFile.FullName -Force -ErrorAction SilentlyContinue
+
+          # Verify dev headers exist
+          if (-not (Test-Path "$dest\include\llvm-c\Core.h")) {
+            Write-Error "LLVM headers not found after extraction"
+            Get-ChildItem "$dest\include" -ErrorAction SilentlyContinue
+            exit 1
+          }
+          Write-Host "LLVM 18 installed to $dest"
+
+      - name: Patch LLVM headers & create llvm-config
+        shell: pwsh
+        run: |
+          # The official LLVM 18.1.8 Windows distribution is missing:
+          #   - llvm/Config/llvm-config.h (needed by Target.h, etc.)
+          #   - llvm-config.exe (needed by llvm-sys build script)
+          # This script creates both from scratch, plus compiles llvm-config.exe via csc.exe.
+          .\tools\windows\patch-llvm.ps1 -LLVM_PREFIX "$env:LLVM_SYS_181_PREFIX"
+
+      - name: Build ky
+        run: cargo build --bin ky --release
+
+      - name: Build runtime
+        run: cargo build -p kyc_runtime --release
+
+      - name: Package
+        shell: pwsh
+        run: |
+          mkdir dist
+          Copy-Item target/release/ky.exe dist/
+          # MSVC names the static lib kyc_runtime.lib (no 'lib' prefix, .lib extension)
+          if (Test-Path target/release/libkyc_runtime.a) {
+            Copy-Item target/release/libkyc_runtime.a dist/
+            $runtimeFile = "libkyc_runtime.a"
+          } elseif (Test-Path target/release/kyc_runtime.lib) {
+            Copy-Item target/release/kyc_runtime.lib dist/
+            $runtimeFile = "kyc_runtime.lib"
+          } else {
+            Write-Error "Runtime library not found (tried libkyc_runtime.a and kyc_runtime.lib)"
+            Get-ChildItem target/release/*runtime*
+            exit 1
+          }
+          Copy-Item LICENSE dist/
+          Compress-Archive -Path dist/ky.exe, dist/$runtimeFile, dist/LICENSE -DestinationPath dist/ky-windows-x64.zip
+
+      - name: Upload
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist
+          gh release upload ${{ github.ref_name }} ky-windows-x64.zip --clobber

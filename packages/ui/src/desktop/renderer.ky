@@ -1,0 +1,215 @@
+from ..extern.glfw import glfw_init, glfw_terminate, glfw_create_window, glfw_destroy_window
+from ..extern.glfw import glfw_make_context_current, glfw_swap_buffers, glfw_poll_events
+from ..extern.glfw import glfw_window_should_close, glfw_set_window_title
+from ..extern.glfw import glfw_get_framebuffer_size, glfw_set_key_callback
+from ..extern.glfw import glfw_set_mouse_button_callback, glfw_set_cursor_pos_callback
+from ..extern.glfw import glfw_set_window_size_callback, glfw_set_scroll_callback
+from ..extern.glfw import gl_clear_color, gl_clear, gl_viewport
+from ..extern.glfw import gl_gen_texture, gl_bind_texture, gl_tex_image_2d
+from ..extern.glfw import gl_tex_parameter_i, gl_enable, gl_disable
+from ..extern.glfw import gl_begin, gl_end, gl_tex_coord_2f, gl_vertex_2f, gl_color_4f
+use ..extern.glfw.{glfw_init,, glfw_make_context_current,, glfw_window_should_close,, glfw_get_framebuffer_size,, glfw_set_mouse_button_callback,, glfw_set_window_size_callback,, gl_clear_color,, gl_gen_texture,, gl_tex_parameter_i,, gl_begin,, Gl}
+
+from ..extern.skia import sk_surface_new_raster, sk_surface_get_canvas
+from ..extern.skia import sk_surface_make_image_snapshot, sk_surface_unref
+from ..extern.skia import sk_canvas_clear, sk_canvas_save, sk_canvas_restore
+from ..extern.skia import sk_canvas_draw_rect, sk_canvas_draw_round_rect
+from ..extern.skia import sk_canvas_draw_simple_text, sk_canvas_translate
+from ..extern.skia import sk_paint_new, sk_paint_unref, sk_paint_set_color
+from ..extern.skia import sk_paint_set_anti_alias, sk_paint_set_stroke
+from ..extern.skia import sk_paint_set_stroke_width, sk_font_new, sk_font_unref
+from ..extern.skia import sk_typeface_create_from_name, sk_typeface_unref
+from ..extern.skia import sk_image_info_new, sk_image_unref
+use ..extern.skia.{sk_surface_new_raster,, sk_surface_make_image_snapshot,, sk_canvas_clear,, sk_canvas_draw_rect,, sk_canvas_draw_simple_text,, sk_paint_new,, sk_paint_set_anti_alias,, sk_paint_set_stroke_width,, sk_typeface_create_from_name,, sk_image_info_new,, Skia}
+
+@link "c"
+extern fn ky_alloc(size: i64) ptr
+extern fn ky_free(ptr)
+extern fn ky_memset(ptr, value: i32, size: i64)
+extern fn ky_now_ms() i64
+extern fn ky_println(ptr)
+
+final class DesktopWindow:
+    width: i32
+    height: i32
+    title: str
+    window_ptr: ptr = 0 as ptr
+    surface_ptr: ptr = 0 as ptr
+    canvas_ptr: ptr = 0 as ptr
+    pixels_ptr: ptr = 0 as ptr
+    texture_id: i32 = 0
+    running: i32 = 1
+    # Callbacks
+    on_render: ^&(fn (canvas: ptr, width: i32, height: i32))
+    on_key: ^&(fn (key: i32, action: i32))
+    on_mouse_click: ^&(fn (button: i32, action: i32, x: f64, y: f64))
+    on_mouse_move: ^&(fn (x: f64, y: f64))
+    on_resize: ^&(fn (width: i32, height: i32))
+    # Timing
+    last_frame_ms: i64 = 0
+    frame_count: i64 = 0
+    fps: f64 = 0.0
+
+    fn init(this, width: i32, height: i32, title: &str):
+        this.width = width
+        this.height = height
+        this.title = title
+
+        # Init GLFW
+        result = glfw_init()
+        if result == 0:
+            ky_println(&("Failed to initialize GLFW" as ptr))
+
+        # Create window
+        title_ptr = title as ptr
+        this.window_ptr = glfw_create_window(width, height, title_ptr, 0 as ptr, 0 as ptr)
+        if this.window_ptr == 0 as ptr:
+            ky_println(&("Failed to create GLFW window" as ptr))
+            glfw_terminate()
+
+        glfw_make_context_current(this.window_ptr)
+
+        # Enable blending for transparency
+        gl_enable(Gl.Blend)
+
+        # Create Skia surface
+        this._create_skia_surface(width, height)
+
+        # Setup callbacks
+        glfw_set_key_callback(this.window_ptr, this._key_callback as ptr)
+        glfw_set_mouse_button_callback(this.window_ptr, this._mouse_callback as ptr)
+        glfw_set_cursor_pos_callback(this.window_ptr, this._mouse_move_callback as ptr)
+        glfw_set_window_size_callback(this.window_ptr, this._resize_callback as ptr)
+
+        # Generate OpenGL texture for blitting
+        tex: ^i32 = 0
+        gl_gen_texture(1, ^&tex)
+        this.texture_id = tex
+
+    fn _create_skia_surface(this, width: i32, height: i32):
+        # Create pixel buffer
+        pixel_size = width * height * 4
+        this.pixels_ptr = ky_alloc(pixel_size as i64)
+        ky_memset(this.pixels_ptr, 0, pixel_size as i64)
+
+        # Create Skia ImageInfo
+        info = sk_image_info_new(width, height, Skia.Rgba8888ColorType, Skia.PremulAlphaType)
+
+        # Create Skia surface from raster pixels
+        this.surface_ptr = sk_surface_new_raster(info, (width * 4) as i64, this.pixels_ptr)
+        this.canvas_ptr = sk_surface_get_canvas(this.surface_ptr)
+
+    fn _blit_to_screen(this):
+        # Upload pixels to OpenGL texture
+        gl_bind_texture(Gl.Texture2d, this.texture_id)
+        gl_tex_image_2d(Gl.Texture2d, 0, Gl.Rgba, this.width, this.height, 0, Gl.Rgba, Gl.UnsignedByte, this.pixels_ptr)
+        gl_tex_parameter_i(Gl.Texture2d, Gl.TextureMinFilter, Gl.Nearest)
+        gl_tex_parameter_i(Gl.Texture2d, Gl.TextureMagFilter, Gl.Nearest)
+
+        # Render full-screen quad with texture
+        gl_begin(Gl.TriangleFan)
+        gl_tex_coord_2f(0.0, 0.0)
+        gl_vertex_2f(-1.0, -1.0)
+        gl_tex_coord_2f(1.0, 0.0)
+        gl_vertex_2f(1.0, -1.0)
+        gl_tex_coord_2f(1.0, 1.0)
+        gl_vertex_2f(1.0, 1.0)
+        gl_tex_coord_2f(0.0, 1.0)
+        gl_vertex_2f(-1.0, 1.0)
+        gl_end()
+
+    fn run(this):
+        this.last_frame_ms = ky_now_ms()
+
+        while this.running != 0:
+            frame_start = ky_now_ms()
+
+            # Poll events
+            glfw_poll_events()
+
+            # Check window close
+            if glfw_window_should_close(this.window_ptr) != 0:
+                this.running = 0
+                break
+
+            # Get framebuffer size
+            w: ^i32 = 0
+            h: ^i32 = 0
+            glfw_get_framebuffer_size(this.window_ptr, ^&w, ^&h)
+            fb_w = w
+            fb_h = h
+
+            # Clear Skia canvas
+            sk_canvas_clear(this.canvas_ptr, 0xFFF0F0F0)  # Light gray background
+
+            # Call user's render callback
+            if this.on_render != 0 as ptr:
+                this.on_render(this.canvas_ptr, fb_w, fb_h)
+
+            # Blit Skia surface to OpenGL
+            gl_viewport(0, 0, fb_w, fb_h)
+            gl_clear_color(0.0, 0.0, 0.0, 1.0)
+            gl_clear(Gl.ColorBufferBit)
+            this._blit_to_screen()
+
+            # Swap buffers
+            glfw_swap_buffers(this.window_ptr)
+
+            # Calculate FPS
+            this.frame_count = this.frame_count + 1
+            elapsed = ky_now_ms() - this.last_frame_ms
+            if elapsed >= 1000:
+                this.fps = (this.frame_count * 1000) as f64 / elapsed as f64
+                this.frame_count = 0
+                this.last_frame_ms = ky_now_ms()
+
+            # Cap at ~60 FPS
+            frame_time = ky_now_ms() - frame_start
+            sleep_ms = 16 - frame_time
+            if sleep_ms > 0:
+                ky_sleep(sleep_ms as i64)
+
+    fn close(this):
+        this.running = 0
+        glfw_set_window_size_callback(this.window_ptr, 0 as ptr)
+        glfw_set_key_callback(this.window_ptr, 0 as ptr)
+        glfw_set_mouse_button_callback(this.window_ptr, 0 as ptr)
+        glfw_set_cursor_pos_callback(this.window_ptr, 0 as ptr)
+
+        if this.texture_id != 0:
+            gl_bind_texture(Gl.Texture2d, 0)
+        if this.pixels_ptr != 0 as ptr:
+            ky_free(this.pixels_ptr)
+            this.pixels_ptr = 0 as ptr
+        if this.surface_ptr != 0 as ptr:
+            sk_surface_unref(this.surface_ptr)
+            this.surface_ptr = 0 as ptr
+
+        glfw_destroy_window(this.window_ptr)
+        glfw_terminate()
+
+    # ── Internal callbacks ──
+
+    fn _key_callback(this, window_ptr: ptr, key: i32, scancode: i32, action: i32, mods: i32):
+        if this.on_key != 0 as ptr:
+            this.on_key(key, action)
+
+    fn _mouse_callback(this, window_ptr: ptr, button: i32, action: i32, mods: i32):
+        if this.on_mouse_click != 0 as ptr:
+            x: ^f64 = 0.0
+            y: ^f64 = 0.0
+            glfw_get_cursor_pos(this.window_ptr, ^&x, ^&y)
+            this.on_mouse_click(button, action, x, y)
+
+    fn _mouse_move_callback(this, window_ptr: ptr, x: f64, y: f64):
+        if this.on_mouse_move != 0 as ptr:
+            this.on_mouse_move(x, y)
+
+    fn _resize_callback(this, window_ptr: ptr, width: i32, height: i32):
+        this.width = width
+        this.height = height
+        if this.surface_ptr != 0 as ptr:
+            sk_surface_unref(this.surface_ptr)
+        this._create_skia_surface(width, height)
+        if this.on_resize != 0 as ptr:
+            this.on_resize(width, height)

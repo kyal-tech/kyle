@@ -1,0 +1,150 @@
+# API REST — Autores + Libros con PostgreSQL
+#   ky run examples/pg_rest_api.ky
+#
+# Requiere PostgreSQL en puerto 5433:
+#   docker run -d --name kyle-pg-test \
+#     -e POSTGRES_PASSWORD=test123 -e POSTGRES_DB=kyle_test \
+#     -p 5433:5432 postgres:16-alpine
+#
+# Endpoints:
+#   GET    /authors
+#   GET    /authors/1
+#   POST   /authors       {"name":"...","email":"..."}
+#   DELETE /authors/1
+#   GET    /books
+
+from http.server import Router, send_json
+from postgres import postgres
+
+CONNSTR := "host=localhost port=5433 dbname=kyle_test user=postgres password=test123"
+
+extern fn PQgetvalue(res: i64, row: i32, col: i32) i64
+
+final class Author:
+    id: i32
+    name: str
+    email: str
+
+final class Book:
+    id: i32
+    title: str
+    author_name: str
+    year: i32
+
+fn get_str(res: i64, r: i32, c: i32) str:
+    p = PQgetvalue(res, r, c)
+    if p == 0: return ""
+    (ky_clone_str(p) as i64 as ptr) as str
+
+extern fn ky_clone_str(i64) i64
+
+fn get_int(res: ptr, r: i32, c: i32) i32:
+    s = get_str(res, r, c)
+    if s == "": return 0
+    parse_int(s)
+
+fn parse_int(s: str) i32:
+    r: ^i32 = 0
+    i: ^i32 = 0
+    sign = 1
+    if i < len(s) and char_at(s, i) == 45:
+        sign = -1
+        i = i + 1
+    while i < len(s):
+        c = char_at(s, i)
+        if c >= 48 and c <= 57:
+            r = r * 10 + (c - 48)
+        i = i + 1
+    r * sign
+
+fn extract_json_str(body: str, key: str) str:
+    search = "\"" + key + "\":\""
+    pos = find_str(body, search)
+    if pos < 0: return ""
+    start = pos + len(search)
+    end = start
+    while end < len(body) and char_at(body, end) != 34:
+        end = end + 1
+    substr(body, start, end - start)
+
+fn find_str(s: str, search: str) i32:
+    i: ^i32 = 0
+    while i <= len(s) - len(search):
+        j: ^i32 = 0
+        is_ok = 1
+        while j < len(search):
+            if char_at(s, i + j) != char_at(search, j):
+                is_ok = 0
+            j = j + 1
+        if is_ok == 1: return i
+        i = i + 1
+    -1
+
+app = Router()
+
+app.get("/authors", (m, p, b, c):
+    conn = postgres.connect(CONNSTR)
+    res = conn.query("SELECT id, name, email FROM authors ORDER BY id")
+    i: ^i32 = 0
+    result = "["
+    while i < res.rows():
+        if i > 0: result = result + ","
+        a = Author { id: get_int(res, i, 0), name: get_str(res, i, 1), email: get_str(res, i, 2) }
+        result = result + serialize(a)
+        i = i + 1
+    result = result + "]"
+    res.free()
+    conn.close()
+    send_json(c, result, 200)
+)
+
+app.get("/authors/1", (m, p, b, c):
+    conn = postgres.connect(CONNSTR)
+    res = conn.query("SELECT id, name, email FROM authors WHERE id = 1")
+    if res.rows() == 0:
+        send_json(c, "\{\"error\":\"not found\"}", 404)
+    else:
+        a = Author { id: get_int(res, 0, 0), name: get_str(res, 0, 1), email: get_str(res, 0, 2) }
+        send_json(c, serialize(a), 200)
+    res.free()
+    conn.close()
+)
+
+app.post("/authors", (m, p, b, c):
+    conn = postgres.connect(CONNSTR)
+    name = extract_json_str(b, "name")
+    email = extract_json_str(b, "email")
+    res = conn.query("INSERT INTO authors (name, email) VALUES ('" + name + "', '" + email + "') RETURNING id")
+    if res.rows() > 0:
+        send_json(c, "\{\"created\":true,\"id\":" + get_str(res, 0, 0) + "}", 201)
+    else:
+        send_json(c, "\{\"error\":\"insert failed\"}", 500)
+    res.free()
+    conn.close()
+)
+
+app.delete("/authors/1", (m, p, b, c):
+    conn = postgres.connect(CONNSTR)
+    res = conn.query("DELETE FROM authors WHERE id = 1")
+    send_json(c, "\{\"deleted\":true}", 200)
+    res.free()
+    conn.close()
+)
+
+app.get("/books", (m, p, b, c):
+    conn = postgres.connect(CONNSTR)
+    res = conn.query("SELECT b.id, b.title, a.name, b.year FROM books b JOIN authors a ON a.id = b.author_id ORDER BY b.id")
+    i: ^i32 = 0
+    result = "["
+    while i < res.rows():
+        if i > 0: result = result + ","
+        book = Book { id: get_int(res, i, 0), title: get_str(res, i, 1), author_name: get_str(res, i, 2), year: get_int(res, i, 3) }
+        result = result + serialize(book)
+        i = i + 1
+    result = result + "]"
+    res.free()
+    conn.close()
+    send_json(c, result, 200)
+)
+
+app.listen(5050)

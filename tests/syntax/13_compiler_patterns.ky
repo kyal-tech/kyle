@@ -1,0 +1,35 @@
+# Patrones usados en el compilador (parser, type checker, MIR)
+
+# --- Scope chain (type checker) ---
+final class Scope:
+    parent: Scope?
+    symbols: ^{str: i32}
+
+fn lookup(s: Scope, name: &str) i32?:
+    if s.symbols.has(name):
+        return some(s.symbols.get(name))
+    return none
+
+# --- Basic block graph (MIR) ---
+final class BasicBlock:
+    id: i32
+    successors: ^{i32}
+
+fn add_successor(block: ^BasicBlock, target: i32):
+    block.successors.push(target)
+
+# --- Token classification ---
+fn classify(name: &str) str:
+    if name == "fn":
+        return "keyword"
+    return "identifier"
+
+fn main():
+    s = Scope{parent: none, symbols: {}}
+    n = "test"
+    _ = lookup(s, &n)
+    items = ["a", "b", "c"]
+    for item in items:
+        print(item)
+    tok = "fn"
+    print(classify(&tok))

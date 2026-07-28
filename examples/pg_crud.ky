@@ -1,0 +1,61 @@
+# PostgreSQL CRUD — Autores + Libros
+#   ky run examples/pg_crud.ky
+#
+# Requiere: docker run -d --name kyle-pg-test \
+#   -e POSTGRES_PASSWORD=test123 -e POSTGRES_DB=kyle_test \
+#   -p 5433:5432 postgres:16-alpine
+
+from postgres import postgres
+
+CONNSTR := "host=localhost port=5433 dbname=kyle_test user=postgres password=test123"
+
+fn main():
+    conn = postgres.connect(CONNSTR)
+    if conn.conn == 0 as ptr:
+        print("Error: cannot connect to PostgreSQL")
+        print(conn.error())
+        return
+
+    # ── CREATE ──
+    print("=== CREATE ===")
+    res = conn.query("INSERT INTO books (title, author_id, year, isbn) VALUES ('Kyle en Accion', 2, 2026, '978-1-234-56789-3') RETURNING id")
+    if res.rows() == 1:
+        new_id = res.get(0, 0)
+        print("Created book id: " + new_id)
+    res.free()
+
+    # ── READ (all books with authors) ──
+    print("\n=== READ (all) ===")
+    res = conn.query("SELECT a.name, b.title, b.year FROM authors a JOIN books b ON a.id = b.author_id ORDER BY a.name, b.year")
+    i: ^i32 = 0
+    while i < res.rows():
+        row = res.data(i)
+        print(row.get("name") + " - " + row.get("title") + " (" + row.get("year") + ")")
+        i = i + 1
+    print("Total: " + str(res.rows()) + " rows")
+    res.free()
+
+    # ── UPDATE ──
+    print("\n=== UPDATE ===")
+    res = conn.query("UPDATE books SET year = 2025 WHERE title = 'Kyle en Accion'")
+    print("Updated: " + str(res.rows()) + " rows")
+    res.free()
+
+    # ── READ (single by join) ──
+    print("\n=== READ (author + books count) ===")
+    res = conn.query("SELECT a.name, count(b.id) as book_count FROM authors a LEFT JOIN books b ON a.id = b.author_id GROUP BY a.name ORDER BY a.name")
+    i = 0
+    while i < res.rows():
+        row = res.data(i)
+        print(row.get("name") + " -> " + row.get("book_count") + " books")
+        i = i + 1
+    res.free()
+
+    # ── DELETE ──
+    print("\n=== DELETE ===")
+    res = conn.query("DELETE FROM books WHERE isbn = '978-1-234-56789-3'")
+    print("Deleted: " + str(res.rows()) + " rows")
+    res.free()
+
+    conn.close()
+    print("\n=== ALL CRUD OPERATIONS OK ===")

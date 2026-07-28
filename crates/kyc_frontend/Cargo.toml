@@ -1,0 +1,9 @@
+[package]
+name = "kyc_frontend"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+kyc_core = { path = "../kyc_core" }

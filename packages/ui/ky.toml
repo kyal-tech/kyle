@@ -1,0 +1,11 @@
+[project]
+name = "ui"
+version = "0.1.0"
+edition = "2024"
+description = "Kyle UI Framework — built-in components"
+
+[compiler]
+optimization = "O2"
+target = "native"
+
+[dependencies]

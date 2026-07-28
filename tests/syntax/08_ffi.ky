@@ -1,0 +1,19 @@
+# FFI — @link, extern fn, punteros
+
+@link "c"
+extern fn malloc(size: i64) ptr
+extern fn free(ptr)
+extern fn strlen(s: ptr) i64
+
+fn test_ffi():
+    buf = malloc(100)
+    free(buf)
+
+@link "c"
+extern fn ky_print(ptr, i32)
+extern fn ky_strlen(ptr) i32
+extern fn ky_alloc(size: i64) ptr
+extern fn ky_free(ptr)
+
+fn main():
+    test_ffi()

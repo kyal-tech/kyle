@@ -1,0 +1,225 @@
+# http v11.0 — Server HTTP (body parsing + rutas parametrizadas)
+# use http.server.Router
+#
+# Uso:
+#   app = Router()
+#   app.get("/users/{id}", (req, res):
+#       id = req.param("id")
+#       res.json(serialize(data), 200)
+#   )
+#   app.listen(8080)
+
+@link "c"
+
+extern fn ky_tcp_listen(port: i32) i32
+extern fn ky_tcp_accept(fd: i32) i32
+extern fn ky_tcp_read(fd: i32, count: i32) ptr
+extern fn ky_tcp_write(i32, ptr, i32) i32
+extern fn ky_tcp_close(fd: i32) i32
+
+M_GET := 0
+M_POST := 1
+M_PUT := 2
+M_DELETE := 3
+
+final class Request:
+    method: str
+    path: str
+    body: str
+    _pattern: str
+
+    fn param(name: str) str:
+        i: ^i32 = 0
+        while i < len(this._pattern):
+            if char_at(this._pattern, i) == 123:
+                ne = i + 1
+                while ne < len(this._pattern) and char_at(this._pattern, ne) != 125 and char_at(this._pattern, ne) != 58:
+                    ne = ne + 1
+                pname = substr(this._pattern, i + 1, ne - i - 1)
+                if pname == name:
+                    return extract_param(&this.path, &this._pattern, i)
+            i = i + 1
+        ""
+
+    fn body() str:
+        this.body
+
+fn extract_param(path: str, pattern: str, pos: i32) str:
+    # Walk both strings to find the value at the pattern's {param} position
+    pi: ^i32 = 0
+    pp: ^i32 = 0
+    while pi < pos and pi < len(pattern) and pp < len(path):
+        if char_at(pattern, pi) == 123:
+            while pi < len(pattern) and char_at(pattern, pi) != 125:
+                pi = pi + 1
+            pi = pi + 1
+            while pp < len(path) and char_at(path, pp) != 47:
+                pp = pp + 1
+        else:
+            if char_at(pattern, pi) == char_at(path, pp):
+                pi = pi + 1
+                pp = pp + 1
+    vs = pp
+    while pp < len(path) and char_at(path, pp) != 47:
+        pp = pp + 1
+    substr(path, vs, pp - vs)
+
+final class Res:
+    fd: i32
+    sent: i32
+
+    fn json_str(data: str, code: i32):
+        st = status_text(code)
+        resp = "HTTP/1.1 " + str(code) + " " + st + "\r\n"
+        resp = resp + "Content-Type: application/json\r\n"
+        resp = resp + "Content-Length: " + str(len(data)) + "\r\n"
+        resp = resp + "Connection: close\r\n\r\n" + data
+        ky_tcp_write(this.fd, resp as ptr, len(resp))
+        this.sent = 1
+
+    fn json(data: {str: str}, code: i32):
+        st = status_text(code)
+        data_str = json_stringify_str(data)
+        resp = "HTTP/1.1 " + str(code) + " " + st + "\r\n"
+        resp = resp + "Content-Type: application/json\r\n"
+        resp = resp + "Content-Length: " + str(len(data_str)) + "\r\n"
+        resp = resp + "Connection: close\r\n\r\n" + data_str
+        ky_tcp_write(this.fd, resp as ptr, len(resp))
+        this.sent = 1
+
+    fn text(body: str, code: i32):
+        st = status_text(code)
+        resp = "HTTP/1.1 " + str(code) + " " + st + "\r\n"
+        resp = resp + "Content-Type: text/plain\r\n"
+        resp = resp + "Content-Length: " + str(len(body)) + "\r\n"
+        resp = resp + "Connection: close\r\n\r\n" + body
+        ky_tcp_write(this.fd, resp as ptr, len(resp))
+        this.sent = 1
+
+final class Router:
+    rmethods: [i32]
+    rpatterns: [str]
+    rhandlers: [ptr]
+
+    Router(port: i32 = 8080):
+        this.rmethods = []
+        this.rpatterns = []
+        this.rhandlers = []
+
+    fn get(path: str, handler: ptr):
+        this.rmethods.push(M_GET)
+        this.rpatterns.push(path)
+        this.rhandlers.push(handler)
+
+    fn post(path: str, handler: ptr):
+        this.rmethods.push(M_POST)
+        this.rpatterns.push(path)
+        this.rhandlers.push(handler)
+
+    fn put(path: str, handler: ptr):
+        this.rmethods.push(M_PUT)
+        this.rpatterns.push(path)
+        this.rhandlers.push(handler)
+
+    fn delete(path: str, handler: ptr):
+        this.rmethods.push(M_DELETE)
+        this.rpatterns.push(path)
+        this.rhandlers.push(handler)
+
+    fn listen(port: i32):
+        fd = ky_tcp_listen(port)
+        if fd < 0: return
+        print("Listening on " + str(port) + "\n")
+        while true:
+            client = ky_tcp_accept(fd)
+            if client >= 0:
+                raw = ky_tcp_read(client, 4096)
+                if (raw as i64) != 0:
+                    this.serve(client, raw as str)
+                ky_tcp_close(client)
+
+    fn serve(client: i32, raw: str):
+        mcode = code_from_raw(&raw)
+        method = method_from_raw(&raw)
+        req_path = path_from_raw(&raw)
+        req_body = body_from_raw(&raw)
+        i: ^i32 = 0
+        while i < len(this.rmethods):
+            if mcode == this.rmethods[i] and match_route(&this.rpatterns[i], &req_path):
+                req = Request {
+                    method: method,
+                    path: req_path,
+                    body: req_body,
+                    _pattern: this.rpatterns[i],
+                }
+                res = Res { fd: client, sent: 0 }
+                this.rhandlers[i](req, res)
+                return
+            i = i + 1
+        send_404(client)
+
+fn match_route(pattern: str, path: str) i32:
+    pi: ^i32 = 0
+    pp: ^i32 = 0
+    while pi < len(pattern) and pp < len(path):
+        if char_at(pattern, pi) == 123:
+            pi = pi + 1
+            while pi < len(pattern) and char_at(pattern, pi) != 125:
+                pi = pi + 1
+            pi = pi + 1
+            while pp < len(path) and char_at(path, pp) != 47:
+                pp = pp + 1
+        else:
+            if char_at(pattern, pi) != char_at(path, pp):
+                return 0
+            pi = pi + 1
+            pp = pp + 1
+    if pi == len(pattern) and pp == len(path): return 1
+    0
+
+fn body_from_raw(raw: str) str:
+    i: ^i32 = 0
+    while i < len(raw):
+        if i + 3 < len(raw) and char_at(raw, i) == 13 and char_at(raw, i + 1) == 10 and char_at(raw, i + 2) == 13 and char_at(raw, i + 3) == 10:
+            return substr(raw, i + 4, len(raw) - i - 4)
+        i = i + 1
+    ""
+
+fn code_from_raw(raw: str) i32:
+    if len(raw) >= 3 and char_at(raw, 0) == 71 and char_at(raw, 1) == 69 and char_at(raw, 2) == 84: return 0
+    if len(raw) >= 4 and char_at(raw, 0) == 80 and char_at(raw, 1) == 79 and char_at(raw, 2) == 83 and char_at(raw, 3) == 84: return 1
+    if len(raw) >= 3 and char_at(raw, 0) == 80 and char_at(raw, 1) == 85 and char_at(raw, 2) == 84: return 2
+    if len(raw) >= 6 and char_at(raw, 0) == 68 and char_at(raw, 1) == 69 and char_at(raw, 2) == 76 and char_at(raw, 3) == 69 and char_at(raw, 4) == 84 and char_at(raw, 5) == 69: return 3
+    -1
+
+fn method_from_raw(raw: str) str:
+    i: ^i32 = 0
+    while i < len(raw) and char_at(raw, i) != 32: i = i + 1
+    substr(raw, 0, i)
+
+fn path_from_raw(raw: str) str:
+    i: ^i32 = 0
+    while i < len(raw) and char_at(raw, i) != 32: i = i + 1
+    i = i + 1
+    s = i
+    while i < len(raw) and char_at(raw, i) != 32 and char_at(raw, i) != 10 and char_at(raw, i) != 13: i = i + 1
+    substr(raw, s, i - s)
+
+fn status_text(code: i32) str:
+    if code == 200: return "OK"
+    if code == 201: return "Created"
+    if code == 400: return "Bad Request"
+    if code == 404: return "Not Found"
+    if code == 500: return "Internal Server Error"
+    "Unknown"
+
+fn send_404(client: i32):
+    ky_tcp_write(client, "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n" as ptr, 52)
+
+fn send_json(client: i32, data: str, code: i32):
+    st = status_text(code)
+    resp = "HTTP/1.1 " + str(code) + " " + st + "\r\n"
+    resp = resp + "Content-Type: application/json\r\n"
+    resp = resp + "Content-Length: " + str(len(data)) + "\r\n"
+    resp = resp + "Connection: close\r\n\r\n" + data
+    ky_tcp_write(client, resp as ptr, len(resp))
