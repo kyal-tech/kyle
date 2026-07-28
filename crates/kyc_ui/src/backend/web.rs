@@ -1283,6 +1283,48 @@ fn to_css_value(prop: &str, val: &str) -> String {
             return format!("{}px", val);
         }
     }
+    // Handle transition(property, duration, easing)
+    if prop == "transition" && val.trim().starts_with("transition(") {
+        let inner = val.trim().trim_start_matches("transition(").trim_end_matches(')');
+        let mut pv = "all".to_string();
+        let mut du = "300ms".to_string();
+        let mut ea = "ease".to_string();
+        for part in inner.split(',') {
+            let part = part.trim();
+            if let Some(eq) = part.find(':') {
+                let key = part[..eq].trim();
+                let val_part = part[eq+1..].trim().trim_matches('"');
+                match key {
+                    "property" => pv = val_part.to_string(),
+                    "duration" => du = format!("{}ms", val_part),
+                    "easing" => ea = val_part.trim_start_matches("easing.").replace('_', "-"),
+                    _ => {}
+                }
+            }
+        }
+        return format!("{} {} {}", pv, du, ea);
+    }
+    // Handle transform(scale_x, scale_y, rotate, ...)
+    if prop == "transform" && val.trim().starts_with("transform(") {
+        let inner = val.trim().trim_start_matches("transform(").trim_end_matches(')');
+        let mut parts: Vec<String> = Vec::new();
+        for part in inner.split(',') {
+            let part = part.trim();
+            if let Some(eq) = part.find(':') {
+                let key = part[..eq].trim();
+                let v = part[eq+1..].trim();
+                let css = match key {
+                    "scale_x" | "scale_y" => format!("scale({})", v),
+                    "rotate" => format!("rotate({}deg)", v),
+                    "translate_x" => format!("translateX({}px)", v),
+                    "translate_y" => format!("translateY({}px)", v),
+                    _ => String::new(),
+                };
+                if !css.is_empty() { parts.push(css); }
+            }
+        }
+        return parts.join(" ");
+    }
     // Direct hex colors
     if val.starts_with('#') || val == "white" || val == "black" || val == "transparent" {
         return val.to_string();
