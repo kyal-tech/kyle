@@ -99,8 +99,8 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 | Style classes (`style=`) | ✅ | Working |
 | Inline styles | ✅ | Working |
 | Animations | 🟡 | Basic support |
-| Transitions | ❌ | Not implemented |
-| Lazy loading (images) | ❌ | Not implemented |
+| Transitions | 🟡 | CSS transitions via style system |
+| Lazy loading (images) | ✅ | IntersectionObserver + loading='lazy' |
 | Virtualization (lists) | ❌ | Not implemented |
 
 **Files:**
@@ -368,12 +368,16 @@ This roadmap outlines the implementation plan for Kyle UI, prioritized by impact
 1. ✅ ~~Fix web backend bugs (toString, compound assignments, watch keys)~~
 2. ✅ ~~Implement touch events~~
 3. ✅ ~~Implement lifecycle hooks~~
-4. 🔴 Implement transitions
-5. 🔴 Create unit tests
+4. ✅ ~~Implement image lazy loading~~
+5. 🟡 Implement CSS transitions (basic via style system)
+6. 🔴 Implement list virtualization
+7. 🔴 Create unit tests
+8. 🔴 Create integration tests
 
 **Deliverables:**
 - All basic events working ✅
 - Lifecycle hooks functional ✅
+- Image lazy loading working ✅
 - Unit tests passing
 
 ---
