@@ -6,6 +6,7 @@
 export class ReactiveState {
     constructor(initial = {}) {
         this._watchers = new Map();   // key → Set<callback>
+        this._onAnyChange = null;     // called on ANY state change (for on_updated)
         this._batchDepth = 0;
         this._batchedUpdates = new Set();
 
@@ -22,6 +23,10 @@ export class ReactiveState {
                 return target[key];
             }
         });
+    }
+
+    onAnyChange(callback) {
+        this._onAnyChange = callback;
     }
 
     // Get current state
@@ -74,6 +79,10 @@ export class ReactiveState {
             for (const cb of watchers) {
                 try { cb(value); } catch (e) { console.warn('Watcher error:', e); }
             }
+        }
+        // Trigger on_updated with changed key
+        if (this._onAnyChange) {
+            try { this._onAnyChange(key); } catch (e) { console.warn('Lifecycle error:', e); }
         }
     }
 }
@@ -161,11 +170,9 @@ export class Binding {
 
 // Create a Kyle-compatible event object from a DOM event
 export function createKyleEvent(domEvent) {
-    return {
+    const base = {
         type: domEvent.type,
         target: domEvent.target,
-        x: domEvent.clientX ?? 0,
-        y: domEvent.clientY ?? 0,
         key: domEvent.key ?? '',
         ctrl_key: domEvent.ctrlKey ?? false,
         shift_key: domEvent.shiftKey ?? false,
@@ -175,6 +182,68 @@ export function createKyleEvent(domEvent) {
         prevent_default: () => domEvent.preventDefault(),
         stop_propagation: () => domEvent.stopPropagation(),
     };
+    // Mouse/click events
+    if (domEvent.clientX !== undefined) {
+        base.x = domEvent.clientX;
+        base.y = domEvent.clientY;
+        base.client_x = domEvent.clientX;
+        base.client_y = domEvent.clientY;
+        base.screen_x = domEvent.screenX ?? 0;
+        base.screen_y = domEvent.screenY ?? 0;
+        base.buttons = domEvent.buttons ?? 0;
+    }
+    // Touch events — convert TouchList to array
+    if (domEvent.touches !== undefined) {
+        base.touches = Array.from(domEvent.touches).map(t => ({
+            identifier: t.identifier,
+            x: t.clientX,
+            y: t.clientY,
+            force: t.force ?? 0,
+            radius_x: t.radiusX ?? 0,
+            radius_y: t.radiusY ?? 0,
+        }));
+        base.changed_touches = Array.from(domEvent.changedTouches).map(t => ({
+            identifier: t.identifier,
+            x: t.clientX,
+            y: t.clientY,
+            force: t.force ?? 0,
+            radius_x: t.radiusX ?? 0,
+            radius_y: t.radiusY ?? 0,
+        }));
+    }
+    // Scroll events
+    if (domEvent.scrollX !== undefined) {
+        base.scroll_x = domEvent.scrollX;
+        base.scroll_y = domEvent.scrollY;
+    }
+    return base;
+}
+
+// Track long press timers per element
+const _longPressTimers = new WeakMap();
+
+// Set up long press detection on an element
+export function enableLongPress(element, callback) {
+    let timer = null;
+    const start = (e) => {
+        timer = setTimeout(() => {
+            callback(createKyleEvent(e));
+            timer = null;
+        }, 500);
+    };
+    const end = () => {
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+    };
+    element.addEventListener('touchstart', start, { passive: true });
+    element.addEventListener('touchend', end);
+    element.addEventListener('touchmove', end);
+    element.addEventListener('mousedown', start);
+    element.addEventListener('mouseup', end);
+    element.addEventListener('mouseleave', end);
+    _longPressTimers.set(element, { start, end });
 }
 
 // Global fallback for direct script inclusion

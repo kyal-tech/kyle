@@ -62,6 +62,7 @@ export class Router {
         this.currentPath = '/';
         this.currentParams = {};
         this.currentView = null;
+        this._currentLifecycle = null;
         this.container = options.container || document.getElementById('app');
         this.layout = options.layout || null;
         this._beforeEnterGuards = [];
@@ -139,13 +140,29 @@ export class Router {
 
         // Render
         if (this.container) {
+            // Call beforeLeave on current view
+            if (this._currentLifecycle && this._currentLifecycle.unmounted) {
+                if (typeof this._beforeLeaveUnmount !== 'function' || this._beforeLeaveUnmount() !== false) {
+                    this._currentLifecycle.unmounted();
+                }
+            }
+
             this.container.innerHTML = '';
             if (typeof viewFn === 'function') {
                 const result = viewFn(params);
                 if (result instanceof HTMLElement) {
                     this.container.appendChild(result);
+                    this._currentLifecycle = null;
                 } else if (result?.element) {
                     this.container.appendChild(result.element);
+                    this._currentLifecycle = result.lifecycle || null;
+                    // Call on_mounted after DOM insertion
+                    if (this._currentLifecycle && this._currentLifecycle.mounted) {
+                        // Use microtask to ensure DOM is ready
+                        Promise.resolve().then(() => {
+                            this._currentLifecycle.mounted();
+                        });
+                    }
                 }
             }
         }
