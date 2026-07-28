@@ -1,7 +1,7 @@
 # Kyle Monorepo — AI Agent Context
 
 > Single entry-point for AI agents and team members working on the Kyle codebase.
-> See also: [`BUILD.md`](BUILD.md) · [`BENCHMARKS.md`](BENCHMARKS.md) · [`VSCODE.md`](VSCODE.md) · [`PACKAGES.md`](PACKAGES.md) · [`tests/SYNTAX_CHECKLIST.md`](tests/SYNTAX_CHECKLIST.md)
+> See also: [`BUILD.md`](BUILD.md) · [`BENCHMARKS.md`](BENCHMARKS.md) · [`VSCODE.md`](VSCODE.md) · [`PACKAGES.md`](PACKAGES.md) · [`tests/SYNTAX_CHECKLIST.md`](tests/SYNTAX_CHECKLIST.md) · [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md)
 
 ## Quick Reference
 
@@ -72,6 +72,60 @@ source (.ky) → kyc_frontend (lexer+parser) → kyc_hir (desugar)
 | **UI design** | `docs/03-language/ui/*.md` | Routing, styles, a11y, i18n, SSR |
 | **Type system** | `docs/09-specification/` | Type system, ABI, memory model |
 | **RFCs** | `docs/10-design/rfc/` | 0005 UI architecture |
+| **Kyle UI Roadmap** | [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md) | Implementation plan & priorities |
+
+## Kyle UI Documentation
+
+Complete documentation for Kyle UI framework at `docs/03-language/ui/`:
+
+### Core Documentation
+
+| Document | Description |
+|----------|-------------|
+| [README.md](docs/03-language/ui/README.md) | Main index & quick start |
+| [architecture.md](docs/03-language/ui/architecture.md) | Multi-platform architecture, anti-patterns |
+| [style-system.md](docs/03-language/ui/style-system.md) | Typed styles (color, spacing, layout, theme) |
+| [state-events.md](docs/03-language/ui/state-events.md) | State, events, binding, forms, validation |
+| [events.md](docs/03-language/ui/events.md) | Complete event system (click, hover, touch, keyboard) |
+| [lifecycle.md](docs/03-language/ui/lifecycle.md) | Component lifecycle hooks (on_mounted, on_unmounted, etc.) |
+| [animation.md](docs/03-language/ui/animation.md) | Animations & transitions |
+| [routing.md](docs/03-language/ui/routing.md) | Routing, navigation, guards |
+| [accessibility.md](docs/03-language/ui/accessibility.md) | WCAG 2.1 AA, ARIA, keyboard, screen readers |
+| [anti-patterns.md](docs/03-language/ui/anti-patterns.md) | Anti-patterns from other frameworks |
+| [framework-comparison.md](docs/03-language/ui/framework-comparison.md) | Comparison with React, Vue, SwiftUI, Compose, Flutter |
+
+### Component Documentation
+
+All components documented at `docs/03-language/ui/components/`:
+
+| Category | Components |
+|----------|-----------|
+| **Layout** | view, card |
+| **Text** | text, link |
+| **Input** | button, text_field, text_area, checkbox, radio, switch, slider, select, file_picker, form |
+| **Media** | img, video, audio |
+| **Feedback** | progress, spinner, skeleton |
+| **Overlay** | modal, alert, tooltip, toast |
+| **Navigation** | app_bar, sidebar, tab_bar, bottom_nav |
+| **Data** | list, table, grid |
+
+### Advanced Patterns
+
+| Document | Description |
+|----------|-------------|
+| [composition.md](docs/03-language/ui/composition.md) | Slots, render props, compound components |
+| [context-patterns.md](docs/03-language/ui/context-patterns.md) | Context, selectors, reducers |
+| [portals.md](docs/03-language/ui/portals.md) | Portals for modals, tooltips |
+| [error-boundaries.md](docs/03-language/ui/error-boundaries.md) | Error handling, fallback UI |
+
+### Infrastructure
+
+| Document | Description |
+|----------|-------------|
+| [ssr.md](docs/03-language/ui/ssr.md) | Server-Side Rendering |
+| [i18n.md](docs/03-language/ui/i18n.md) | Internationalization |
+| [testing.md](docs/03-language/ui/testing.md) | Testing (unit, integration, E2E) |
+| [file-picker.md](docs/03-language/ui/file-picker.md) | Native file picker |
 
 ## Current State
 
@@ -104,6 +158,7 @@ source (.ky) → kyc_frontend (lexer+parser) → kyc_hir (desugar)
 | Theming (light/dark) | ✅ |
 | Styles, animations, state/events | ✅ |
 | File picker, form models | ✅ |
+| **Complete documentation** (35+ components, events, lifecycle) | ✅ |
 
 ### ✅ VS Code Extension — Included in Monorepo
 
@@ -122,7 +177,7 @@ source (.ky) → kyc_frontend (lexer+parser) → kyc_hir (desugar)
 
 | Backend | Status |
 |---------|--------|
-| **Web** | ✅ Functional |
+| **Web** | ✅ Functional (see [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md) for remaining features) |
 | **Desktop (SDL2/Skia)** | 🟡 WIP — SDL_PollEvent + RenderFillRect added |
 | **iOS (SwiftUI)** | 🟡 Broken — invalid Swift output |
 | **WASM** | ❌ Untested |
@@ -212,13 +267,92 @@ The self-hosting compiler (`runtimes/ky/`) works for transpiling simple Kyle to 
 ## Key Commands
 
 ```bash
-cargo build --release --bin ky         # Build
-cargo test --workspace                  # Run all Rust tests
-ky run examples/hello.ky                # Run Kyle program
-ky build examples/counter.kyx           # Build UI web app
-ky check packages/ui/src/lib.kyx        # Type-check UI package
-ky test packages/http/tests/test_http.ky  # Run package test
-ky add http                             # Install package
-ky new myapp                            # Create new project
-ky doc                                  # Open docs
+# Build compiler
+cargo build --release --bin ky
+
+# Development install (compiler + runtime)
+./scripts/dev-install.sh
+
+# Development install (VS Code extension)
+./scripts/dev-ext.sh
+
+# Run tests
+cargo test --workspace
+
+# Run Kyle program
+ky run examples/hello.ky
+
+# Build UI web app
+ky build examples/counter.kyx
+
+# Type-check UI package
+ky check packages/ui/src/lib.kyx
+
+# Run package test
+ky test packages/http/tests/test_http.ky
+
+# Install package
+ky add http
+
+# Create new project
+ky new myapp
+
+# Open docs
+ky doc
 ```
+
+## Development Workflow
+
+### Quick Development Cycle
+
+1. **Make changes** to compiler or UI components
+2. **Build and install**: `./scripts/dev-install.sh`
+3. **Test**: `ky run examples/hello.ky`
+4. **Repeat**
+
+### VS Code Extension Development
+
+1. **Make changes** to extension code
+2. **Build and install**: `./scripts/dev-ext.sh`
+3. **Reload VS Code** window (Cmd+Shift+P → Reload Window)
+4. **Test** extension features
+
+### UI Component Development
+
+1. **Edit component** in `packages/ui/src/components/`
+2. **Build**: `./scripts/dev-install.sh`
+3. **Test in browser**: `ky run web` in a kyui project
+4. **Verify** component renders correctly
+
+## Implementation Priorities
+
+See [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md) for detailed implementation plan.
+
+### Current Focus: Phase 1 - Core Web Backend
+
+**Priority:** 🔴 CRITICAL
+
+- [ ] Implement touch events (touch_start, touch_end, touch_move)
+- [ ] Implement lifecycle hooks (on_created, on_mounted, on_updated, on_unmounted)
+- [ ] Implement CSS transitions
+- [ ] Implement image lazy loading
+- [ ] Implement list virtualization
+- [ ] Create unit tests
+- [ ] Create integration tests
+
+### Next: Phase 2 - Testing & Validation
+
+**Priority:** 🔴 CRITICAL
+
+- [ ] Unit tests (>80% coverage)
+- [ ] Integration tests
+- [ ] Browser testing (Chrome, Firefox, Safari, Edge)
+- [ ] Mobile browser testing
+- [ ] Accessibility testing
+
+### Future: Phase 3-6
+
+- Phase 3: Desktop backend (SDL2/Skia)
+- Phase 4: iOS backend (SwiftUI)
+- Phase 5: Android backend (Jetpack Compose)
+- Phase 6: Advanced features (SSR, DevTools)
