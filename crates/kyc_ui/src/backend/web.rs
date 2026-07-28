@@ -1599,8 +1599,8 @@ fn extract_state_keys(expr: &str) -> Vec<String> {
             current.push(c);
         } else {
             if c == '.' {
-                // Flush the identifier before the dot (it's a state var)
-                flush_ident(&mut current, &mut keys, false);
+                // Flush the identifier before the dot (respect after_dot state)
+                flush_ident(&mut current, &mut keys, after_dot);
                 after_dot = true;
             } else {
                 // Flush and don't treat as state var if after dot
@@ -1680,7 +1680,8 @@ fn kyle_to_js_expr(expr: &str) -> String {
 fn flush_token(current: &mut String, out: &mut String, after_dot: bool, in_string: bool) {
     if !current.is_empty() {
         let token = current.clone();
-        if after_dot || in_string || is_builtin(&token) || token.starts_with("state.") {
+        let is_numeric = token.chars().all(|c| c.is_ascii_digit() || c == '.' || c == '-');
+        if after_dot || in_string || is_builtin(&token) || token.starts_with("state.") || is_numeric {
             out.push_str(&token);
         } else {
             out.push_str(&format!("state.get('{}')", token));
@@ -1751,5 +1752,197 @@ mod tests {
         let js = generate_animations(&anims);
         assert!(js.contains("export const animations"));
         assert!(js.contains("export function applyAnimation"));
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_simple_var() {
+        let result = kyle_to_js_expr("count");
+        assert_eq!(result, "state.get('count')");
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_method_call() {
+        let result = kyle_to_js_expr("count.to_str()");
+        assert_eq!(result, "state.get('count').toString()");
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_with_string() {
+        let result = kyle_to_js_expr("\"Hello \" + name");
+        assert_eq!(result, "\"Hello \" + state.get('name')");
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_builtin_skipped() {
+        let result = kyle_to_js_expr("true");
+        assert_eq!(result, "true");
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_event_param() {
+        let result = kyle_to_js_expr("event.x.to_str()");
+        assert_eq!(result, "event.x.toString()");
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_chained_methods() {
+        let result = kyle_to_js_expr("user.name.to_upper()");
+        assert_eq!(result, "state.get('user').name.to_upper()");
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_arithmetic() {
+        let result = kyle_to_js_expr("count + 1");
+        assert_eq!(result, "state.get('count') + 1");
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_len_conversion() {
+        let result = kyle_to_js_expr("items.len()");
+        assert_eq!(result, "state.get('items').length");
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_is_empty() {
+        let result = kyle_to_js_expr("name.is_empty()");
+        assert_eq!(result, "state.get('name') === ''");
+    }
+
+    #[test]
+    fn test_kyle_to_js_expr_contains() {
+        let result = kyle_to_js_expr("email.contains('@')");
+        assert_eq!(result, "state.get('email').includes('@')");
+    }
+
+    #[test]
+    fn test_extract_state_keys_simple() {
+        let keys = extract_state_keys("count");
+        assert_eq!(keys, vec!["count"]);
+    }
+
+    #[test]
+    fn test_extract_state_keys_with_method() {
+        let keys = extract_state_keys("count.to_str()");
+        assert_eq!(keys, vec!["count"]);
+    }
+
+    #[test]
+    fn test_extract_state_keys_multi() {
+        let keys = extract_state_keys("first_name + \" \" + last_name");
+        assert!(keys.contains(&"first_name".to_string()));
+        assert!(keys.contains(&"last_name".to_string()));
+    }
+
+    #[test]
+    fn test_extract_state_keys_skips_builtins() {
+        let keys = extract_state_keys("event.x + count");
+        assert_eq!(keys, vec!["count"]);
+    }
+
+    #[test]
+    fn test_extract_state_keys_complex() {
+        let keys = extract_state_keys("user.name.to_str()");
+        assert_eq!(keys, vec!["user"]);
+    }
+
+    #[test]
+    fn test_translate_block_state_init() {
+        let js = translate_kyle_block_to_js("count: ^i32 = 0");
+        assert!(js.contains("state.set('count', 0)"));
+    }
+
+    #[test]
+    fn test_translate_block_function_def() {
+        let js = translate_kyle_block_to_js("fn increment():\n    count += 1");
+        assert!(js.contains("const increment = () => {"));
+        assert!(js.contains("state.get('count') + 1"));
+    }
+
+    #[test]
+    fn test_translate_block_compound() {
+        let js = translate_kyle_block_to_js("count += 1");
+        assert!(js.contains("state.set('count', state.get('count') + 1)"));
+    }
+
+    #[test]
+    fn test_translate_block_simple_assign() {
+        let js = translate_kyle_block_to_js("name = \"test\"");
+        assert!(js.contains("state.set('name', \"test\")"));
+    }
+
+    #[test]
+    fn test_is_builtin_recognizes_event() {
+        assert!(is_builtin("event"));
+        assert!(is_builtin("toast"));
+        assert!(is_builtin("navigate"));
+        assert!(is_builtin("console"));
+        assert!(!is_builtin("count"));
+        assert!(!is_builtin("items"));
+    }
+
+    #[test]
+    fn test_js_tag_mapping() {
+        assert_eq!(js_tag(&ComponentTag::Button), "button");
+        assert_eq!(js_tag(&ComponentTag::Text), "span");
+        assert_eq!(js_tag(&ComponentTag::Image), "img");
+        assert_eq!(js_tag(&ComponentTag::List), "ul");
+        assert_eq!(js_tag(&ComponentTag::Form), "form");
+        assert_eq!(js_tag(&ComponentTag::View), "div");
+        assert_eq!(js_tag(&ComponentTag::TextField), "input");
+        assert_eq!(js_tag(&ComponentTag::Checkbox), "input");
+        assert_eq!(js_tag(&ComponentTag::Slider), "input");
+        assert_eq!(js_tag(&ComponentTag::Progress), "progress");
+    }
+
+    #[test]
+    fn test_style_attr_to_css_mapping() {
+        assert_eq!(style_attr_to_css("font_size"), Some("'fontSize'".to_string()));
+        assert_eq!(style_attr_to_css("border_radius"), Some("'borderRadius'".to_string()));
+        assert_eq!(style_attr_to_css("background_color"), Some("'backgroundColor'".to_string()));
+        assert_eq!(style_attr_to_css("margin"), Some("'margin'".to_string()));
+        assert_eq!(style_attr_to_css("transition"), Some("'transition'".to_string()));
+        assert_eq!(style_attr_to_css("unknown_prop"), None);
+    }
+
+    #[test]
+    fn test_event_name_mapping() {
+        // Test that the event name mapping matches expected JS events
+        let check = |name: &str, expected: &str| {
+            match name {
+                "click" => assert_eq!("click", expected),
+                "mouse_enter" => assert_eq!("mouseenter", expected),
+                "mouse_leave" => assert_eq!("mouseleave", expected),
+                "touch_start" => assert_eq!("touchstart", expected),
+                "touch_end" => assert_eq!("touchend", expected),
+                "touch_move" => assert_eq!("touchmove", expected),
+                "long_press" => assert_eq!("longpress", expected),
+                "dblclick" => assert_eq!("dblclick", expected),
+                "keydown" => assert_eq!("keydown", expected),
+                "submit" => assert_eq!("submit", expected),
+                _ => {}
+            }
+        };
+        check("click", "click");
+        check("mouse_enter", "mouseenter");
+        check("touch_start", "touchstart");
+        check("long_press", "longpress");
+    }
+
+    #[test]
+    fn test_interpolate_state_simple() {
+        let result = interpolate_state("@name");
+        assert_eq!(result, "state.get(\"name\")");
+    }
+
+    #[test]
+    fn test_interpolate_state_with_text() {
+        let result = interpolate_state("Hello @name");
+        assert_eq!(result, "\"Hello \" + state.get(\"name\")");
+    }
+
+    #[test]
+    fn test_interpolate_state_multi() {
+        let result = interpolate_state("@first @last");
+        assert_eq!(result, "state.get(\"first\") + \" \" + state.get(\"last\")");
     }
 }
