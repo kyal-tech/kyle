@@ -1,49 +1,184 @@
-# Kyle UI — Demo Completo
+# Kyle UI — Comprehensive Demo
 
-from views.home import home
+from views.dashboard import dashboard
+from views.components import components
 from views.form import form
 from views.not_found import not_found
 
-style<button> Primary:
-    background = color("#0066FF")
-    color = color("#FFFFFF")
-    border_radius = 8
-    padding = spacing.all(12)
-    font_size = 16
-    font_weight = font_weight.medium
-    transition = transition(property: "all", duration: 200, easing: easing.ease_out)
+# ── Global Styles ──────────────────────────────────────────
 
-style<button> Secondary:
-    background = color("transparent")
-    color = color("#0066FF")
-    border = border(2, color("#0066FF"), border_style.solid)
-    border_radius = 8
-    padding = spacing.all(12)
-    font_size = 16
+style<view> Page:
+    background = color("#F1F5F9")
+    min_height = "100vh"
 
-style<text> Title:
-    font_size = 24
-    font_weight = font_weight.bold
-
-style<text> SuccessText:
-    color = color("#10B981")
-    font_weight = font_weight.bold
-
-style<text> title_404:
-    font_size = 72
-    font_weight = font_weight.bold
-    color = color("#0066FF")
+style<view> Section:
+    padding = spacing.all(24)
+    max_width = 960
+    layout = layout.center
 
 style<card> Elevated:
     background = color("#FFFFFF")
     border_radius = 12
-    padding = spacing.all(20)
+    padding = spacing.all(24)
     shadow = shadow(x: 0, y: 2, blur: 12, color: color("#000000").with_alpha(0.08))
+    transition = transition(property: "all", duration: 200, easing: easing.ease_out)
+
+style<card> Interactive:
+    background = color("#FFFFFF")
+    border_radius = 12
+    padding = spacing.all(24)
+    shadow = shadow(x: 0, y: 2, blur: 8, color: color("#000000").with_alpha(0.06))
+    transition = transition(property: "all", duration: 200, easing: easing.ease_out)
+
+style<card> DarkCard:
+    background = color("#1E293B")
+    border_radius = 12
+    padding = spacing.all(32)
+    color = color("#FFFFFF")
+
+style<button> Primary:
+    background = color("#3B82F6")
+    color = color("#FFFFFF")
+    border_radius = 8
+    padding = spacing.all(12)
+    padding_left = 24
+    padding_right = 24
+    font_size = 15
+    font_weight = font_weight.semibold
+    transition = transition(property: "all", duration: 200, easing: easing.ease_out)
+
+style<button> Secondary:
+    background = color("transparent")
+    color = color("#3B82F6")
+    border = border(2, color("#3B82F6"), border_style.solid)
+    border_radius = 8
+    padding = spacing.all(12)
+    padding_left = 24
+    padding_right = 24
+    font_size = 15
+    font_weight = font_weight.semibold
+    transition = transition(property: "all", duration: 200, easing: easing.ease_out)
+
+style<button> Danger:
+    background = color("#EF4444")
+    color = color("#FFFFFF")
+    border_radius = 8
+    padding = spacing.all(12)
+    padding_left = 24
+    padding_right = 24
+    font_size = 15
+    font_weight = font_weight.semibold
+
+style<button> Ghost:
+    background = color("transparent")
+    color = color("#64748B")
+    border_radius = 8
+    padding = spacing.all(12)
+    padding_left = 24
+    padding_right = 24
+    font_size = 15
+
+style<text> H1:
+    font_size = 32
+    font_weight = font_weight.bold
+    color = color("#0F172A")
+
+style<text> H2:
+    font_size = 24
+    font_weight = font_weight.bold
+    color = color("#0F172A")
+
+style<text> H3:
+    font_size = 18
+    font_weight = font_weight.semibold
+    color = color("#0F172A")
+
+style<text> Body:
+    font_size = 14
+    color = color("#475569")
+
+style<text> Muted:
+    font_size = 12
+    color = color("#94A3B8")
+
+style<text> Success:
+    color = color("#10B981")
+    font_weight = font_weight.semibold
+
+style<text> Error:
+    color = color("#EF4444")
+    font_size = 12
+
+style<text> NavLink:
+    font_size = 14
+    font_weight = font_weight.medium
+    color = color("#FFFFFF")
+
+style<text> NavLinkActive:
+    font_size = 14
+    font_weight = font_weight.semibold
+    color = color("#60A5FA")
+
+style<text> Badge:
+    font_size = 11
+    font_weight = font_weight.bold
+    padding = spacing.all(4)
+    padding_left = 8
+    padding_right = 8
+    border_radius = 999
+
+style<text> BadgePrimary:
+    font_size = 11
+    font_weight = font_weight.bold
+    padding = spacing.all(4)
+    padding_left = 8
+    padding_right = 8
+    border_radius = 999
+    background = color("#DBEAFE")
+    color = color("#1D4ED8")
+
+style<text> StatValue:
+    font_size = 28
+    font_weight = font_weight.bold
+    color = color("#3B82F6")
+
+style<text> StatLabel:
+    font_size = 12
+    color = color("#64748B")
+
+style<view> Divider:
+    height = 1
+    background = color("#E2E8F0")
+
+# ── App ────────────────────────────────────────────────────
 
 <app title="Kyle UI Demo">
-    <router>
-        <route path="/" component=home title="Inicio" />
-        <route path="/form" component=form title="Formulario" />
-        <route path="*" component=not_found title="404" />
-    </router>
+    <view style=Page>
+        <vstack>
+            <hstack padding=16 padding_left=24 padding_right=24 background="#1E293B" layout="space_between" alignment="center">
+                <hstack spacing=32 alignment="center">
+                    <text value="Kyle UI" style=NavLinkActive />
+                    <link to="/">
+                        <text value="Dashboard" style=NavLink />
+                    </link>
+                    <link to="/components">
+                        <text value="Components" style=NavLink />
+                    </link>
+                    <link to="/form">
+                        <text value="Form" style=NavLink />
+                    </link>
+                </hstack>
+                <text value="v0.1.0" style=Muted />
+            </hstack>
+
+            <view style=Section>
+                <router>
+                    <route path="/" component=dashboard title="Dashboard" />
+                    <route path="/components" component=components title="Components" />
+                    <route path="/form" component=form title="Form" />
+                    <route path="*" component=not_found title="404" />
+                </router>
+            </view>
+        </vstack>
+    </view>
 </app>

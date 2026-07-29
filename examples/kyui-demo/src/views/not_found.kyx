@@ -1,8 +1,16 @@
-# Not Found
+# 404 — Not Found
+
 <view>
-    <vstack spacing=16 alignment=alignment.center>
-        <text value="404" style=title_404 />
-        <text value="Página no encontrada" />
-        <link href="/" text="Volver al inicio" />
+    <vstack spacing=24 alignment="center" layout="center">
+        <card style=Elevated>
+            <vstack spacing=16 alignment="center">
+                <text value="404" style=title_404 />
+                <text value="Page not found" style=H2 />
+                <text value="The page you're looking for doesn't exist." style=Body />
+                <link to="/">
+                    <button text="Back to Home" style=Primary />
+                </link>
+            </vstack>
+        </card>
     </vstack>
 </view>

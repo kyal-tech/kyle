@@ -1,10 +1,11 @@
-# Formulario — todos los inputs
+# Form — Complex form with all input types
+
 <view>
     @(
         email: ^str = ""
         password: ^str = ""
         bio: ^str = ""
-        subscribe: ^bool = true
+        newsletter: ^bool = false
         country: ^str = ""
         volume: ^f32 = 50.0
         submitted: ^bool = false
@@ -13,30 +14,52 @@
             submitted = true
     )
 
-    <vstack spacing=24>
-        <card>
-            <vstack spacing=16>
-                <text value="Formulario" style=Title />
+    <vstack spacing=32>
+        <vstack spacing=8>
+            <text value="Form Demo" style=H2 />
+            <text value="Comprehensive form with all input types and reactive state binding." style=Body />
+        </vstack>
 
-                <text_field bind=@email label="Email" placeholder="email@ejemplo.com" />
-                <password_field bind=@password label="Contraseña" placeholder="******" />
-                <text_area bind=@bio label="Biografía" placeholder="Sobre ti..." rows=3 />
-                <checkbox bind=@subscribe label="Suscribirme" />
-                <switch bind=@subscribe label="Notificaciones" />
-                <select bind=@country label="País">
-                    <option value="pe" label="Perú" />
-                    <option value="cl" label="Chile" />
+        <card style=Elevated>
+            <vstack spacing=20>
+                <text value="Account Information" style=H3 />
+
+                <text_field bind=@email label="Email" placeholder="you@example.com" />
+                <password_field bind=@password label="Password" placeholder="Min 6 characters" />
+                <text_area bind=@bio label="Biography" placeholder="Tell us about yourself..." rows=4 />
+
+                <view style=Divider />
+                <text value="Preferences" style=H3 />
+
+                <checkbox bind=@newsletter label="Subscribe to newsletter" />
+
+                <select bind=@country label="Country">
+                    <option value="us" label="United States" />
+                    <option value="uk" label="United Kingdom" />
+                    <option value="jp" label="Japan" />
+                    <option value="de" label="Germany" />
                 </select>
-                <slider bind=@volume label="Volumen" min=0 max=100 />
+
+                <slider bind=@volume label="Volume" min=0 max=100 />
+
+                <view style=Divider />
+                <text value="Plan Selection" style=H3 />
                 <hstack spacing=12>
-                    <radio bind=@country value="pe" label="Perú" />
-                    <radio bind=@country value="cl" label="Chile" />
+                    <radio name="plan" value="free" label="Free" />
+                    <radio name="plan" value="pro" label="Pro" />
+                    <radio name="plan" value="enterprise" label="Enterprise" />
                 </hstack>
 
-                <button text="Enviar" style=Primary click=@handle_submit />
+                <hstack spacing=12>
+                    <button text="Submit" style=Primary click=@handle_submit />
+                </hstack>
 
                 @if submitted:
-                    <text value="Formulario enviado!" style=SuccessText />
+                    <card style=DarkCard>
+                        <vstack spacing=8>
+                            <text value="✓ Form submitted successfully!" style=Success />
+                        </vstack>
+                    </card>
             </vstack>
         </card>
     </vstack>

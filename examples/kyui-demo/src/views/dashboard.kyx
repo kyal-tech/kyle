@@ -1,0 +1,114 @@
+# Dashboard — Home page with feature overview
+
+<view>
+    @(
+        count: ^i32 = 0
+        name: ^str = "Kyle"
+
+        fn increment():
+            count += 1
+
+        fn decrement():
+            count -= 1
+    )
+
+    <vstack spacing=32>
+        <card style=DarkCard>
+            <vstack spacing=8 alignment="center">
+                <text value="Kyle UI Framework" style=H1 />
+                <text value="Multi-platform UI framework for Kyle — web, desktop, mobile." style=Body />
+                <spacing height=8 />
+                <hstack spacing=12 alignment="center">
+                    <link to="/components">
+                        <button text="Browse Components" style=Primary />
+                    </link>
+                    <link to="/form">
+                        <button text="Try the Form" style=Secondary />
+                    </link>
+                </hstack>
+            </vstack>
+        </card>
+
+        <hstack spacing=24>
+            <card style=Elevated>
+                <vstack spacing=12 alignment="center">
+                    <text value="30+" style=StatValue />
+                    <text value="Components" style=StatLabel />
+                </vstack>
+            </card>
+            <card style=Elevated>
+                <vstack spacing=12 alignment="center">
+                    <text value="3" style=StatValue />
+                    <text value="Platforms" style=StatLabel />
+                </vstack>
+            </card>
+            <card style=Elevated>
+                <vstack spacing=12 alignment="center">
+                    <text value="✓" style=StatValue />
+                    <text value="Full system" style=StatLabel />
+                </vstack>
+            </card>
+        </hstack>
+
+        <text value="Interactive Demo" style=H2 />
+        <card style=Elevated>
+            <vstack spacing=16>
+                <text value="Counter with State Binding" style=H3 />
+                <text value="Click buttons to update count in real time using ReactiveState." style=Body />
+
+                <hstack spacing=16 alignment="center">
+                    <button text="-1" style=Secondary click=@decrement />
+                    <card style=Interactive>
+                        <text value=@"Clicks: " + count.to_str() style=H1 />
+                    </card>
+                    <button text="+1" style=Primary click=@increment />
+                </hstack>
+
+                @if count >= 5:
+                    <card style=DarkCard>
+                        <hstack spacing=8 alignment="center">
+                            <text value="5+ clicks! You're getting there" style=H3 />
+                            <text value="Success" style=BadgePrimary />
+                        </hstack>
+                    </card>
+
+                @if count >= 10:
+                    <hstack spacing=8>
+                        <text value="10+ clicks — incredible!" style=Success />
+                    </hstack>
+
+                <view style=Divider />
+
+                <text value="Text Binding" style=H3 />
+                <text_field bind=@name label="Your name" placeholder="Type your name..." />
+                <text value=@"Hello, " + name style=Body />
+
+                <view style=Divider />
+
+                <text value="Features" style=H3 />
+                <vstack spacing=8>
+                    <hstack spacing=8>
+                        <text value="✅" />
+                        <text value="Component system" style=Body />
+                    </hstack>
+                    <hstack spacing=8>
+                        <text value="✅" />
+                        <text value="Reactive state binding" style=Body />
+                    </hstack>
+                    <hstack spacing=8>
+                        <text value="✅" />
+                        <text value="Router with history API" style=Body />
+                    </hstack>
+                    <hstack spacing=8>
+                        <text value="✅" />
+                        <text value="Style system" style=Body />
+                    </hstack>
+                    <hstack spacing=8>
+                        <text value="✅" />
+                        <text value="Image lazy loading" style=Body />
+                    </hstack>
+                </vstack>
+            </vstack>
+        </card>
+    </vstack>
+</view>

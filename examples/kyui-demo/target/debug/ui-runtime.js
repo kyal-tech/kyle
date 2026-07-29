@@ -11,41 +11,148 @@ const _i18n = getI18n();
 const _a11y = new A11yManager();
 
 const _style_data = {
-  'Primary': {
-    'background': '#0066FF',
-    'color': '#FFFFFF',
-    'borderRadius': '8px',
-    'padding': '12px',
-    'fontSize': '16px',
-    'fontWeight': '500',
-    'transition': 'all 200ms ease-out',
+  'Page': {
+    'background': '#F1F5F9',
+    'minHeight': '"100vh"',
   },
-  'Secondary': {
-    'background': '#333333',
-    'color': '#0066FF',
-    'border': 'border(2, color("#0066FF"), border_style.solid)',
-    'borderRadius': '8px',
-    'padding': '12px',
-    'fontSize': '16px',
-  },
-  'Title': {
-    'fontSize': '24px',
-    'fontWeight': '700',
-  },
-  'SuccessText': {
-    'color': '#10B981',
-    'fontWeight': '700',
-  },
-  'title_404': {
-    'fontSize': '72px',
-    'fontWeight': '700',
-    'color': '#0066FF',
+  'Section': {
+    'padding': '24px',
+    'maxWidth': '960',
+    'layout': 'layout.center',
   },
   'Elevated': {
     'background': '#FFFFFF',
     'borderRadius': '12px',
-    'padding': '20px',
+    'padding': '24px',
     'boxShadow': 'shadow(x: 0, y: 2, blur: 12, color: color("#000000").with_alpha(0.08))',
+    'transition': 'all 200ms ease-out',
+  },
+  'Interactive': {
+    'background': '#FFFFFF',
+    'borderRadius': '12px',
+    'padding': '24px',
+    'boxShadow': 'shadow(x: 0, y: 2, blur: 8, color: color("#000000").with_alpha(0.06))',
+    'transition': 'all 200ms ease-out',
+  },
+  'DarkCard': {
+    'background': '#1E293B',
+    'borderRadius': '12px',
+    'padding': '32px',
+    'color': '#FFFFFF',
+  },
+  'Primary': {
+    'background': '#3B82F6',
+    'color': '#FFFFFF',
+    'borderRadius': '8px',
+    'padding': '12px',
+    'padding_left': '24',
+    'padding_right': '24',
+    'fontSize': '15px',
+    'fontWeight': '600',
+    'transition': 'all 200ms ease-out',
+  },
+  'Secondary': {
+    'background': '#333333',
+    'color': '#3B82F6',
+    'border': 'border(2, color("#3B82F6"), border_style.solid)',
+    'borderRadius': '8px',
+    'padding': '12px',
+    'padding_left': '24',
+    'padding_right': '24',
+    'fontSize': '15px',
+    'fontWeight': '600',
+    'transition': 'all 200ms ease-out',
+  },
+  'Danger': {
+    'background': '#EF4444',
+    'color': '#FFFFFF',
+    'borderRadius': '8px',
+    'padding': '12px',
+    'padding_left': '24',
+    'padding_right': '24',
+    'fontSize': '15px',
+    'fontWeight': '600',
+  },
+  'Ghost': {
+    'background': '#333333',
+    'color': '#64748B',
+    'borderRadius': '8px',
+    'padding': '12px',
+    'padding_left': '24',
+    'padding_right': '24',
+    'fontSize': '15px',
+  },
+  'H1': {
+    'fontSize': '32px',
+    'fontWeight': '700',
+    'color': '#0F172A',
+  },
+  'H2': {
+    'fontSize': '24px',
+    'fontWeight': '700',
+    'color': '#0F172A',
+  },
+  'H3': {
+    'fontSize': '18px',
+    'fontWeight': '600',
+    'color': '#0F172A',
+  },
+  'Body': {
+    'fontSize': '14px',
+    'color': '#475569',
+  },
+  'Muted': {
+    'fontSize': '12px',
+    'color': '#94A3B8',
+  },
+  'Success': {
+    'color': '#10B981',
+    'fontWeight': '600',
+  },
+  'Error': {
+    'color': '#EF4444',
+    'fontSize': '12px',
+  },
+  'NavLink': {
+    'fontSize': '14px',
+    'fontWeight': '500',
+    'color': '#FFFFFF',
+  },
+  'NavLinkActive': {
+    'fontSize': '14px',
+    'fontWeight': '600',
+    'color': '#60A5FA',
+  },
+  'Badge': {
+    'fontSize': '11px',
+    'fontWeight': '700',
+    'padding': '4px',
+    'padding_left': '8',
+    'padding_right': '8',
+    'borderRadius': '999px',
+  },
+  'BadgePrimary': {
+    'fontSize': '11px',
+    'fontWeight': '700',
+    'padding': '4px',
+    'padding_left': '8',
+    'padding_right': '8',
+    'borderRadius': '999px',
+    'background': '#DBEAFE',
+    'color': '#1D4ED8',
+  },
+  'StatValue': {
+    'fontSize': '28px',
+    'fontWeight': '700',
+    'color': '#3B82F6',
+  },
+  'StatLabel': {
+    'fontSize': '12px',
+    'color': '#64748B',
+  },
+  'Divider': {
+    'height': '1',
+    'background': '#E2E8F0',
   },
 };
 
@@ -98,14 +205,82 @@ function render(container, initialState = {}) {
     });
   }
   const el = document.createDocumentFragment();
-  const _el50 = document.createElement('div');
-    _el50.style['title'] = 'Kyle UI Demo';
+  const _el0 = document.createElement('div');
+    _el0.style['title'] = 'Kyle UI Demo';
   document.title = "Kyle UI Demo";
-  A11yManager.applyAria(_el50, "app");
-    const _el51 = document.createElement('div');
-    A11yManager.applyAria(_el51, "router");
-    _el50.appendChild(_el51);
-  el.appendChild(_el50);
+  A11yManager.applyAria(_el0, "app");
+    const _el1 = document.createElement('div');
+      applyStyle(_el1, "Page");
+    A11yManager.applyAria(_el1, "view");
+      const _el2 = document.createElement('div');
+      A11yManager.applyAria(_el2, "vstack");
+        const _el3 = document.createElement('div');
+          const __upd__el3_padding = () => { _el3.style['padding'] = state.get("16"); };
+          __upd__el3_padding();
+          state.watch('count', __upd__el3_padding);
+          _el3.style['padding-left'] = state.get("24");
+          _el3.style['padding-right'] = state.get("24");
+          _el3.style['background'] = '#1E293B';
+          _el3.style.display = 'flex';
+          _el3.style.alignItems = 'center';
+          _el3.style.justifyContent = 'space-between';
+          _el3.style['alignment'] = 'center';
+        A11yManager.applyAria(_el3, "hstack");
+          const _el4 = document.createElement('div');
+            _el4.style['alignment'] = 'center';
+          A11yManager.applyAria(_el4, "hstack");
+            const _el5 = document.createElement('span');
+              _el5.textContent = "Kyle UI";
+              applyStyle(_el5, "NavLinkActive");
+            A11yManager.applyAria(_el5, "text");
+            _el4.appendChild(_el5);
+            const _el6 = document.createElement('a');
+              _el6.style['to'] = '/';
+            _el6.addEventListener('click', (e) => { e.preventDefault(); navigate("/"); });
+            A11yManager.applyAria(_el6, "link");
+              const _el7 = document.createElement('span');
+                _el7.textContent = "Dashboard";
+                applyStyle(_el7, "NavLink");
+              A11yManager.applyAria(_el7, "text");
+              _el6.appendChild(_el7);
+            _el4.appendChild(_el6);
+            const _el8 = document.createElement('a');
+              _el8.style['to'] = '/components';
+            _el8.addEventListener('click', (e) => { e.preventDefault(); navigate("/components"); });
+            A11yManager.applyAria(_el8, "link");
+              const _el9 = document.createElement('span');
+                _el9.textContent = "Components";
+                applyStyle(_el9, "NavLink");
+              A11yManager.applyAria(_el9, "text");
+              _el8.appendChild(_el9);
+            _el4.appendChild(_el8);
+            const _el10 = document.createElement('a');
+              _el10.style['to'] = '/form';
+            _el10.addEventListener('click', (e) => { e.preventDefault(); navigate("/form"); });
+            A11yManager.applyAria(_el10, "link");
+              const _el11 = document.createElement('span');
+                _el11.textContent = "Form";
+                applyStyle(_el11, "NavLink");
+              A11yManager.applyAria(_el11, "text");
+              _el10.appendChild(_el11);
+            _el4.appendChild(_el10);
+          _el3.appendChild(_el4);
+          const _el12 = document.createElement('span');
+            _el12.textContent = "v0.1.0";
+            applyStyle(_el12, "Muted");
+          A11yManager.applyAria(_el12, "text");
+          _el3.appendChild(_el12);
+        _el2.appendChild(_el3);
+        const _el13 = document.createElement('div');
+          applyStyle(_el13, "Section");
+        A11yManager.applyAria(_el13, "view");
+          const _el14 = document.createElement('div');
+          A11yManager.applyAria(_el14, "router");
+          _el13.appendChild(_el14);
+        _el2.appendChild(_el13);
+      _el1.appendChild(_el2);
+    _el0.appendChild(_el1);
+  el.appendChild(_el0);
   // Set up lifecycle: on_mounted / on_unmounted
   const _lifecycle = {
     mounted: typeof on_mounted === 'function' ? () => on_mounted() : null,
@@ -116,8 +291,8 @@ function render(container, initialState = {}) {
 }
 
 
-// Component renderer: home
-function render_home(params = {}) {
+// Component renderer: dashboard
+function render_dashboard(params = {}) {
   const state = new ReactiveState({});
   // Lifecycle hooks
   if (typeof on_created === 'function') on_created();
@@ -127,119 +302,645 @@ function render_home(params = {}) {
     });
   }
   const el = document.createDocumentFragment();
-  const _el52 = document.createElement('div');
-  A11yManager.applyAria(_el52, "view");
+  const _el15 = document.createElement('div');
+  A11yManager.applyAria(_el15, "view");
     // From inline Kyle block:
     state.set('count', 0);
-    state.set('name', "Mundo");
-    state.set('hovered', false);
-    state.set('loaded', false);
-    state.set('items', {});
-    state.set('img_src', "https://picsum.photos/seed/1/400/300");
-    const on_mounted = () => {
-      state.set('loaded', true);
-      state.set('items', ["Manzana", "Banana", "Naranja", "Uva", "Fresa"]);
-    }
+    state.set('name', "Kyle");
     const increment = () => {
       state.set('count', state.get('count') + 1);
     }
-    const reset = () => {
-      state.set('count', 0);
+    const decrement = () => {
+      state.set('count', state.get('count') - 1);
     };
-    const _el54 = document.createElement('div');
-    A11yManager.applyAria(_el54, "vstack");
-      const _el55 = document.createElement('div');
-      A11yManager.applyAria(_el55, "card");
-        const _el56 = document.createElement('div');
-        A11yManager.applyAria(_el56, "vstack");
-          const _el57 = document.createElement('span');
-            _el57.textContent = "Kyle UI Demo";
-            applyStyle(_el57, "Title");
-          A11yManager.applyAria(_el57, "text");
-          _el56.appendChild(_el57);
-          const _el58 = document.createElement('span');
-            const __upd__el58_value = () => { _el58.textContent = "Hola " + state.get('name'); };
-            __upd__el58_value();
-            state.watch("name", __upd__el58_value);
-          A11yManager.applyAria(_el58, "text");
-          _el56.appendChild(_el58);
-          const _el59 = document.createElement('input');
-            Binding.twoWay(_el59, state, "name", 'input');
-            _el59.textContent = "Nombre";
-            _el59.setAttribute("placeholder", "Tu nombre");
-          A11yManager.applyAria(_el59, "text_field");
-          _el56.appendChild(_el59);
-          const _el60 = document.createElement('span');
-            const __upd__el60_value = () => { _el60.textContent = "Clicks: " + state.get('count').toString(); };
-            __upd__el60_value();
-            state.watch("count", __upd__el60_value);
-          A11yManager.applyAria(_el60, "text");
-          _el56.appendChild(_el60);
-          const _el61 = document.createElement('div');
-          A11yManager.applyAria(_el61, "hstack");
-            const _el62 = document.createElement('button');
-              _el62.textContent = "+1";
-              applyStyle(_el62, "Primary");
-              _el62.addEventListener("click", (e) => { increment(createKyleEvent(e)); });
-            A11yManager.applyAria(_el62, "button");
-            _el61.appendChild(_el62);
-            const _el63 = document.createElement('button');
-              _el63.textContent = "Reset";
-              applyStyle(_el63, "Secondary");
-              _el63.addEventListener("click", (e) => { reset(createKyleEvent(e)); });
-            A11yManager.applyAria(_el63, "button");
-            _el61.appendChild(_el63);
-          _el56.appendChild(_el61);
+    const _el17 = document.createElement('div');
+    A11yManager.applyAria(_el17, "vstack");
+      const _el18 = document.createElement('div');
+        applyStyle(_el18, "DarkCard");
+      A11yManager.applyAria(_el18, "card");
+        const _el19 = document.createElement('div');
+          _el19.style['alignment'] = 'center';
+        A11yManager.applyAria(_el19, "vstack");
+          const _el20 = document.createElement('span');
+            _el20.textContent = "Kyle UI Framework";
+            applyStyle(_el20, "H1");
+          A11yManager.applyAria(_el20, "text");
+          _el19.appendChild(_el20);
+          const _el21 = document.createElement('span');
+            _el21.textContent = "Multi-platform UI framework for Kyle — web, desktop, mobile.";
+            applyStyle(_el21, "Body");
+          A11yManager.applyAria(_el21, "text");
+          _el19.appendChild(_el21);
+          const _el22 = document.createElement('div');
+            const __upd__el22_height = () => { _el22.style['height'] = state.get("8"); };
+            __upd__el22_height();
+            state.watch('count', __upd__el22_height);
+          A11yManager.applyAria(_el22, "spacing");
+          _el19.appendChild(_el22);
+          const _el23 = document.createElement('div');
+            _el23.style['alignment'] = 'center';
+          A11yManager.applyAria(_el23, "hstack");
+            const _el24 = document.createElement('a');
+              _el24.style['to'] = '/components';
+            _el24.addEventListener('click', (e) => { e.preventDefault(); navigate("/components"); });
+            A11yManager.applyAria(_el24, "link");
+              const _el25 = document.createElement('button');
+                _el25.textContent = "Browse Components";
+                applyStyle(_el25, "Primary");
+              A11yManager.applyAria(_el25, "button");
+              _el24.appendChild(_el25);
+            _el23.appendChild(_el24);
+            const _el26 = document.createElement('a');
+              _el26.style['to'] = '/form';
+            _el26.addEventListener('click', (e) => { e.preventDefault(); navigate("/form"); });
+            A11yManager.applyAria(_el26, "link");
+              const _el27 = document.createElement('button');
+                _el27.textContent = "Try the Form";
+                applyStyle(_el27, "Secondary");
+              A11yManager.applyAria(_el27, "button");
+              _el26.appendChild(_el27);
+            _el23.appendChild(_el26);
+          _el19.appendChild(_el23);
+        _el18.appendChild(_el19);
+      _el17.appendChild(_el18);
+      const _el28 = document.createElement('div');
+      A11yManager.applyAria(_el28, "hstack");
+        const _el29 = document.createElement('div');
+          applyStyle(_el29, "Elevated");
+        A11yManager.applyAria(_el29, "card");
+          const _el30 = document.createElement('div');
+            _el30.style['alignment'] = 'center';
+          A11yManager.applyAria(_el30, "vstack");
+            const _el31 = document.createElement('span');
+              _el31.textContent = "30+";
+              applyStyle(_el31, "StatValue");
+            A11yManager.applyAria(_el31, "text");
+            _el30.appendChild(_el31);
+            const _el32 = document.createElement('span');
+              _el32.textContent = "Components";
+              applyStyle(_el32, "StatLabel");
+            A11yManager.applyAria(_el32, "text");
+            _el30.appendChild(_el32);
+          _el29.appendChild(_el30);
+        _el28.appendChild(_el29);
+        const _el33 = document.createElement('div');
+          applyStyle(_el33, "Elevated");
+        A11yManager.applyAria(_el33, "card");
+          const _el34 = document.createElement('div');
+            _el34.style['alignment'] = 'center';
+          A11yManager.applyAria(_el34, "vstack");
+            const _el35 = document.createElement('span');
+              _el35.textContent = "3";
+              applyStyle(_el35, "StatValue");
+            A11yManager.applyAria(_el35, "text");
+            _el34.appendChild(_el35);
+            const _el36 = document.createElement('span');
+              _el36.textContent = "Platforms";
+              applyStyle(_el36, "StatLabel");
+            A11yManager.applyAria(_el36, "text");
+            _el34.appendChild(_el36);
+          _el33.appendChild(_el34);
+        _el28.appendChild(_el33);
+        const _el37 = document.createElement('div');
+          applyStyle(_el37, "Elevated");
+        A11yManager.applyAria(_el37, "card");
+          const _el38 = document.createElement('div');
+            _el38.style['alignment'] = 'center';
+          A11yManager.applyAria(_el38, "vstack");
+            const _el39 = document.createElement('span');
+              _el39.textContent = "✓";
+              applyStyle(_el39, "StatValue");
+            A11yManager.applyAria(_el39, "text");
+            _el38.appendChild(_el39);
+            const _el40 = document.createElement('span');
+              _el40.textContent = "Full system";
+              applyStyle(_el40, "StatLabel");
+            A11yManager.applyAria(_el40, "text");
+            _el38.appendChild(_el40);
+          _el37.appendChild(_el38);
+        _el28.appendChild(_el37);
+      _el17.appendChild(_el28);
+      const _el41 = document.createElement('span');
+        _el41.textContent = "Interactive Demo";
+        applyStyle(_el41, "H2");
+      A11yManager.applyAria(_el41, "text");
+      _el17.appendChild(_el41);
+      const _el42 = document.createElement('div');
+        applyStyle(_el42, "Elevated");
+      A11yManager.applyAria(_el42, "card");
+        const _el43 = document.createElement('div');
+        A11yManager.applyAria(_el43, "vstack");
+          const _el44 = document.createElement('span');
+            _el44.textContent = "Counter with State Binding";
+            applyStyle(_el44, "H3");
+          A11yManager.applyAria(_el44, "text");
+          _el43.appendChild(_el44);
+          const _el45 = document.createElement('span');
+            _el45.textContent = "Click buttons to update count in real time using ReactiveState.";
+            applyStyle(_el45, "Body");
+          A11yManager.applyAria(_el45, "text");
+          _el43.appendChild(_el45);
+          const _el46 = document.createElement('div');
+            _el46.style['alignment'] = 'center';
+          A11yManager.applyAria(_el46, "hstack");
+            const _el47 = document.createElement('button');
+              _el47.textContent = "-1";
+              applyStyle(_el47, "Secondary");
+              _el47.addEventListener("click", (e) => { decrement(createKyleEvent(e)); });
+            A11yManager.applyAria(_el47, "button");
+            _el46.appendChild(_el47);
+            const _el48 = document.createElement('div');
+              applyStyle(_el48, "Interactive");
+            A11yManager.applyAria(_el48, "card");
+              const _el49 = document.createElement('span');
+                const __upd__el49_value = () => { _el49.textContent = "Clicks: " + state.get('count').toString(); };
+                __upd__el49_value();
+                state.watch("count", __upd__el49_value);
+                applyStyle(_el49, "H1");
+              A11yManager.applyAria(_el49, "text");
+              _el48.appendChild(_el49);
+            _el46.appendChild(_el48);
+            const _el50 = document.createElement('button');
+              _el50.textContent = "+1";
+              applyStyle(_el50, "Primary");
+              _el50.addEventListener("click", (e) => { increment(createKyleEvent(e)); });
+            A11yManager.applyAria(_el50, "button");
+            _el46.appendChild(_el50);
+          _el43.appendChild(_el46);
           if (state.get('count') >= 5) {
-              const _el65 = document.createElement('span');
-                _el65.textContent = "¡Llegaste a 5 clicks!";
-                applyStyle(_el65, "SuccessText");
-              A11yManager.applyAria(_el65, "text");
-              _el56.appendChild(_el65);
-              const _el66 = document.createElement('div');
-              A11yManager.applyAria(_el66, "divider");
-              _el56.appendChild(_el66);
-              const _el67 = document.createElement('span');
-                _el67.textContent = "Imagen con lazy loading";
-              A11yManager.applyAria(_el67, "text");
-              _el56.appendChild(_el67);
-              const _el68 = document.createElement('img');
-                if (state.get("img_src") != null) _el68.src = state.get("img_src");
-                const __upd__el68_width = () => { _el68.style['width'] = state.get("400"); };
-                __upd__el68_width();
-                state.watch('count', __upd__el68_width);
-                const __upd__el68_height = () => { _el68.style['height'] = state.get("300"); };
-                __upd__el68_height();
-                state.watch('count', __upd__el68_height);
-                _el68.loading = 'lazy';
-                _el68.style.opacity = '0.5';
-                _el68.style.transition = 'opacity 0.3s';
-                _el68.onload = () => { _el68.style.opacity = '1'; };
-              A11yManager.applyAria(_el68, "image");
-              _el56.appendChild(_el68);
-              const _el69 = document.createElement('div');
-              A11yManager.applyAria(_el69, "divider");
-              _el56.appendChild(_el69);
-              const _el70 = document.createElement('span');
-                _el70.textContent = "Lista de frutas";
-              A11yManager.applyAria(_el70, "text");
-              _el56.appendChild(_el70);
-              const _el71 = document.createElement('ul');
-                _el71.style['virtual'] = state.get("true");
-                _el71.style['item-height'] = state.get("40");
-              A11yManager.applyAria(_el71, "list");
-                for (const item of state.get('items')) {
-                    const _el73 = document.createElement('span');
-                      Binding.oneWay(_el73, 'textContent', state, "item");
-                    A11yManager.applyAria(_el73, "text");
-                    _el71.appendChild(_el73);
-                }
-              _el56.appendChild(_el71);
+              const _el52 = document.createElement('div');
+                applyStyle(_el52, "DarkCard");
+              A11yManager.applyAria(_el52, "card");
+                const _el53 = document.createElement('div');
+                  _el53.style['alignment'] = 'center';
+                A11yManager.applyAria(_el53, "hstack");
+                  const _el54 = document.createElement('span');
+                    _el54.textContent = "5+ clicks! You're getting there";
+                    applyStyle(_el54, "H3");
+                  A11yManager.applyAria(_el54, "text");
+                  _el53.appendChild(_el54);
+                  const _el55 = document.createElement('span');
+                    _el55.textContent = "Success";
+                    applyStyle(_el55, "BadgePrimary");
+                  A11yManager.applyAria(_el55, "text");
+                  _el53.appendChild(_el55);
+                _el52.appendChild(_el53);
+              _el43.appendChild(_el52);
+              if (state.get('count') >= 10) {
+                  const _el57 = document.createElement('div');
+                  A11yManager.applyAria(_el57, "hstack");
+                    const _el58 = document.createElement('span');
+                      _el58.textContent = "10+ clicks — incredible!";
+                      applyStyle(_el58, "Success");
+                    A11yManager.applyAria(_el58, "text");
+                    _el57.appendChild(_el58);
+                  _el43.appendChild(_el57);
+                  const _el59 = document.createElement('div');
+                    applyStyle(_el59, "Divider");
+                  A11yManager.applyAria(_el59, "view");
+                  _el43.appendChild(_el59);
+                  const _el60 = document.createElement('span');
+                    _el60.textContent = "Text Binding";
+                    applyStyle(_el60, "H3");
+                  A11yManager.applyAria(_el60, "text");
+                  _el43.appendChild(_el60);
+                  const _el61 = document.createElement('input');
+                    Binding.twoWay(_el61, state, "name", 'input');
+                    _el61.textContent = "Your name";
+                    _el61.setAttribute("placeholder", "Type your name...");
+                  A11yManager.applyAria(_el61, "text_field");
+                  _el43.appendChild(_el61);
+                  const _el62 = document.createElement('span');
+                    const __upd__el62_value = () => { _el62.textContent = "Hello, " + state.get('name'); };
+                    __upd__el62_value();
+                    state.watch("name", __upd__el62_value);
+                    applyStyle(_el62, "Body");
+                  A11yManager.applyAria(_el62, "text");
+                  _el43.appendChild(_el62);
+                  const _el63 = document.createElement('div');
+                    applyStyle(_el63, "Divider");
+                  A11yManager.applyAria(_el63, "view");
+                  _el43.appendChild(_el63);
+                  const _el64 = document.createElement('span');
+                    _el64.textContent = "Features";
+                    applyStyle(_el64, "H3");
+                  A11yManager.applyAria(_el64, "text");
+                  _el43.appendChild(_el64);
+                  const _el65 = document.createElement('div');
+                  A11yManager.applyAria(_el65, "vstack");
+                    const _el66 = document.createElement('div');
+                    A11yManager.applyAria(_el66, "hstack");
+                      const _el67 = document.createElement('span');
+                        _el67.textContent = "✅";
+                      A11yManager.applyAria(_el67, "text");
+                      _el66.appendChild(_el67);
+                      const _el68 = document.createElement('span');
+                        _el68.textContent = "Component system";
+                        applyStyle(_el68, "Body");
+                      A11yManager.applyAria(_el68, "text");
+                      _el66.appendChild(_el68);
+                    _el65.appendChild(_el66);
+                    const _el69 = document.createElement('div');
+                    A11yManager.applyAria(_el69, "hstack");
+                      const _el70 = document.createElement('span');
+                        _el70.textContent = "✅";
+                      A11yManager.applyAria(_el70, "text");
+                      _el69.appendChild(_el70);
+                      const _el71 = document.createElement('span');
+                        _el71.textContent = "Reactive state binding";
+                        applyStyle(_el71, "Body");
+                      A11yManager.applyAria(_el71, "text");
+                      _el69.appendChild(_el71);
+                    _el65.appendChild(_el69);
+                    const _el72 = document.createElement('div');
+                    A11yManager.applyAria(_el72, "hstack");
+                      const _el73 = document.createElement('span');
+                        _el73.textContent = "✅";
+                      A11yManager.applyAria(_el73, "text");
+                      _el72.appendChild(_el73);
+                      const _el74 = document.createElement('span');
+                        _el74.textContent = "Router with history API";
+                        applyStyle(_el74, "Body");
+                      A11yManager.applyAria(_el74, "text");
+                      _el72.appendChild(_el74);
+                    _el65.appendChild(_el72);
+                    const _el75 = document.createElement('div');
+                    A11yManager.applyAria(_el75, "hstack");
+                      const _el76 = document.createElement('span');
+                        _el76.textContent = "✅";
+                      A11yManager.applyAria(_el76, "text");
+                      _el75.appendChild(_el76);
+                      const _el77 = document.createElement('span');
+                        _el77.textContent = "Style system";
+                        applyStyle(_el77, "Body");
+                      A11yManager.applyAria(_el77, "text");
+                      _el75.appendChild(_el77);
+                    _el65.appendChild(_el75);
+                    const _el78 = document.createElement('div');
+                    A11yManager.applyAria(_el78, "hstack");
+                      const _el79 = document.createElement('span');
+                        _el79.textContent = "✅";
+                      A11yManager.applyAria(_el79, "text");
+                      _el78.appendChild(_el79);
+                      const _el80 = document.createElement('span');
+                        _el80.textContent = "Image lazy loading";
+                        applyStyle(_el80, "Body");
+                      A11yManager.applyAria(_el80, "text");
+                      _el78.appendChild(_el80);
+                    _el65.appendChild(_el78);
+                  _el43.appendChild(_el65);
+              }
           }
-        _el55.appendChild(_el56);
-      _el54.appendChild(_el55);
-    _el52.appendChild(_el54);
-  el.appendChild(_el52);
+        _el42.appendChild(_el43);
+      _el17.appendChild(_el42);
+    _el15.appendChild(_el17);
+  el.appendChild(_el15);
+  // Lifecycle hooks for mounting/unmounting
+  const _lifecycle = {
+    mounted: typeof on_mounted === 'function' ? () => on_mounted() : null,
+    unmounted: typeof on_unmounted === 'function' ? () => on_unmounted() : null,
+    updated: typeof on_updated === 'function' ? (changed) => on_updated(changed) : null,
+  };
+  return { element: el, state, lifecycle: _lifecycle };
+}
+
+// Component renderer: components
+function render_components(params = {}) {
+  const state = new ReactiveState({});
+  // Lifecycle hooks
+  if (typeof on_created === 'function') on_created();
+  if (typeof on_updated === 'function') {
+    state.onAnyChange((key) => {
+      on_updated(new Set([key]));
+    });
+  }
+  const el = document.createDocumentFragment();
+  const _el81 = document.createElement('div');
+  A11yManager.applyAria(_el81, "view");
+    const _el82 = document.createElement('div');
+    A11yManager.applyAria(_el82, "vstack");
+      const _el83 = document.createElement('div');
+      A11yManager.applyAria(_el83, "vstack");
+        const _el84 = document.createElement('span');
+          _el84.textContent = "Components Showcase";
+          applyStyle(_el84, "H2");
+        A11yManager.applyAria(_el84, "text");
+        _el83.appendChild(_el84);
+        const _el85 = document.createElement('span');
+          _el85.textContent = "All available UI components rendered with proper styling.";
+          applyStyle(_el85, "Body");
+        A11yManager.applyAria(_el85, "text");
+        _el83.appendChild(_el85);
+      _el82.appendChild(_el83);
+      const _el86 = document.createElement('div');
+        applyStyle(_el86, "Elevated");
+      A11yManager.applyAria(_el86, "card");
+        const _el87 = document.createElement('div');
+        A11yManager.applyAria(_el87, "vstack");
+          const _el88 = document.createElement('span');
+            _el88.textContent = "Buttons";
+            applyStyle(_el88, "H3");
+          A11yManager.applyAria(_el88, "text");
+          _el87.appendChild(_el88);
+          const _el89 = document.createElement('div');
+          A11yManager.applyAria(_el89, "hstack");
+            const _el90 = document.createElement('button');
+              _el90.textContent = "Primary";
+              applyStyle(_el90, "Primary");
+            A11yManager.applyAria(_el90, "button");
+            _el89.appendChild(_el90);
+            const _el91 = document.createElement('button');
+              _el91.textContent = "Secondary";
+              applyStyle(_el91, "Secondary");
+            A11yManager.applyAria(_el91, "button");
+            _el89.appendChild(_el91);
+            const _el92 = document.createElement('button');
+              _el92.textContent = "Danger";
+              applyStyle(_el92, "Danger");
+            A11yManager.applyAria(_el92, "button");
+            _el89.appendChild(_el92);
+            const _el93 = document.createElement('button');
+              _el93.textContent = "Ghost";
+              applyStyle(_el93, "Ghost");
+            A11yManager.applyAria(_el93, "button");
+            _el89.appendChild(_el93);
+          _el87.appendChild(_el89);
+          const _el94 = document.createElement('div');
+          A11yManager.applyAria(_el94, "vstack");
+            const _el95 = document.createElement('span');
+              _el95.textContent = "All buttons support click events, hover states via CSS transitions, and keyboard accessibility.";
+              applyStyle(_el95, "Body");
+            A11yManager.applyAria(_el95, "text");
+            _el94.appendChild(_el95);
+          _el87.appendChild(_el94);
+        _el86.appendChild(_el87);
+      _el82.appendChild(_el86);
+      const _el96 = document.createElement('div');
+        applyStyle(_el96, "Elevated");
+      A11yManager.applyAria(_el96, "card");
+        const _el97 = document.createElement('div');
+        A11yManager.applyAria(_el97, "vstack");
+          const _el98 = document.createElement('span');
+            _el98.textContent = "Text Inputs";
+            applyStyle(_el98, "H3");
+          A11yManager.applyAria(_el98, "text");
+          _el97.appendChild(_el98);
+          const _el99 = document.createElement('input');
+            _el99.textContent = "Standard Input";
+            _el99.setAttribute("placeholder", "Type something...");
+          A11yManager.applyAria(_el99, "text_field");
+          _el97.appendChild(_el99);
+          const _el100 = document.createElement('input');
+            _el100.textContent = "Password";
+            _el100.setAttribute("placeholder", "Enter password...");
+          A11yManager.applyAria(_el100, "password_field");
+          _el97.appendChild(_el100);
+          const _el101 = document.createElement('textarea');
+            _el101.textContent = "Text Area";
+            _el101.setAttribute("placeholder", "Multi-line text...");
+            _el101.style['rows'] = state.get("4");
+          A11yManager.applyAria(_el101, "text_area");
+          _el97.appendChild(_el101);
+        _el96.appendChild(_el97);
+      _el82.appendChild(_el96);
+      const _el102 = document.createElement('div');
+        applyStyle(_el102, "Elevated");
+      A11yManager.applyAria(_el102, "card");
+        const _el103 = document.createElement('div');
+        A11yManager.applyAria(_el103, "vstack");
+          const _el104 = document.createElement('span');
+            _el104.textContent = "Selection Controls";
+            applyStyle(_el104, "H3");
+          A11yManager.applyAria(_el104, "text");
+          _el103.appendChild(_el104);
+          const _el105 = document.createElement('div');
+          A11yManager.applyAria(_el105, "hstack");
+            const _el106 = document.createElement('input');
+              _el106.textContent = "Checkbox Option";
+            A11yManager.applyAria(_el106, "checkbox");
+            _el105.appendChild(_el106);
+            const _el107 = document.createElement('input');
+              _el107.textContent = "Subscribe to newsletter";
+            A11yManager.applyAria(_el107, "checkbox");
+            _el105.appendChild(_el107);
+          _el103.appendChild(_el105);
+          const _el108 = document.createElement('div');
+          A11yManager.applyAria(_el108, "hstack");
+            const _el109 = document.createElement('input');
+              _el109.style['name'] = 'group';
+              _el109.textContent = "A";
+              _el109.textContent = "Option A";
+            A11yManager.applyAria(_el109, "radio");
+            _el108.appendChild(_el109);
+            const _el110 = document.createElement('input');
+              _el110.style['name'] = 'group';
+              _el110.textContent = "B";
+              _el110.textContent = "Option B";
+            A11yManager.applyAria(_el110, "radio");
+            _el108.appendChild(_el110);
+            const _el111 = document.createElement('input');
+              _el111.style['name'] = 'group';
+              _el111.textContent = "C";
+              _el111.textContent = "Option C";
+            A11yManager.applyAria(_el111, "radio");
+            _el108.appendChild(_el111);
+          _el103.appendChild(_el108);
+          const _el112 = document.createElement('input');
+            _el112.textContent = "Dark Mode";
+          A11yManager.applyAria(_el112, "switch");
+          _el103.appendChild(_el112);
+          const _el113 = document.createElement('select');
+            _el113.textContent = "Country";
+          A11yManager.applyAria(_el113, "select");
+            const _el114 = document.createElement('div');
+              _el114.textContent = "us";
+              _el114.textContent = "United States";
+            A11yManager.applyAria(_el114, "option");
+            _el113.appendChild(_el114);
+            const _el115 = document.createElement('div');
+              _el115.textContent = "uk";
+              _el115.textContent = "United Kingdom";
+            A11yManager.applyAria(_el115, "option");
+            _el113.appendChild(_el115);
+            const _el116 = document.createElement('div');
+              _el116.textContent = "jp";
+              _el116.textContent = "Japan";
+            A11yManager.applyAria(_el116, "option");
+            _el113.appendChild(_el116);
+            const _el117 = document.createElement('div');
+              _el117.textContent = "de";
+              _el117.textContent = "Germany";
+            A11yManager.applyAria(_el117, "option");
+            _el113.appendChild(_el117);
+          _el103.appendChild(_el113);
+        _el102.appendChild(_el103);
+      _el82.appendChild(_el102);
+      const _el118 = document.createElement('div');
+        applyStyle(_el118, "Elevated");
+      A11yManager.applyAria(_el118, "card");
+        const _el119 = document.createElement('div');
+        A11yManager.applyAria(_el119, "vstack");
+          const _el120 = document.createElement('span');
+            _el120.textContent = "Sliders";
+            applyStyle(_el120, "H3");
+          A11yManager.applyAria(_el120, "text");
+          _el119.appendChild(_el120);
+          const _el121 = document.createElement('input');
+            _el121.textContent = "Volume";
+            _el121.style['min'] = state.get("0");
+            _el121.style['max'] = state.get("100");
+          A11yManager.applyAria(_el121, "slider");
+          _el119.appendChild(_el121);
+          const _el122 = document.createElement('input');
+            _el122.textContent = "Brightness";
+            _el122.style['min'] = state.get("0");
+            _el122.style['max'] = state.get("100");
+          A11yManager.applyAria(_el122, "slider");
+          _el119.appendChild(_el122);
+        _el118.appendChild(_el119);
+      _el82.appendChild(_el118);
+      const _el123 = document.createElement('div');
+        applyStyle(_el123, "Elevated");
+      A11yManager.applyAria(_el123, "card");
+        const _el124 = document.createElement('div');
+        A11yManager.applyAria(_el124, "vstack");
+          const _el125 = document.createElement('span');
+            _el125.textContent = "Cards & Surfaces";
+            applyStyle(_el125, "H3");
+          A11yManager.applyAria(_el125, "text");
+          _el124.appendChild(_el125);
+          const _el126 = document.createElement('div');
+          A11yManager.applyAria(_el126, "hstack");
+            const _el127 = document.createElement('div');
+              applyStyle(_el127, "Interactive");
+            A11yManager.applyAria(_el127, "card");
+              const _el128 = document.createElement('div');
+                _el128.style['alignment'] = 'center';
+              A11yManager.applyAria(_el128, "vstack");
+                const _el129 = document.createElement('span');
+                  _el129.textContent = "Card";
+                  applyStyle(_el129, "H3");
+                A11yManager.applyAria(_el129, "text");
+                _el128.appendChild(_el129);
+                const _el130 = document.createElement('span');
+                  _el130.textContent = "Interactive card with subtle shadow.";
+                  applyStyle(_el130, "Body");
+                A11yManager.applyAria(_el130, "text");
+                _el128.appendChild(_el130);
+              _el127.appendChild(_el128);
+            _el126.appendChild(_el127);
+            const _el131 = document.createElement('div');
+              applyStyle(_el131, "Elevated");
+            A11yManager.applyAria(_el131, "card");
+              const _el132 = document.createElement('div');
+                _el132.style['alignment'] = 'center';
+              A11yManager.applyAria(_el132, "vstack");
+                const _el133 = document.createElement('span');
+                  _el133.textContent = "Elevated";
+                  applyStyle(_el133, "H3");
+                A11yManager.applyAria(_el133, "text");
+                _el132.appendChild(_el133);
+                const _el134 = document.createElement('span');
+                  _el134.textContent = "Elevated card with deeper shadow.";
+                  applyStyle(_el134, "Body");
+                A11yManager.applyAria(_el134, "text");
+                _el132.appendChild(_el134);
+              _el131.appendChild(_el132);
+            _el126.appendChild(_el131);
+          _el124.appendChild(_el126);
+        _el123.appendChild(_el124);
+      _el82.appendChild(_el123);
+      const _el135 = document.createElement('div');
+        applyStyle(_el135, "Elevated");
+      A11yManager.applyAria(_el135, "card");
+        const _el136 = document.createElement('div');
+        A11yManager.applyAria(_el136, "vstack");
+          const _el137 = document.createElement('span');
+            _el137.textContent = "Image with Lazy Loading";
+            applyStyle(_el137, "H3");
+          A11yManager.applyAria(_el137, "text");
+          _el136.appendChild(_el137);
+          const _el138 = document.createElement('span');
+            _el138.textContent = "Images support lazy loading, fade-in transitions, and responsive sizing.";
+            applyStyle(_el138, "Body");
+          A11yManager.applyAria(_el138, "text");
+          _el136.appendChild(_el138);
+          const _el139 = document.createElement('img');
+            _el139.setAttribute("src", "https://picsum.photos/seed/ky1/800/400");
+            const __upd__el139_width = () => { _el139.style['width'] = state.get("800"); };
+            __upd__el139_width();
+            state.watch('count', __upd__el139_width);
+            const __upd__el139_height = () => { _el139.style['height'] = state.get("400"); };
+            __upd__el139_height();
+            state.watch('count', __upd__el139_height);
+            _el139.loading = 'lazy';
+            _el139.style.opacity = '0.5';
+            _el139.style.transition = 'opacity 0.3s';
+            _el139.onload = () => { _el139.style.opacity = '1'; };
+          A11yManager.applyAria(_el139, "image");
+          _el136.appendChild(_el139);
+        _el135.appendChild(_el136);
+      _el82.appendChild(_el135);
+      const _el140 = document.createElement('div');
+        applyStyle(_el140, "Elevated");
+      A11yManager.applyAria(_el140, "card");
+        const _el141 = document.createElement('div');
+        A11yManager.applyAria(_el141, "vstack");
+          const _el142 = document.createElement('span');
+            _el142.textContent = "Progress & Loading";
+            applyStyle(_el142, "H3");
+          A11yManager.applyAria(_el142, "text");
+          _el141.appendChild(_el142);
+          const _el143 = document.createElement('div');
+          A11yManager.applyAria(_el143, "vstack");
+            const _el144 = document.createElement('progress');
+              Binding.oneWay(_el144, 'textContent', state, "65");
+              _el144.style['max'] = state.get("100");
+            A11yManager.applyAria(_el144, "progress");
+            _el143.appendChild(_el144);
+            const _el145 = document.createElement('div');
+            A11yManager.applyAria(_el145, "spinner");
+            _el143.appendChild(_el145);
+            const _el146 = document.createElement('span');
+              _el146.textContent = "65% complete";
+              applyStyle(_el146, "Muted");
+            A11yManager.applyAria(_el146, "text");
+            _el143.appendChild(_el146);
+          _el141.appendChild(_el143);
+        _el140.appendChild(_el141);
+      _el82.appendChild(_el140);
+      const _el147 = document.createElement('div');
+        applyStyle(_el147, "Elevated");
+      A11yManager.applyAria(_el147, "card");
+        const _el148 = document.createElement('div');
+        A11yManager.applyAria(_el148, "vstack");
+          const _el149 = document.createElement('span');
+            _el149.textContent = "Lists";
+            applyStyle(_el149, "H3");
+          A11yManager.applyAria(_el149, "text");
+          _el148.appendChild(_el149);
+          const _el150 = document.createElement('ul');
+          A11yManager.applyAria(_el150, "list");
+            const _el151 = document.createElement('span');
+              _el151.textContent = "First item — with rich text content";
+              applyStyle(_el151, "Body");
+            A11yManager.applyAria(_el151, "text");
+            _el150.appendChild(_el151);
+            const _el152 = document.createElement('span');
+              _el152.textContent = "Second item — supports any child component";
+              applyStyle(_el152, "Body");
+            A11yManager.applyAria(_el152, "text");
+            _el150.appendChild(_el152);
+            const _el153 = document.createElement('span');
+              _el153.textContent = "Third item — automatic spacing";
+              applyStyle(_el153, "Body");
+            A11yManager.applyAria(_el153, "text");
+            _el150.appendChild(_el153);
+          _el148.appendChild(_el150);
+        _el147.appendChild(_el148);
+      _el82.appendChild(_el147);
+    _el81.appendChild(_el82);
+  el.appendChild(_el81);
   // Lifecycle hooks for mounting/unmounting
   const _lifecycle = {
     mounted: typeof on_mounted === 'function' ? () => on_mounted() : null,
@@ -260,113 +961,166 @@ function render_form(params = {}) {
     });
   }
   const el = document.createDocumentFragment();
-  const _el74 = document.createElement('div');
-  A11yManager.applyAria(_el74, "view");
+  const _el154 = document.createElement('div');
+  A11yManager.applyAria(_el154, "view");
     // From inline Kyle block:
     state.set('email', "");
     state.set('password', "");
     state.set('bio', "");
-    state.set('subscribe', true);
+    state.set('newsletter', false);
     state.set('country', "");
     state.set('volume', 50.0);
     state.set('submitted', false);
     const handle_submit = () => {
       state.set('submitted', true);
     };
-    const _el76 = document.createElement('div');
-    A11yManager.applyAria(_el76, "vstack");
-      const _el77 = document.createElement('div');
-      A11yManager.applyAria(_el77, "card");
-        const _el78 = document.createElement('div');
-        A11yManager.applyAria(_el78, "vstack");
-          const _el79 = document.createElement('span');
-            _el79.textContent = "Formulario";
-            applyStyle(_el79, "Title");
-          A11yManager.applyAria(_el79, "text");
-          _el78.appendChild(_el79);
-          const _el80 = document.createElement('input');
-            Binding.twoWay(_el80, state, "email", 'input');
-            _el80.textContent = "Email";
-            _el80.setAttribute("placeholder", "email@ejemplo.com");
-          A11yManager.applyAria(_el80, "text_field");
-          _el78.appendChild(_el80);
-          const _el81 = document.createElement('input');
-            Binding.twoWay(_el81, state, "password", 'input');
-            _el81.textContent = "Contraseña";
-            _el81.setAttribute("placeholder", "******");
-          A11yManager.applyAria(_el81, "password_field");
-          _el78.appendChild(_el81);
-          const _el82 = document.createElement('textarea');
-            Binding.twoWay(_el82, state, "bio", 'input');
-            _el82.textContent = "Biografía";
-            _el82.setAttribute("placeholder", "Sobre ti...");
-            _el82.style['rows'] = state.get("3");
-          A11yManager.applyAria(_el82, "text_area");
-          _el78.appendChild(_el82);
-          const _el83 = document.createElement('input');
-            Binding.twoWay(_el83, state, "subscribe", 'input');
-            _el83.textContent = "Suscribirme";
-          A11yManager.applyAria(_el83, "checkbox");
-          _el78.appendChild(_el83);
-          const _el84 = document.createElement('input');
-            Binding.twoWay(_el84, state, "subscribe", 'input');
-            _el84.textContent = "Notificaciones";
-          A11yManager.applyAria(_el84, "switch");
-          _el78.appendChild(_el84);
-          const _el85 = document.createElement('select');
-            Binding.twoWay(_el85, state, "country", 'input');
-            _el85.textContent = "País";
-          A11yManager.applyAria(_el85, "select");
-            const _el86 = document.createElement('div');
-              _el86.textContent = "pe";
-              _el86.textContent = "Perú";
-            A11yManager.applyAria(_el86, "option");
-            _el85.appendChild(_el86);
-            const _el87 = document.createElement('div');
-              _el87.textContent = "cl";
-              _el87.textContent = "Chile";
-            A11yManager.applyAria(_el87, "option");
-            _el85.appendChild(_el87);
-          _el78.appendChild(_el85);
-          const _el88 = document.createElement('input');
-            Binding.twoWay(_el88, state, "volume", 'input');
-            _el88.textContent = "Volumen";
-            _el88.style['min'] = state.get("0");
-            _el88.style['max'] = state.get("100");
-          A11yManager.applyAria(_el88, "slider");
-          _el78.appendChild(_el88);
-          const _el89 = document.createElement('div');
-          A11yManager.applyAria(_el89, "hstack");
-            const _el90 = document.createElement('input');
-              Binding.twoWay(_el90, state, "country", 'input');
-              _el90.textContent = "pe";
-              _el90.textContent = "Perú";
-            A11yManager.applyAria(_el90, "radio");
-            _el89.appendChild(_el90);
-            const _el91 = document.createElement('input');
-              Binding.twoWay(_el91, state, "country", 'input');
-              _el91.textContent = "cl";
-              _el91.textContent = "Chile";
-            A11yManager.applyAria(_el91, "radio");
-            _el89.appendChild(_el91);
-          _el78.appendChild(_el89);
-          const _el92 = document.createElement('button');
-            _el92.textContent = "Enviar";
-            applyStyle(_el92, "Primary");
-            _el92.addEventListener("click", (e) => { handle_submit(createKyleEvent(e)); });
-          A11yManager.applyAria(_el92, "button");
-          _el78.appendChild(_el92);
+    const _el156 = document.createElement('div');
+    A11yManager.applyAria(_el156, "vstack");
+      const _el157 = document.createElement('div');
+      A11yManager.applyAria(_el157, "vstack");
+        const _el158 = document.createElement('span');
+          _el158.textContent = "Form Demo";
+          applyStyle(_el158, "H2");
+        A11yManager.applyAria(_el158, "text");
+        _el157.appendChild(_el158);
+        const _el159 = document.createElement('span');
+          _el159.textContent = "Comprehensive form with all input types and reactive state binding.";
+          applyStyle(_el159, "Body");
+        A11yManager.applyAria(_el159, "text");
+        _el157.appendChild(_el159);
+      _el156.appendChild(_el157);
+      const _el160 = document.createElement('div');
+        applyStyle(_el160, "Elevated");
+      A11yManager.applyAria(_el160, "card");
+        const _el161 = document.createElement('div');
+        A11yManager.applyAria(_el161, "vstack");
+          const _el162 = document.createElement('span');
+            _el162.textContent = "Account Information";
+            applyStyle(_el162, "H3");
+          A11yManager.applyAria(_el162, "text");
+          _el161.appendChild(_el162);
+          const _el163 = document.createElement('input');
+            Binding.twoWay(_el163, state, "email", 'input');
+            _el163.textContent = "Email";
+            _el163.setAttribute("placeholder", "you@example.com");
+          A11yManager.applyAria(_el163, "text_field");
+          _el161.appendChild(_el163);
+          const _el164 = document.createElement('input');
+            Binding.twoWay(_el164, state, "password", 'input');
+            _el164.textContent = "Password";
+            _el164.setAttribute("placeholder", "Min 6 characters");
+          A11yManager.applyAria(_el164, "password_field");
+          _el161.appendChild(_el164);
+          const _el165 = document.createElement('textarea');
+            Binding.twoWay(_el165, state, "bio", 'input');
+            _el165.textContent = "Biography";
+            _el165.setAttribute("placeholder", "Tell us about yourself...");
+            _el165.style['rows'] = state.get("4");
+          A11yManager.applyAria(_el165, "text_area");
+          _el161.appendChild(_el165);
+          const _el166 = document.createElement('div');
+            applyStyle(_el166, "Divider");
+          A11yManager.applyAria(_el166, "view");
+          _el161.appendChild(_el166);
+          const _el167 = document.createElement('span');
+            _el167.textContent = "Preferences";
+            applyStyle(_el167, "H3");
+          A11yManager.applyAria(_el167, "text");
+          _el161.appendChild(_el167);
+          const _el168 = document.createElement('input');
+            Binding.twoWay(_el168, state, "newsletter", 'input');
+            _el168.textContent = "Subscribe to newsletter";
+          A11yManager.applyAria(_el168, "checkbox");
+          _el161.appendChild(_el168);
+          const _el169 = document.createElement('select');
+            Binding.twoWay(_el169, state, "country", 'input');
+            _el169.textContent = "Country";
+          A11yManager.applyAria(_el169, "select");
+            const _el170 = document.createElement('div');
+              _el170.textContent = "us";
+              _el170.textContent = "United States";
+            A11yManager.applyAria(_el170, "option");
+            _el169.appendChild(_el170);
+            const _el171 = document.createElement('div');
+              _el171.textContent = "uk";
+              _el171.textContent = "United Kingdom";
+            A11yManager.applyAria(_el171, "option");
+            _el169.appendChild(_el171);
+            const _el172 = document.createElement('div');
+              _el172.textContent = "jp";
+              _el172.textContent = "Japan";
+            A11yManager.applyAria(_el172, "option");
+            _el169.appendChild(_el172);
+            const _el173 = document.createElement('div');
+              _el173.textContent = "de";
+              _el173.textContent = "Germany";
+            A11yManager.applyAria(_el173, "option");
+            _el169.appendChild(_el173);
+          _el161.appendChild(_el169);
+          const _el174 = document.createElement('input');
+            Binding.twoWay(_el174, state, "volume", 'input');
+            _el174.textContent = "Volume";
+            _el174.style['min'] = state.get("0");
+            _el174.style['max'] = state.get("100");
+          A11yManager.applyAria(_el174, "slider");
+          _el161.appendChild(_el174);
+          const _el175 = document.createElement('div');
+            applyStyle(_el175, "Divider");
+          A11yManager.applyAria(_el175, "view");
+          _el161.appendChild(_el175);
+          const _el176 = document.createElement('span');
+            _el176.textContent = "Plan Selection";
+            applyStyle(_el176, "H3");
+          A11yManager.applyAria(_el176, "text");
+          _el161.appendChild(_el176);
+          const _el177 = document.createElement('div');
+          A11yManager.applyAria(_el177, "hstack");
+            const _el178 = document.createElement('input');
+              _el178.style['name'] = 'plan';
+              _el178.textContent = "free";
+              _el178.textContent = "Free";
+            A11yManager.applyAria(_el178, "radio");
+            _el177.appendChild(_el178);
+            const _el179 = document.createElement('input');
+              _el179.style['name'] = 'plan';
+              _el179.textContent = "pro";
+              _el179.textContent = "Pro";
+            A11yManager.applyAria(_el179, "radio");
+            _el177.appendChild(_el179);
+            const _el180 = document.createElement('input');
+              _el180.style['name'] = 'plan';
+              _el180.textContent = "enterprise";
+              _el180.textContent = "Enterprise";
+            A11yManager.applyAria(_el180, "radio");
+            _el177.appendChild(_el180);
+          _el161.appendChild(_el177);
+          const _el181 = document.createElement('div');
+          A11yManager.applyAria(_el181, "hstack");
+            const _el182 = document.createElement('button');
+              _el182.textContent = "Submit";
+              applyStyle(_el182, "Primary");
+              _el182.addEventListener("click", (e) => { handle_submit(createKyleEvent(e)); });
+            A11yManager.applyAria(_el182, "button");
+            _el181.appendChild(_el182);
+          _el161.appendChild(_el181);
           if (state.get('submitted')) {
-              const _el94 = document.createElement('span');
-                _el94.textContent = "Formulario enviado!";
-                applyStyle(_el94, "SuccessText");
-              A11yManager.applyAria(_el94, "text");
-              _el78.appendChild(_el94);
+              const _el184 = document.createElement('div');
+                applyStyle(_el184, "DarkCard");
+              A11yManager.applyAria(_el184, "card");
+                const _el185 = document.createElement('div');
+                A11yManager.applyAria(_el185, "vstack");
+                  const _el186 = document.createElement('span');
+                    _el186.textContent = "✓ Form submitted successfully!";
+                    applyStyle(_el186, "Success");
+                  A11yManager.applyAria(_el186, "text");
+                  _el185.appendChild(_el186);
+                _el184.appendChild(_el185);
+              _el161.appendChild(_el184);
           }
-        _el77.appendChild(_el78);
-      _el76.appendChild(_el77);
-    _el74.appendChild(_el76);
-  el.appendChild(_el74);
+        _el160.appendChild(_el161);
+      _el156.appendChild(_el160);
+    _el154.appendChild(_el156);
+  el.appendChild(_el154);
   // Lifecycle hooks for mounting/unmounting
   const _lifecycle = {
     mounted: typeof on_mounted === 'function' ? () => on_mounted() : null,
@@ -387,27 +1141,49 @@ function render_not_found(params = {}) {
     });
   }
   const el = document.createDocumentFragment();
-  const _el95 = document.createElement('div');
-  A11yManager.applyAria(_el95, "view");
-    const _el96 = document.createElement('div');
-      _el96.style['alignment'] = state.get("alignment.center");
-    A11yManager.applyAria(_el96, "vstack");
-      const _el97 = document.createElement('span');
-        _el97.textContent = "404";
-        applyStyle(_el97, "title_404");
-      A11yManager.applyAria(_el97, "text");
-      _el96.appendChild(_el97);
-      const _el98 = document.createElement('span');
-        _el98.textContent = "Página no encontrada";
-      A11yManager.applyAria(_el98, "text");
-      _el96.appendChild(_el98);
-      const _el99 = document.createElement('a');
-        _el99.setAttribute("href", "/");
-        _el99.textContent = "Volver al inicio";
-      A11yManager.applyAria(_el99, "link");
-      _el96.appendChild(_el99);
-    _el95.appendChild(_el96);
-  el.appendChild(_el95);
+  const _el187 = document.createElement('div');
+  A11yManager.applyAria(_el187, "view");
+    const _el188 = document.createElement('div');
+      _el188.style['alignment'] = 'center';
+      _el188.style.display = 'flex';
+      _el188.style.alignItems = 'center';
+      _el188.style.justifyContent = 'center';
+    A11yManager.applyAria(_el188, "vstack");
+      const _el189 = document.createElement('div');
+        applyStyle(_el189, "Elevated");
+      A11yManager.applyAria(_el189, "card");
+        const _el190 = document.createElement('div');
+          _el190.style['alignment'] = 'center';
+        A11yManager.applyAria(_el190, "vstack");
+          const _el191 = document.createElement('span');
+            _el191.textContent = "404";
+            applyStyle(_el191, "title_404");
+          A11yManager.applyAria(_el191, "text");
+          _el190.appendChild(_el191);
+          const _el192 = document.createElement('span');
+            _el192.textContent = "Page not found";
+            applyStyle(_el192, "H2");
+          A11yManager.applyAria(_el192, "text");
+          _el190.appendChild(_el192);
+          const _el193 = document.createElement('span');
+            _el193.textContent = "The page you're looking for doesn't exist.";
+            applyStyle(_el193, "Body");
+          A11yManager.applyAria(_el193, "text");
+          _el190.appendChild(_el193);
+          const _el194 = document.createElement('a');
+            _el194.style['to'] = '/';
+          _el194.addEventListener('click', (e) => { e.preventDefault(); navigate("/"); });
+          A11yManager.applyAria(_el194, "link");
+            const _el195 = document.createElement('button');
+              _el195.textContent = "Back to Home";
+              applyStyle(_el195, "Primary");
+            A11yManager.applyAria(_el195, "button");
+            _el194.appendChild(_el195);
+          _el190.appendChild(_el194);
+        _el189.appendChild(_el190);
+      _el188.appendChild(_el189);
+    _el187.appendChild(_el188);
+  el.appendChild(_el187);
   // Lifecycle hooks for mounting/unmounting
   const _lifecycle = {
     mounted: typeof on_mounted === 'function' ? () => on_mounted() : null,
@@ -421,9 +1197,10 @@ document.title = "Kyle UI Demo";
 // Register and start router
 if (typeof window !== 'undefined') {
   if (!window.__KYLE_ROUTES) window.__KYLE_ROUTES = {};
+  window.__KYLE_ROUTES["/"] = render_dashboard;
   window.__KYLE_ROUTES["/form"] = render_form;
-  window.__KYLE_ROUTES["/"] = render_home;
   window.__KYLE_ROUTES["*"] = render_not_found;
+  window.__KYLE_ROUTES["/components"] = render_components;
   const router = createRouter({ container: document.getElementById('app') });
   router.start();
 }

@@ -1,0 +1,114 @@
+# Components — Showcase all UI components
+
+<view>
+    <vstack spacing=32>
+        <vstack spacing=8>
+            <text value="Components Showcase" style=H2 />
+            <text value="All available UI components rendered with proper styling." style=Body />
+        </vstack>
+
+        <card style=Elevated>
+            <vstack spacing=16>
+                <text value="Buttons" style=H3 />
+                <hstack spacing=12>
+                    <button text="Primary" style=Primary />
+                    <button text="Secondary" style=Secondary />
+                    <button text="Danger" style=Danger />
+                    <button text="Ghost" style=Ghost />
+                </hstack>
+                <vstack spacing=8>
+                    <text value="All buttons support click events, hover states via CSS transitions, and keyboard accessibility." style=Body />
+                </vstack>
+            </vstack>
+        </card>
+
+        <card style=Elevated>
+            <vstack spacing=16>
+                <text value="Text Inputs" style=H3 />
+                <text_field label="Standard Input" placeholder="Type something..." />
+                <password_field label="Password" placeholder="Enter password..." />
+                <text_area label="Text Area" placeholder="Multi-line text..." rows=4 />
+            </vstack>
+        </card>
+
+        <card style=Elevated>
+            <vstack spacing=16>
+                <text value="Selection Controls" style=H3 />
+                <hstack spacing=24>
+                    <checkbox label="Checkbox Option" />
+                    <checkbox label="Subscribe to newsletter" />
+                </hstack>
+                <hstack spacing=24>
+                    <radio name="group" value="A" label="Option A" />
+                    <radio name="group" value="B" label="Option B" />
+                    <radio name="group" value="C" label="Option C" />
+                </hstack>
+                <switch label="Dark Mode" />
+                <select label="Country">
+                    <option value="us" label="United States" />
+                    <option value="uk" label="United Kingdom" />
+                    <option value="jp" label="Japan" />
+                    <option value="de" label="Germany" />
+                </select>
+            </vstack>
+        </card>
+
+        <card style=Elevated>
+            <vstack spacing=16>
+                <text value="Sliders" style=H3 />
+                <slider label="Volume" min=0 max=100 />
+                <slider label="Brightness" min=0 max=100 />
+            </vstack>
+        </card>
+
+        <card style=Elevated>
+            <vstack spacing=16>
+                <text value="Cards & Surfaces" style=H3 />
+                <hstack spacing=16>
+                    <card style=Interactive>
+                        <vstack spacing=8 alignment="center">
+                            <text value="Card" style=H3 />
+                            <text value="Interactive card with subtle shadow." style=Body />
+                        </vstack>
+                    </card>
+                    <card style=Elevated>
+                        <vstack spacing=8 alignment="center">
+                            <text value="Elevated" style=H3 />
+                            <text value="Elevated card with deeper shadow." style=Body />
+                        </vstack>
+                    </card>
+                </hstack>
+            </vstack>
+        </card>
+
+        <card style=Elevated>
+            <vstack spacing=16>
+                <text value="Image with Lazy Loading" style=H3 />
+                <text value="Images support lazy loading, fade-in transitions, and responsive sizing." style=Body />
+                <img src="https://picsum.photos/seed/ky1/800/400" width=800 height=400 lazy />
+            </vstack>
+        </card>
+
+        <card style=Elevated>
+            <vstack spacing=16>
+                <text value="Progress & Loading" style=H3 />
+                <vstack spacing=12>
+                    <progress value=65 max=100 />
+                    <spinner />
+                    <text value="65% complete" style=Muted />
+                </vstack>
+            </vstack>
+        </card>
+
+        <card style=Elevated>
+            <vstack spacing=16>
+                <text value="Lists" style=H3 />
+                <list>
+                    <text value="First item — with rich text content" style=Body />
+                    <text value="Second item — supports any child component" style=Body />
+                    <text value="Third item — automatic spacing" style=Body />
+                </list>
+            </vstack>
+        </card>
+    </vstack>
+</view>
