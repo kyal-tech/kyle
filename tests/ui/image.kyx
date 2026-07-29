@@ -1,0 +1,6 @@
+# Test: Image with lazy loading
+<view>
+    @( src: ^str = "https://picsum.photos/200")
+    <img src=@src lazy alt="Random photo" />
+    <button text="Change" click=@() => src = "https://picsum.photos/201" />
+</view>

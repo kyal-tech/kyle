@@ -126,7 +126,8 @@ export class Binding {
     // Two-way binding: state ↔ UI
     static twoWay(el, state, key, eventType = 'input') {
         // One-way: state → UI
-        const unsub1 = Binding.oneWay(el, 'value', state, key);
+        const prop = el.type === 'checkbox' || el.type === 'radio' ? 'checked' : 'value';
+        const unsub1 = Binding.oneWay(el, prop, state, key);
 
         // UI → state
         const handler = () => {

@@ -1,0 +1,16 @@
+# Test: Form with model
+from models.user import UserForm
+
+<view>
+    @(
+        form: ^UserForm = UserForm()
+        fn handle_submit():
+            print("submitted")
+    )
+
+    <form model=@form submit=@handle_submit>
+        <text_field field="name" label="Nombre" />
+        <text_field field="email" label="Email" type=input_type.email />
+        <button text="Guardar" style=Primary type="submit" />
+    </form>
+</view>

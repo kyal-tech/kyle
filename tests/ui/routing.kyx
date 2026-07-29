@@ -1,0 +1,13 @@
+# Test: Routing and navigation
+from views.home import home
+from views.about import about
+from views.not_found import not_found
+from layouts.main import main
+
+<app title="Test App">
+    <router>
+        <route path="/" component=home layout=main title="Home" />
+        <route path="/about" component=about layout=main title="About" />
+        <route path="*" component=not_found layout=main title="404" />
+    </router>
+</app>

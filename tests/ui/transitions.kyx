@@ -1,0 +1,15 @@
+# Test: CSS transitions
+style<button> Primary:
+    background = color("#0066FF")
+    color = color("#FFFFFF")
+    transition = transition(property: "all", duration: 200, easing: easing.ease_out)
+
+<view>
+    @( hovered: ^bool = false)
+    <button
+        text=@if hovered: "Hovered" else: "Hover"
+        style=Primary
+        mouse_enter=@() => hovered = true
+        mouse_leave=@() => hovered = false
+    />
+</view>

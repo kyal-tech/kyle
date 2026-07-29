@@ -1,0 +1,27 @@
+# Test: Styles at file level
+style<button> Primary:
+    background = color("#0066FF")
+    color = color("#FFFFFF")
+    border_radius = 8
+    padding = spacing.all(12)
+    font_size = 14
+    font_weight = font_weight.bold
+    cursor = cursor.pointer
+
+style<button> Secondary: Primary:
+    background = color("transparent")
+    color = color("#0066FF")
+    border = border(2, color("#0066FF"), border_style.solid)
+
+style<text> Title:
+    font_size = 24
+    font_weight = font_weight.bold
+    color = color("#1A1A1A")
+
+<view>
+    <vstack spacing=16>
+        <button text="Primary" style=Primary />
+        <button text="Secondary" style=Secondary />
+        <text value="Title Text" style=Title />
+    </vstack>
+</view>

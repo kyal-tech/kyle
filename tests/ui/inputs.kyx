@@ -1,0 +1,18 @@
+# Test: All input types
+<view>
+    @(
+        text_val: ^str = ""
+        checked: ^bool = false
+        num: ^f32 = 0.0
+        selected: ^str = ""
+    )
+
+    <text_field bind=@text_val label="Text" />
+    <password_field bind=@text_val label="Password" />
+    <checkbox bind=@checked label="Check" />
+    <switch bind=@checked label="Switch" />
+    <slider bind=@num label="Slider" />
+    <select bind=@selected label="Select" options={"a", "b"} />
+    <radio bind=@selected value="a" label="A" />
+    <text_area bind=@text_val label="Area" />
+</view>

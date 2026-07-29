@@ -1,0 +1,8 @@
+# Test: For loops
+<view>
+    @( items: ^{str} = {"A", "B", "C"})
+    <vstack spacing=8>
+        @for(item in items):
+            <text value=@item />
+    </vstack>
+</view>

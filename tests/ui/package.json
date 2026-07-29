@@ -1,0 +1,12 @@
+{
+  "name": "ky-ui-tests",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node runner.js",
+    "test:watch": "node --watch runner.js"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1"
+  }
+}
