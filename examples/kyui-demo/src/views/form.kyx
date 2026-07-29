@@ -11,7 +11,13 @@
         submitted: ^bool = false
 
         fn handle_submit():
-            console.log("Form submitted successfully!")
+            console.log("Form submitted with data:")
+            console.log("  Email:", email)
+            console.log("  Password:", password)
+            console.log("  Bio:", bio)
+            console.log("  Newsletter:", newsletter)
+            console.log("  Country:", country)
+            console.log("  Volume:", volume)
             submitted = true
     )
 
