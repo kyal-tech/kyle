@@ -803,7 +803,11 @@ fn gen_attrs(attrs: &[UiAttr], js: &mut String, indent: usize, el: &str, tag: &s
                         js.push_str(&format!("{}{}.alt = state.get({:?});\n", ind, el, expr));
                     }
                     "tpl" | "style" => {
-                        js.push_str(&format!("{}applyStyle({}, state.get({:?}));\n", ind, el, expr));
+                        if is_simple_key(expr) {
+                            js.push_str(&format!("{}applyStyle({}, {:?});\n", ind, el, expr));
+                        } else {
+                            js.push_str(&format!("{}applyStyle({}, state.get({:?}));\n", ind, el, expr));
+                        }
                     }
                     "animation" => {
                         js.push_str(&format!("{}applyAnimation({}, state.get({:?}));\n", ind, el, expr));
