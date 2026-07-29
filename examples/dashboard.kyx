@@ -1,0 +1,89 @@
+# dashboard — Kyle UI demo: admin dashboard with stats and table
+# Uso: ky build examples/dashboard.kyx
+
+<app title="Dashboard Demo">
+    <view layout=top>
+        <vstack spacing=16 padding=16>
+            <text value="Dashboard" font_size=24 font_weight=bold />
+
+            <hstack spacing=12>
+                <card width=fill padding=16>
+                    <vstack spacing=4>
+                        <text value="Users" color=gray />
+                        <text value=@stats.users.to_str() font_size=28 font_weight=bold />
+                    </vstack>
+                </card>
+                <card width=fill padding=16>
+                    <vstack spacing=4>
+                        <text value="Revenue" color=gray />
+                        <text value=@"$" + @stats.revenue.to_str() font_size=28 font_weight=bold />
+                    </vstack>
+                </card>
+                <card width=fill padding=16>
+                    <vstack spacing=4>
+                        <text value="Orders" color=gray />
+                        <text value=@stats.orders.to_str() font_size=28 font_weight=bold />
+                    </vstack>
+                </card>
+                <card width=fill padding=16>
+                    <vstack spacing=4>
+                        <text value="Growth" color=gray />
+                        <text value=@"+" + @stats.growth.to_str() + "%" font_size=28 font_weight=bold color=green />
+                    </vstack>
+                </card>
+            </hstack>
+
+            <card width=fill padding=16>
+                <vstack spacing=8>
+                    <text value="Recent Orders" font_size=18 font_weight=bold />
+                    @for order in @orders:
+                        <hstack spacing=8 padding=8>
+                            <text value=@order.id width=80 />
+                            <text value=@order.customer width=fill />
+                            <text value=@"$" + @order.total.to_str() width=80 />
+                            <text value=@order.status width=80 />
+                        </hstack>
+                    @end
+                </vstack>
+            </card>
+
+            <hstack spacing=8>
+                <button tpl=primary text="Refresh Data" click=@refresh />
+                <button tpl=ghost text="Export" click=@export_data />
+            </hstack>
+        </vstack>
+    </view>
+</app>
+
+final class Stats:
+    users: i32
+    revenue: f32
+    orders: i32
+    growth: f32
+
+final class Order:
+    id: str
+    customer: str
+    total: f32
+    status: str
+
+@stats := Stats(users: 1248, revenue: 48250, orders: 356, growth: 12.5)
+@orders := [
+    Order(id: "#001", customer: "Alice Johnson", total: 299.99, status: "Shipped"),
+    Order(id: "#002", customer: "Bob Smith", total: 149.50, status: "Processing"),
+    Order(id: "#003", customer: "Carol Davis", total: 599.00, status: "Pending"),
+    Order(id: "#004", customer: "David Wilson", total: 89.99, status: "Shipped"),
+]
+
+fn refresh():
+    # Simulate data refresh
+    @stats = Stats(
+        users: @stats.users + 1,
+        revenue: @stats.revenue + 100,
+        orders: @stats.orders + 1,
+        growth: @stats.growth + 0.1,
+    )
+
+fn export_data():
+    # Placeholder — in real app, this would trigger a download
+    pass

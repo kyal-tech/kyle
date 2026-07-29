@@ -1,0 +1,79 @@
+# profile — Kyle UI demo: user profile with form and image
+# Uso: ky build examples/profile.kyx
+
+<app title="Profile Demo">
+    <view layout=top>
+        <scroll width=fill>
+            <vstack spacing=16 padding=16>
+                <vstack spacing=8 alignment=center>
+                    <view width=96 height=96 radius=48 layout=center>
+                        <text value=@initials() font_size=32 font_weight=bold color=white />
+                    </view>
+                    <text value=@"@" + @username font_size=18 font_weight=bold />
+                    <text value=@bio color=gray />
+                </vstack>
+
+                <card width=fill padding=16>
+                    <vstack spacing=12>
+                        <text value="Personal Info" font_size=18 font_weight=bold />
+
+                        <text value="Full Name" color=gray />
+                        <text_field bind=@name placeholder="Full Name" />
+
+                        <text value="Username" color=gray />
+                        <text_field bind=@username placeholder="Username" />
+
+                        <text value="Bio" color=gray />
+                        <text_area bind=@bio placeholder="Tell us about yourself..." />
+
+                        <text value="Website" color=gray />
+                        <text_field bind=@website placeholder="https://" />
+                    </vstack>
+                </card>
+
+                <card width=fill padding=16>
+                    <vstack spacing=12>
+                        <text value="Account" font_size=18 font_weight=bold />
+
+                        <hstack spacing=8>
+                            <text value="Public Profile" width=fill />
+                            <switch checked=@public_profile />
+                        </hstack>
+
+                        <hstack spacing=8>
+                            <text value="Show Email" width=fill />
+                            <switch checked=@show_email />
+                        </hstack>
+                    </vstack>
+                </card>
+
+                <hstack spacing=8>
+                    <button tpl=primary text="Save Profile" width=fill click=@save />
+                    <button tpl=ghost text="Cancel" click=@cancel />
+                </hstack>
+            </vstack>
+        </scroll>
+    </view>
+</app>
+
+@name := "Alex Rivera"
+@username := "alex_dev"
+@bio := "Full-stack developer & open source enthusiast"
+@website := "https://alex.dev"
+@public_profile := true
+@show_email := false
+
+fn initials() str:
+    parts: [str] = @name.split(" ")
+    if len(parts) >= 2:
+        parts[0].get(0).to_str() + parts[1].get(0).to_str()
+    else:
+        @name.get(0).to_str()
+
+fn save():
+    # Persist profile changes
+    pass
+
+fn cancel():
+    # Revert changes
+    pass

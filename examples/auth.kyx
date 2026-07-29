@@ -1,0 +1,63 @@
+# auth — Kyle UI demo: login/register with tabs
+# Uso: ky build examples/auth.kyx
+
+<app title="Auth Demo">
+    <view layout=center>
+        <card width=400 padding=24>
+            <vstack spacing=16>
+                <hstack spacing=0>
+                    <button tpl=primary text="Login" width=fill click=@show_login />
+                    <button tpl=ghost text="Register" width=fill click=@show_register />
+                </hstack>
+
+                @if @mode == "login":
+                    <vstack spacing=12>
+                        <text_field bind=@email placeholder="Email" />
+                        <password_field bind=@password placeholder="Password" />
+                        <text value=@error color=red visible=@error != "" />
+                        <button tpl=primary text="Sign In" width=fill click=@handle_login />
+                    </vstack>
+                @else:
+                    <vstack spacing=12>
+                        <text_field bind=@name placeholder="Full Name" />
+                        <text_field bind=@email placeholder="Email" />
+                        <password_field bind=@password placeholder="Password" />
+                        <password_field bind=@confirm placeholder="Confirm Password" />
+                        <text value=@error color=red visible=@error != "" />
+                        <button tpl=primary text="Create Account" width=fill click=@handle_register />
+                    </vstack>
+            </vstack>
+        </card>
+    </view>
+</app>
+
+@mode := "login"
+@name := ""
+@email := ""
+@password := ""
+@confirm := ""
+@error := ""
+
+fn show_login():
+    @mode = "login"
+    @error = ""
+
+fn show_register():
+    @mode = "register"
+    @error = ""
+
+fn handle_login():
+    if @email == "" or @password == "":
+        @error = "Please fill all fields"
+    else:
+        @error = ""
+
+fn handle_register():
+    if @name == "" or @email == "" or @password == "":
+        @error = "Please fill all fields"
+    elif @password != @confirm:
+        @error = "Passwords do not match"
+    elif len(@password) < 6:
+        @error = "Password must be at least 6 characters"
+    else:
+        @error = ""

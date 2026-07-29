@@ -1,0 +1,98 @@
+# settings — Kyle UI demo: settings page with all input types
+# Uso: ky build examples/settings.kyx
+
+<app title="Settings Demo">
+    <view layout=top>
+        <scroll width=fill>
+            <vstack spacing=16 padding=16>
+                <text value="Settings" font_size=24 font_weight=bold />
+
+                <card width=fill padding=16>
+                    <vstack spacing=12>
+                        <text value="Profile" font_size=18 font_weight=bold />
+
+                        <text value="Display Name" color=gray />
+                        <text_field bind=@display_name placeholder="Enter your name" />
+
+                        <text value="Email" color=gray />
+                        <text_field bind=@email placeholder="you@example.com" />
+                    </vstack>
+                </card>
+
+                <card width=fill padding=16>
+                    <vstack spacing=12>
+                        <text value="Preferences" font_size=18 font_weight=bold />
+
+                        <hstack spacing=8>
+                            <text value="Dark Mode" width=fill />
+                            <switch checked=@dark_mode />
+                        </hstack>
+
+                        <hstack spacing=8>
+                            <text value="Email Notifications" width=fill />
+                            <switch checked=@notifications />
+                        </hstack>
+
+                        <text value="Language" color=gray />
+                        <select bind=@language>
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </select>
+                    </vstack>
+                </card>
+
+                <card width=fill padding=16>
+                    <vstack spacing=12>
+                        <text value="Display" font_size=18 font_weight=bold />
+
+                        <text value="Volume: @volume.to_str()" />
+                        <slider bind=@volume min=0 max=100 />
+
+                        <text value="Font Size" color=gray />
+                        <hstack spacing=8>
+                            <button text="A-" click=@decrease_font />
+                            <text value=@font_size.to_str() width=fill align=center />
+                            <button text="A+" click=@increase_font />
+                        </hstack>
+                    </vstack>
+                </card>
+
+                <hstack spacing=8>
+                    <button tpl=primary text="Save Settings" width=fill click=@save />
+                    <button tpl=ghost text="Reset" click=@reset />
+                </hstack>
+            </vstack>
+        </scroll>
+    </view>
+</app>
+
+@display_name := "Jane Doe"
+@email := "jane@example.com"
+@dark_mode := false
+@notifications := true
+@language := "en"
+@volume := 75
+@font_size := 16
+
+fn increase_font():
+    if @font_size < 24:
+        @font_size = @font_size + 1
+
+fn decrease_font():
+    if @font_size > 10:
+        @font_size = @font_size - 1
+
+fn save():
+    # In real app, persist settings
+    pass
+
+fn reset():
+    @display_name = "Jane Doe"
+    @email = "jane@example.com"
+    @dark_mode = false
+    @notifications = true
+    @language = "en"
+    @volume = 75
+    @font_size = 16

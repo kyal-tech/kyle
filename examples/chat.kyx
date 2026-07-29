@@ -1,0 +1,62 @@
+# chat — Kyle UI demo: real-time chat interface
+# Uso: ky build examples/chat.kyx
+
+<app title="Chat Demo">
+    <view layout=fill>
+        <vstack spacing=0 height=fill>
+            <card width=fill padding=12>
+                <hstack spacing=8>
+                    <text value="Chat Room" font_size=18 font_weight=bold width=fill />
+                    <text value=@status color=gray />
+                </hstack>
+            </card>
+
+            <scroll width=fill height=fill>
+                <vstack spacing=8 padding=16>
+                    @for msg in @messages:
+                        <card width=fill padding=12>
+                            <vstack spacing=4>
+                                <hstack spacing=8>
+                                    <text value=@msg.user font_weight=bold font_size=12 />
+                                    <text value=@msg.time color=gray font_size=10 />
+                                </hstack>
+                                <text value=@msg.text />
+                            </vstack>
+                        </card>
+                    @end
+                </vstack>
+            </scroll>
+
+            <card width=fill padding=12>
+                <hstack spacing=8>
+                    <text_field bind=@input placeholder="Type a message..." width=fill />
+                    <button tpl=primary text="Send" click=@send_message disabled=@input == "" />
+                </hstack>
+            </card>
+        </vstack>
+    </view>
+</app>
+
+final class Message:
+    user: str
+    text: str
+    time: str
+
+@input := ""
+@status := "Connected"
+@messages := [
+    Message(user: "System", text: "Welcome to the chat!", time: "10:00"),
+    Message(user: "Alice", text: "Hey everyone!", time: "10:01"),
+    Message(user: "Bob", text: "Hi! How's it going?", time: "10:02"),
+]
+
+@next_id := 3
+
+fn send_message():
+    if @input == "":
+        return
+
+    now: str = "10:" + @next_id.to_str()
+    @messages.push(Message(user: "You", text: @input, time: now))
+    @input = ""
+    @next_id = @next_id + 1
