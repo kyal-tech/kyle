@@ -426,6 +426,19 @@ fn gen_node(node: &UiNode, js: &mut String, indent: usize, parent: &str, model: 
                 }
             }
 
+            // Auto-apply flexbox for layout components
+            match tag {
+                ComponentTag::VStack => {
+                    js.push_str(&format!("{}{}.style.display = 'flex';\n", ind, el));
+                    js.push_str(&format!("{}{}.style.flexDirection = 'column';\n", ind, el));
+                }
+                ComponentTag::HStack => {
+                    js.push_str(&format!("{}{}.style.display = 'flex';\n", ind, el));
+                    js.push_str(&format!("{}{}.style.flexDirection = 'row';\n", ind, el));
+                }
+                _ => {}
+            }
+
             js.push_str(&format!("{}A11yManager.applyAria({}, {:?});\n", ind, el, tag.as_str()));
             for child in children {
                 gen_node(child, js, indent + 2, &el, child_model);
@@ -1032,6 +1045,7 @@ fn js_tag(tag: &ComponentTag) -> &str {
         ComponentTag::Video => "video",
         ComponentTag::Audio => "audio",
         ComponentTag::Select => "select",
+        ComponentTag::Option => "option",
         ComponentTag::Slider => "input",
         ComponentTag::Switch => "input",
         ComponentTag::Progress => "progress",
@@ -1060,8 +1074,12 @@ fn generate_html(call_render: bool) -> String {
     <style>
       * {{ margin: 0; padding: 0; box-sizing: border-box; }}
       html, body {{ width: 100%; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }}
-      button, input, select, textarea {{ font: inherit; border: none; background: none; outline: none; }}
-      button {{ cursor: pointer; }}
+      button {{ font: inherit; cursor: pointer; }}
+      input, select, textarea {{ font: inherit; }}
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+      select, textarea {{ border: 1px solid #E2E8F0; background: #FFF; border-radius: 8px; padding: 12px; outline: none; }}
+      select {{ appearance: auto; }}
+      input:focus, select:focus, textarea:focus {{ border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }}
       a {{ color: inherit; text-decoration: none; }}
       ul, ol {{ list-style: none; }}
       img {{ max-width: 100%; display: block; }}

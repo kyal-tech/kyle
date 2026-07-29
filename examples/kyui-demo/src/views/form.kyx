@@ -11,6 +11,7 @@
         submitted: ^bool = false
 
         fn handle_submit():
+            console.log("Form submitted successfully!")
             submitted = true
     )
 

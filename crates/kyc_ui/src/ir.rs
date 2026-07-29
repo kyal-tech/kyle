@@ -166,7 +166,7 @@ pub enum ComponentTag {
     Navbar, Sidebar, TabBar, Footer,
 
     // Form
-    Form, Select, List, Card, Surface,
+    Form, Select, Option, List, Card, Surface,
 
     // File
     FilePicker,
@@ -226,6 +226,7 @@ impl ComponentTag {
 
             "form" => Self::Form,
             "select" => Self::Select,
+            "option" => Self::Option,
             "list" => Self::List,
             "card" => Self::Card,
             "surface" => Self::Surface,
@@ -289,6 +290,7 @@ impl ComponentTag {
 
             Self::Form => "form",
             Self::Select => "select",
+            Self::Option => "option",
             Self::List => "list",
             Self::Card => "card",
             Self::Surface => "surface",
