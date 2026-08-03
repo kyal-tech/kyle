@@ -1,0 +1,24 @@
+final class Io:
+    static fn print(s: &str):
+        print(s)
+
+    static fn println(s: &str):
+        println(s)
+
+    static fn input() str:
+        input()
+
+    static fn open(path: &str, mode: &str) i32:
+        open(path, mode)
+
+    static fn read(fd: i32, count: i32) str:
+        read_str(fd, count)
+
+    static fn write(fd: i32, s: &str) i32:
+        write_str(fd, s)
+
+    static fn close(fd: i32) i32:
+        close(fd)
+
+    static fn sleep(ms: i32):
+        sleep(ms)

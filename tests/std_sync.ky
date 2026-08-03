@@ -1,0 +1,31 @@
+use std.sync.{Mutex, AtomicI64, AtomicBool, Channel}
+
+fn main():
+    m := Mutex.create(5)
+    val := Mutex.lock(m)
+    if val != 5:
+        println(&"FAIL: mutex val " + val.to_str())
+    Mutex.free(m)
+
+    a := AtomicI64.create(10)
+    AtomicI64.add(a, 5)
+    if AtomicI64.load(a) != 15:
+        println(&"FAIL: atomic load")
+    AtomicI64.free(a)
+
+    b := AtomicBool.create(true)
+    if AtomicBool.load(b) == false:
+        println(&"FAIL: atomic bool")
+    AtomicBool.free(b)
+
+    ch := Channel.create(2)
+    if Channel.send(ch, 42) == false:
+        println(&"FAIL: channel send")
+    if Channel.len(ch) != 1:
+        println(&"FAIL: channel len")
+    got := Channel.recv(ch)
+    if got != 42:
+        println(&"FAIL: channel recv")
+    Channel.free(ch)
+
+    println(&"sync: ok")

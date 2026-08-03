@@ -1,0 +1,30 @@
+@link "c"
+extern fn ky_pow(f64, f64) f64
+extern fn ky_add_pct(f64, f64) f64
+extern fn ky_sub_pct(f64, f64) f64
+extern fn ky_mul_pct(f64, f64) f64
+
+final class Math:
+    static fn pow(base: f64, exp: f64) f64:
+        ky_pow(base, exp)
+
+    static fn add_pct(val: f64, pct: f64) f64:
+        ky_add_pct(val, pct)
+
+    static fn sub_pct(val: f64, pct: f64) f64:
+        ky_sub_pct(val, pct)
+
+    static fn mul_pct(val: f64, pct: f64) f64:
+        ky_mul_pct(val, pct)
+
+    static fn decimal_from_str(s: &str) i64:
+        decimal_from_str(&s)
+
+    static fn decimal_to_str(val: i64) str:
+        decimal_to_str(val)
+
+    static fn decimal_round(val: i64, n: i32) i64:
+        decimal_round(val, n)
+
+    static fn decimal_truncate(val: i64) i64:
+        decimal_truncate(val)

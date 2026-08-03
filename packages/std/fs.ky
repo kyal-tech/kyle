@@ -1,0 +1,39 @@
+final class Fs:
+    static fn exists(path: &str) bool:
+        fs_exists(&path) == 1
+
+    static fn is_dir(path: &str) bool:
+        fs_is_dir(&path) == 1
+
+    static fn is_file(path: &str) bool:
+        fs_is_file(&path) == 1
+
+    static fn size(path: &str) i64:
+        fs_size(&path)
+
+    static fn copy(src: &str, dst: &str) bool:
+        fs_copy(&src, &dst) == 0
+
+    static fn remove(path: &str) bool:
+        fs_remove(&path) == 0
+
+    static fn create_dir(path: &str) bool:
+        fs_create_dir(&path) == 0
+
+    static fn remove_dir(path: &str) bool:
+        fs_remove_dir(&path) == 0
+
+    static fn rename(src: &str, dst: &str) bool:
+        fs_rename(&src, &dst) == 0
+
+    static fn read(path: &str) str:
+        fs_read_to_string(&path)
+
+    static fn write(path: &str, data: &str) bool:
+        fs_write_string(&path, &data) == 0
+
+    static fn list(path: &str) i64:
+        fs_list_dir(&path) as i64
+
+    static fn list_dir(path: &str) i64:
+        fs_list_dir(&path) as i64

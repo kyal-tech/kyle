@@ -192,7 +192,11 @@ pub fn is_move_type(t: &MirType) -> bool {
         MirType::Set(_) => true,
         MirType::Queue(_) | MirType::Stack(_) | MirType::Deque(_) | MirType::LinkedList(_) => true,
         MirType::Box(_) => true,
-        MirType::Chan(_) | MirType::Bytes => true,
+        MirType::Chan(_) => true,
+        // Bytes is NOT a move type. It represents a raw byte buffer pointer
+        // that is always manually managed (ky_bytes_new / ky_bytes_free).
+        // Treating it as move causes premature ky_free when cast to i64.
+        // MirType::Bytes => true,
         // Array is NOT heap-allocated — value type on stack. No ky_free.
         // Struct is NOT heap-allocated — it's a value type on the stack.
         // Excluding it from Move prevents kl_free of stack addresses (crash).

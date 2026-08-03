@@ -452,9 +452,7 @@ impl BorrowAnalysis {
                     Some(MirType::Stack(_)) => "ky_stack_free",
                     Some(MirType::Deque(_)) => "ky_deque_free",
                     Some(MirType::LinkedList(_)) => "ky_linked_list_free",
-                    Some(MirType::Chan(_)) => "ky_free",
                     Some(MirType::Chan(_)) => "ky_channel_free",
-                    Some(MirType::Bytes) => "ky_free",
                     _ => "ky_free",
                 };
                 block.insts.push(MirInst::Call {

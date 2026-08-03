@@ -1,41 +1,66 @@
-# net — Red
+# net — TCP networking
 
-> Module de redis (TCP).
-> Import: `use net.tcp`
+> Low-level TCP client and server.
+> Import: `use std.net`
 
-## tcp: conexionis TCP
+## TCP server
 
 ```ky
-use net.tcp
+use std.net
 
-# Servidor
-server: tcp = tcp.listen(8080)
-client: tcp = server.accept()
-data: str = client.read(1024)
-client.write("HTTP/1.1 200 OK\r\n\r\n")
-client.close()
-server.close()
+listener: tcp_listener = net.tcp_listen(8080)!
+println("listening on port 8080")
 
-# Cliente
-conn: tcp = tcp.connect("example.com", 80)
+while true:
+    client: tcp_stream = listener.accept()!
+    data: str = client.read(1024)
+    client.write("HTTP/1.1 200 OK\r\n\r\nHello World")
+    client.close()
+```
+
+## TCP client
+
+```ky
+conn: tcp_stream = net.tcp_connect("example.com", 80)!
 conn.write("GET / HTTP/1.1\r\nHost: example.com\r\n\r\n")
-resp: str = conn.read(4096)
+response: str = conn.read(4096)
 conn.close()
 ```
 
-### Methods (socket servidor)
+## tcp_listener
 
-| Method | Firma | Description |
-|--------|-------|-------------|
-| `tcp.listen(port)` | `fn(port: i32) tcp` | Crear socket servidor |
-| `s.accept()` | `fn() tcp` | Aceptar connection |
-| `s.close()` | `fn()` | Cerrar socket |
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `net.tcp_listen(port)` | `fn(port: i32) tcp_listener!` | Start listening |
+| `.accept()` | `fn() tcp_stream!` | Accept connection (blocks) |
+| `.close()` | `fn()` | Stop listening |
 
-### Methods (socket cliente)
+## tcp_stream
 
-| Method | Firma | Description |
-|--------|-------|-------------|
-| `tcp.connect(host, port)` | `fn(host: str, port: i32) tcp` | Conectar |
-| `c.read(count)` | `fn(count: i32) str` | Leer hasta N bytis |
-| `c.write(data)` | `fn(data: &str)` | Enviar data |
-| `c.close()` | `fn()` | Cerrar connection |
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `net.tcp_connect(host, port)` | `fn(host: &str, port: i32) tcp_stream!` | Connect to host |
+| `.read(count)` | `fn(count: i32) str` | Read up to N bytes |
+| `.read_all()` | `fn() str` | Read until connection closes |
+| `.write(data)` | `fn(data: &str)` | Send data |
+| `.close()` | `fn()` | Close connection |
+
+## Example: simple HTTP server
+
+```ky
+use std.net
+
+fn handle_request(client: tcp_stream):
+    request: str = client.read(4096)
+    client.write("HTTP/1.1 200 OK\r\n")
+    client.write("Content-Type: text/plain\r\n")
+    client.write("Content-Length: 12\r\n")
+    client.write("\r\n")
+    client.write("Hello World")
+    client.close()
+
+listener: tcp_listener = net.tcp_listen(8080)!
+while true:
+    client: tcp_stream = listener.accept()!
+    handle_request(client)
+```

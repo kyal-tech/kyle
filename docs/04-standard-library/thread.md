@@ -1,47 +1,64 @@
-# thread — Threads
+# thread — OS threads
 
-> Module for threads d sistema operativo.
-> Imbyt: `from thread imbyt thread`
+> Spawn and manage operating system threads.
+> Import: `use std.thread`
 
-## thread: spawn y join
+## Spawning and joining
 
 ```ky
-from thread imbyt thread
+use std.thread
 
 fn worker(n: i64) i64:
- n * 2
+    i: ^i64 = 0
+    result: ^i64 = 0
+    while i < n:
+        result = result + i
+        i = i + 1
+    result
 
-h = thread.spawn(worker as ptr, 21)
-result = thread.join(h)
-println(result.to_str()) # 42
+handle: thread = thread.spawn(worker, 1000000)
+result: i64 = thread.join(handle)
+println(result.to_str())
 ```
 
-### Functions
-
-| Function | Description |
-|---------|-------------|
-| `thread.spawn(fn_ptr, arg)` | Create nuevo thread d SO |
-| `thread.join(handle)` | Wait que thread termine |
-| `thread.yi d()` | Ceder turno al scheduler |
-| `thread.sleep(ms)` | Dormir thread current |
-| `thread.id()` | ID d thread current |
-
-### Example
+## Sleeping
 
 ```ky
-from thread imbyt thread
+thread.sleep(1000)   # milliseconds
+```
+
+## Current thread
+
+```ky
+id: i64 = thread.id()
+```
+
+## Functions
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `spawn(fn_ptr, arg)` | `fn(fn(T) R, T) thread` | Create new OS thread |
+| `join(handle)` | `fn(handle: thread) R` | Wait for thread to finish |
+| `sleep(ms)` | `fn(ms: i64)` | Sleep current thread |
+| `yield()` | `fn()` | Yield CPU to scheduler |
+| `id()` | `fn() i64` | Current thread ID |
+
+## Example
+
+```ky
+use std.thread
 
 fn compute(n: i64) i64:
- i: ^i64 = 0
- result: ^i64 = 0
- while i < n:
- result = result + i
- i = i + 1
- result
+    i: ^i64 = 0
+    result: ^i64 = 0
+    while i < n:
+        result = result + i
+        i = i + 1
+    result
 
-h1 = thread.spawn(compute as ptr, 1000000)
-h2 = thread.spawn(compute as ptr, 2000000)
-r1 = thread.join(h1)
-r2 = thread.join(h2)
+h1: thread = thread.spawn(compute, 1000000)
+h2: thread = thread.spawn(compute, 2000000)
+r1: i64 = thread.join(h1)
+r2: i64 = thread.join(h2)
 println("total: " + (r1 + r2).to_str())
 ```

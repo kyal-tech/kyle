@@ -1,0 +1,15 @@
+final class Tcp:
+    static fn listen(port: i32) i32:
+        tcp_listen(port)
+
+    static fn accept(fd: i32) i32:
+        tcp_accept(fd)
+
+    static fn read(fd: i32, count: i32) i64:
+        tcp_read(fd, count) as i64
+
+    static fn write(fd: i32, buf: i64, len: i32) i32:
+        tcp_write(fd, buf as ptr, len)
+
+    static fn close(fd: i32) i32:
+        tcp_close(fd)

@@ -1080,6 +1080,140 @@ impl<'ctx> Codegen<'ctx> {
             self.module.add_function("ky_bytes_to_base64", ft, None);
         }
 
+        // === Bytes extended API (endian, buffer) ===
+        // ptr ky_bytes_from_base64(ptr, ptr)
+        {
+            let params = [ptr_ty.into(), ptr_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_from_base64", ft, None);
+        }
+        // ptr ky_bytes_to_be_i32(i32)
+        {
+            let params = [i32_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_to_be_i32", ft, None);
+        }
+        // ptr ky_bytes_to_le_i32(i32)
+        {
+            let params = [i32_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_to_le_i32", ft, None);
+        }
+        // ptr ky_bytes_to_be_i64(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_to_be_i64", ft, None);
+        }
+        // ptr ky_bytes_to_le_i64(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_to_le_i64", ft, None);
+        }
+        // i32 ky_bytes_from_be_i32(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_from_be_i32", ft, None);
+        }
+        // i32 ky_bytes_from_le_i32(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_from_le_i32", ft, None);
+        }
+        // i64 ky_bytes_from_be_i64(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = i64_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_from_be_i64", ft, None);
+        }
+        // i64 ky_bytes_from_le_i64(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = i64_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_from_le_i64", ft, None);
+        }
+        // i32 ky_bytes_from_be_i32_at(ptr, i32)
+        {
+            let params = [ptr_ty.into(), i32_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_from_be_i32_at", ft, None);
+        }
+        // i64 ky_bytes_from_be_i64_at(ptr, i32)
+        {
+            let params = [ptr_ty.into(), i32_ty.into()];
+            let ft = i64_ty.fn_type(&params, false);
+            self.module.add_function("ky_bytes_from_be_i64_at", ft, None);
+        }
+        // i64 ky_buffer_new(i32)
+        {
+            let params = [i32_ty.into()];
+            let ft = i64_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_new", ft, None);
+        }
+        // void ky_buffer_free(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_free", ft, None);
+        }
+        // i32 ky_buffer_len(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_len", ft, None);
+        }
+        // void ky_buffer_write_byte(i64, i32)
+        {
+            let params = [i64_ty.into(), i32_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_write_byte", ft, None);
+        }
+        // void ky_buffer_write_be_i32(i64, i32)
+        {
+            let params = [i64_ty.into(), i32_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_write_be_i32", ft, None);
+        }
+        // void ky_buffer_write_le_i32(i64, i32)
+        {
+            let params = [i64_ty.into(), i32_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_write_le_i32", ft, None);
+        }
+        // void ky_buffer_write_be_i64(i64, i64)
+        {
+            let params = [i64_ty.into(), i64_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_write_be_i64", ft, None);
+        }
+        // void ky_buffer_write_le_i64(i64, i64)
+        {
+            let params = [i64_ty.into(), i64_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_write_le_i64", ft, None);
+        }
+        // void ky_buffer_write_str(i64, ptr)
+        {
+            let params = [i64_ty.into(), ptr_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_write_str", ft, None);
+        }
+        // ptr ky_buffer_to_bytes(i64, ptr)
+        {
+            let params = [i64_ty.into(), ptr_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_to_bytes", ft, None);
+        }
+        // void ky_buffer_clear(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_buffer_clear", ft, None);
+        }
+
         // === Prelude types: decimal ===
         // i64 ky_decimal_from_str(ptr)
         {
@@ -1181,6 +1315,121 @@ impl<'ctx> Codegen<'ctx> {
             let params = [ptr_ty.into()];
             let ft = ptr_ty.fn_type(&params, false);
             self.module.add_function("ky_url_query", ft, None);
+        }
+
+        // === Handle-based URL API (used by std.url) ===
+        // i64 ky_url_new()
+        {
+            let ft = i64_ty.fn_type(&[], false);
+            self.module.add_function("ky_url_new", ft, None);
+        }
+        // i64 ky_url_parse(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = i64_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_parse", ft, None);
+        }
+        // void ky_url_free(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_free", ft, None);
+        }
+        // ptr ky_url_to_str(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_to_str", ft, None);
+        }
+        // ptr ky_url_get_scheme(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_get_scheme", ft, None);
+        }
+        // ptr ky_url_get_host(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_get_host", ft, None);
+        }
+        // i32 ky_url_get_port(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_get_port", ft, None);
+        }
+        // ptr ky_url_get_path(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_get_path", ft, None);
+        }
+        // ptr ky_url_get_query(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_get_query", ft, None);
+        }
+        // ptr ky_url_get_fragment(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_get_fragment", ft, None);
+        }
+        // ptr ky_url_get_userinfo(i64)
+        {
+            let params = [i64_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_get_userinfo", ft, None);
+        }
+        // ptr ky_url_get_query_value(i64, ptr)
+        {
+            let params = [i64_ty.into(), ptr_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_get_query_value", ft, None);
+        }
+        // i32 ky_url_set_scheme(i64, ptr)
+        {
+            let params = [i64_ty.into(), ptr_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_set_scheme", ft, None);
+        }
+        // i32 ky_url_set_host(i64, ptr)
+        {
+            let params = [i64_ty.into(), ptr_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_set_host", ft, None);
+        }
+        // i32 ky_url_set_port(i64, i32)
+        {
+            let params = [i64_ty.into(), i32_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_set_port", ft, None);
+        }
+        // i32 ky_url_set_path(i64, ptr)
+        {
+            let params = [i64_ty.into(), ptr_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_set_path", ft, None);
+        }
+        // i32 ky_url_set_query(i64, ptr)
+        {
+            let params = [i64_ty.into(), ptr_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_set_query", ft, None);
+        }
+        // ptr ky_url_encode(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_encode", ft, None);
+        }
+        // ptr ky_url_decode(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = ptr_ty.fn_type(&params, false);
+            self.module.add_function("ky_url_decode", ft, None);
         }
 
         // === Crypto ===
@@ -1664,6 +1913,49 @@ impl<'ctx> Codegen<'ctx> {
             let params = [i64_ty.into()];
             let ft = void_ty.fn_type(&params, false);
             self.module.add_function("ky_atomic_bool_free", ft, None);
+        }
+
+        // === Log ===
+        // void ky_log_debug(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_log_debug", ft, None);
+        }
+        // void ky_log_info(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_log_info", ft, None);
+        }
+        // void ky_log_warn(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_log_warn", ft, None);
+        }
+        // void ky_log_error(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_log_error", ft, None);
+        }
+        // void ky_log_set_level(i32)
+        {
+            let params = [i32_ty.into()];
+            let ft = void_ty.fn_type(&params, false);
+            self.module.add_function("ky_log_set_level", ft, None);
+        }
+        // i32 ky_log_set_output(ptr)
+        {
+            let params = [ptr_ty.into()];
+            let ft = i32_ty.fn_type(&params, false);
+            self.module.add_function("ky_log_set_output", ft, None);
+        }
+        // void ky_log_set_console()
+        {
+            let ft = void_ty.fn_type(&[], false);
+            self.module.add_function("ky_log_set_console", ft, None);
         }
     }
 

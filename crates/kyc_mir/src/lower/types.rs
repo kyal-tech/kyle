@@ -96,8 +96,8 @@ pub(crate) fn builtin_return_type(name: &str) -> Option<MirType> {
         "ky_fs_read_to_string" => Some(MirType::Str),
         "ky_bytes_new" => Some(MirType::Bytes),
         "ky_bytes_get" | "ky_bytes_set" => Some(MirType::I32),
-        "ky_bytes_to_hex" | "ky_bytes_to_base64" => Some(MirType::Str),
-        "ky_bytes_from_hex" => Some(MirType::Bytes),
+        "ky_bytes_to_hex" | "ky_bytes_to_base64" => Some(MirType::Ptr(Box::new(MirType::U8))),
+        "ky_bytes_from_hex" | "ky_bytes_from_base64" => Some(MirType::Bytes),
         _ => None,
     }
 }

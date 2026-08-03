@@ -2,6 +2,10 @@ use crate::mir::*;
 use kyc_core::ast::*;
 use super::*;
 
+fn is_ref_param(p: &Parameter) -> bool {
+    p.mode == ParamMode::MutableBorrow || matches!(&p.type_, AstType::Mutable { .. })
+}
+
 impl super::Lowerer {
     pub(crate) fn collect_class_fields(
         c: &ClassDecl,
@@ -233,7 +237,7 @@ impl super::Lowerer {
                 } else {
                     ast_type_to_mir(&p.type_, Some(&struct_defs))
                 };
-                if p.mode == ParamMode::MutableBorrow {
+                if is_ref_param(p) {
                     MirType::Ptr(Box::new(base))
                 } else {
                     base
@@ -458,7 +462,12 @@ impl super::Lowerer {
             // Static method: no `this`, just explicit params
             let mut params: Vec<MirType> = Vec::new();
             for p in &m.params {
-                params.push(ast_type_to_mir(&p.type_, Some(&struct_defs)));
+                let base = ast_type_to_mir(&p.type_, Some(&struct_defs));
+                if is_ref_param(p) {
+                    params.push(MirType::Ptr(Box::new(base)));
+                } else {
+                    params.push(base);
+                }
             }
             mir_func.params = params;
             let param_modes: Vec<ParamMode> = m.params.iter().map(|p| p.mode).collect();
@@ -469,7 +478,12 @@ impl super::Lowerer {
                 if i == 0 && (p.name == "this" || p.name == "self") {
                     continue;
                 }
-                params.push(ast_type_to_mir(&p.type_, Some(&struct_defs)));
+                let base = ast_type_to_mir(&p.type_, Some(&struct_defs));
+                if is_ref_param(p) {
+                    params.push(MirType::Ptr(Box::new(base)));
+                } else {
+                    params.push(base);
+                }
             }
             mir_func.params = params;
             let mut param_modes = vec![ParamMode::MutableBorrow];
@@ -492,7 +506,16 @@ impl super::Lowerer {
         if is_static {
             // Static method: bind explicit params directly (no `this`)
             for (i, param) in m.params.iter().enumerate() {
-                let local = ctx.alloc_local(&param.name, ast_type_to_mir(&param.type_, Some(&ctx.struct_defs)));
+                let base = ast_type_to_mir(&param.type_, Some(&ctx.struct_defs));
+                let local_type = if is_ref_param(param) {
+                    MirType::Ptr(Box::new(base))
+                } else {
+                    base
+                };
+                let local = ctx.alloc_local(&param.name, local_type.clone());
+                if is_ref_param(param) {
+                    ctx.ref_param_locals.insert(local);
+                }
                 ctx.current_block.insts.push(MirInst::Store {
                     dest: local,
                     value: MirValue::Param(i),
@@ -517,7 +540,17 @@ impl super::Lowerer {
                 if i == 0 && (param.name == "this" || param.name == "self") {
                     continue;
                 }
-                let local = ctx.alloc_local(&param.name, ast_type_to_mir(&param.type_, Some(&ctx.struct_defs)));
+                let base = ast_type_to_mir(&param.type_, Some(&ctx.struct_defs));
+                let is_ref = is_ref_param(param);
+                let local_type = if is_ref {
+                    MirType::Ptr(Box::new(base))
+                } else {
+                    base
+                };
+                let local = ctx.alloc_local(&param.name, local_type);
+                if is_ref {
+                    ctx.ref_param_locals.insert(local);
+                }
                 ctx.current_block.insts.push(MirInst::Store {
                     dest: local,
                     value: MirValue::Param(param_offset),

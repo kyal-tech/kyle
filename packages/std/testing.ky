@@ -1,0 +1,20 @@
+@link "c"
+extern fn ky_assert(i32)
+extern fn ky_assert_eq(i64, i64)
+extern fn ky_assert_ne(i64, i64)
+extern fn ky_assert_str_eq(ptr, ptr)
+
+final class Assert:
+    static fn true(cond: bool):
+        v: ^i32 = 0
+        if cond: v = 1
+        ky_assert(v)
+
+    static fn eq(a: i64, b: i64):
+        ky_assert_eq(a, b)
+
+    static fn ne(a: i64, b: i64):
+        ky_assert_ne(a, b)
+
+    static fn str_eq(a: &str, b: &str):
+        ky_assert_str_eq(a as ptr, b as ptr)

@@ -1,0 +1,34 @@
+use std.cli.{Cli}
+
+fn main():
+    Cli.define(&"port", &"p", &"server port", &"8080")
+    Cli.define(&"verbose", &"v", &"verbose output", &"false")
+
+    handle := Cli.parse()
+
+    if Cli.has(&"port") == false:
+        println(&"FAIL: has(port)")
+    port := Cli.get(&"port")
+    if port != "9000":
+        println(&"FAIL: get(port) got '" + port + "'")
+    port_int := Cli.get_int(&"port")
+    if port_int != 9000:
+        println(&"FAIL: get_int(port) got " + port_int as str)
+
+    if Cli.has(&"verbose") == false:
+        println(&"FAIL: has(verbose)")
+    verbose := Cli.get_bool(&"verbose")
+    if verbose == false:
+        println(&"FAIL: get_bool(verbose)")
+
+    if Cli.argc() != 1:
+        println(&"FAIL: argc " + Cli.argc() as str)
+    first := Cli.arg(0)
+    if first != "in.txt":
+        println(&"FAIL: arg(0) got '" + first + "'")
+
+    help := Cli.help()
+    if help == "":
+        println(&"FAIL: help empty")
+
+    println(&"cli: ok")

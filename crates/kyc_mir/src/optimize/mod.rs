@@ -108,13 +108,12 @@ impl Optimizer {
                     continue; // skip complex terminators for now
                 }
 
-                // Remove the Call instruction
-                func_blocks[bi].insts.remove(ii);
-
-                // Clone the callee's single block with remapped locals
+                // Build the inlined instruction sequence (spliced at the call site).
+                // The callee's single block is cloned with remapped locals.
                 let callee_block = &callee.basic_blocks[0];
                 let param_count = callee.params.len();
                 let mut local_map: HashMap<usize, usize> = HashMap::new();
+                let mut inline_insts: Vec<MirInst> = Vec::new();
 
                 // Map callee allocas to new locals
                 for inst in &callee_block.insts {
@@ -126,11 +125,11 @@ impl Optimizer {
                         if let MirInst::Alloca { dest, .. } = &mut new_alloca {
                             *dest = new_local;
                         }
-                        func_blocks[bi].insts.push(new_alloca);
+                        inline_insts.push(new_alloca);
                         // Store param values into param allocas
                         if *dest < param_count {
                             if let Some(arg) = call_args.get(*dest) {
-                                func_blocks[bi].insts.push(MirInst::Store {
+                                inline_insts.push(MirInst::Store {
                                     dest: new_local,
                                     value: arg.clone(),
                                 });
@@ -139,25 +138,36 @@ impl Optimizer {
                     }
                 }
 
-                // Map and copy non-alloca instructions
+                // Map and copy non-alloca instructions. Skip the callee's own
+                // param binding stores (store param -> param alloca) — the real
+                // call arguments were already stored into the param allocas above.
                 for inst in &callee_block.insts {
                     if matches!(inst, MirInst::Alloca { .. }) {
                         continue;
                     }
+                    if let MirInst::Store { dest, value: MirValue::Param(_) } = inst {
+                        if *dest < param_count {
+                            continue;
+                        }
+                    }
                     let mut new_inst = inst.clone();
                     Self::remap_inst_locals(&mut new_inst, &local_map);
-                    func_blocks[bi].insts.push(new_inst);
+                    inline_insts.push(new_inst);
                 }
                 // Handle return terminator: store result then continue to next block
                 if let MirTerminator::Return(val) = &callee_block.terminator {
                     let mapped_val = Self::map_value(val, &local_map);
                     if let Some(dest) = dest_local {
-                        func_blocks[bi].insts.push(MirInst::Store {
+                        inline_insts.push(MirInst::Store {
                             dest,
                             value: mapped_val,
                         });
                     }
                 }
+
+                // Replace the call instruction with the inlined sequence in place,
+                // preserving instruction order relative to surrounding code.
+                func_blocks[bi].insts.splice(ii..ii + 1, inline_insts);
             }
 
             module.functions[func_idx].basic_blocks = func_blocks;

@@ -104,9 +104,16 @@ impl super::Lowerer {
                         if let Some(vl) = val_local {
                             let inferred = ctx.local_types.get(&vl).cloned();
                             if let Some(t) = inferred {
-                                if matches!(t, MirType::List(_) | MirType::Struct(_, _) | MirType::Array(_, _) | MirType::Dict(_, _) | MirType::Ptr(_)) {
+                                // Preserve the RHS type when it's pointer-backed or a
+                                // wider scalar. Inferring I32 would truncate pointers
+                                // (e.g. bytes → i32 loses the upper 32 bits).
+                                if matches!(t, MirType::List(_) | MirType::Struct(_, _) | MirType::Array(_, _)
+                                    | MirType::Dict(_, _) | MirType::Set(_) | MirType::Queue(_)
+                                    | MirType::Stack(_) | MirType::Deque(_) | MirType::LinkedList(_)
+                                    | MirType::Chan(_) | MirType::Slice(_) | MirType::Box(_)
+                                    | MirType::Ptr(_) | MirType::Bytes) {
                                     t
-                                } else if matches!(t, MirType::Str | MirType::I64 | MirType::F64 | MirType::Char) {
+                                } else if matches!(t, MirType::Str | MirType::I64 | MirType::F64 | MirType::Char | MirType::U64) {
                                     t
                                 } else {
                                     MirType::I32

@@ -610,6 +610,7 @@ dependencies = [
  "libc",
  "num-bigint",
  "num-traits",
+ "percent-encoding",
  "regex",
  "ring",
  "url",

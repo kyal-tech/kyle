@@ -1,0 +1,52 @@
+@link "c"
+extern fn ky_csv_parse(ptr, ptr) ptr
+extern fn ky_csv_free(ptr)
+extern fn ky_csv_row_count(ptr) i32
+extern fn ky_csv_col_count(ptr) i32
+extern fn ky_csv_get(ptr, i32, i32) ptr
+extern fn ky_csv_get_col(ptr, ptr, i32) ptr
+extern fn ky_csv_to_str(ptr) ptr
+extern fn ky_fs_exists(ptr) i32
+extern fn ky_fs_read_to_string(ptr) ptr
+extern fn ky_fs_write_string(ptr, ptr) i32
+
+final class Csv:
+    static fn parse(data: &str) i64:
+        ky_csv_parse(data as ptr, &",") as i64
+
+    static fn parse_delim(data: &str, delim: &str) i64:
+        ky_csv_parse(data as ptr, delim as ptr) as i64
+
+    static fn parse_file(path: &str) i64:
+        if ky_fs_exists(path as ptr) == 0: return 0
+        raw := ky_fs_read_to_string(path as ptr) as i64
+        if raw == 0: return 0
+        ky_csv_parse(raw as ptr, &",") as i64
+
+    static fn free(h: i64):
+        ky_csv_free(h as ptr)
+
+    static fn row_count(h: i64) i32:
+        ky_csv_row_count(h as ptr)
+
+    static fn col_count(h: i64) i32:
+        ky_csv_col_count(h as ptr)
+
+    static fn get(h: i64, r: i32, c: i32) str:
+        raw := ky_csv_get(h as ptr, r, c) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn get_col(h: i64, col: &str, r: i32) str:
+        raw := ky_csv_get_col(h as ptr, col as ptr, r) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn to_str(h: i64) str:
+        raw := ky_csv_to_str(h as ptr) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn to_file(path: &str, h: i64):
+        data := Csv.to_str(h)
+        ky_fs_write_string(path as ptr, data as ptr)

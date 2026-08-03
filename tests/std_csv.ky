@@ -1,0 +1,40 @@
+use std.csv.{Csv}
+
+fn main():
+    data := "name,age\nKyle,30\nAna,25\n"
+    h := Csv.parse(data)
+    if h == 0:
+        println(&"FAIL: parse returned null")
+    if Csv.row_count(h) != 2:
+        println(&"FAIL: row_count " + Csv.row_count(h).to_str())
+    if Csv.col_count(h) != 2:
+        println(&"FAIL: col_count " + Csv.col_count(h).to_str())
+
+    hdr := Csv.get(h, 0, 0)
+    if hdr != "name":
+        println(&"FAIL: header[0] got '" + hdr + "'")
+    cell := Csv.get(h, 1, 1)
+    if cell != "30":
+        println(&"FAIL: cell(1,1) got '" + cell + "'")
+    by := Csv.get_col(h, &"age", 1)
+    if by != "25":
+        println(&"FAIL: get_col age row1 got '" + by + "'")
+    miss := Csv.get_col(h, &"nope", 0)
+    if miss != "":
+        println(&"FAIL: get_col missing got '" + miss + "'")
+
+    s := Csv.to_str(h)
+    if s != data:
+        println(&"FAIL: to_str got '" + s + "'")
+
+    Csv.to_file(&"/tmp/kyle_csv_out.csv", h)
+    h2 := Csv.parse_file(&"/tmp/kyle_csv_out.csv")
+    if h2 == 0 or Csv.row_count(h2) != 2:
+        println(&"FAIL: parse_file roundtrip")
+    re := Csv.get_col(h2, &"age", 1)
+    if re != "25":
+        println(&"FAIL: parse_file age got '" + re + "'")
+
+    Csv.free(h)
+    Csv.free(h2)
+    println(&"csv: ok")

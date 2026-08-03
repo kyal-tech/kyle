@@ -1,15 +1,20 @@
-# datetime — Fechas, Horas y Duraciones
+# time — Date, time, and duration
 
-> Module de typis temporales: `date_time`, `date`, `time`, `duration`.
-> Todos are nativos de Kyle (no requieren `from ... import`).
+> Types for working with dates, times, and durations.
+> Import: `use std.time`
 
-## date_time: fecha y hora completas
+## datetime
+
+Full date and time with second precision.
 
 ```ky
-# DateTime (fecha + hora)
-dt: date_time = date_time.now()
-dt = date_time.parse("2024-01-01T12:30:00")
-dt = date_time.from_ymdhms(2024, 1, 1, 12, 30, 0)
+use std.time
+
+now: datetime = datetime.now()
+println(now.to_str())  # "2024-01-15T10:30:00"
+
+dt: datetime = datetime.from_ymd_hms(2024, 1, 1, 12, 30, 0)
+dt = datetime.parse("2024-01-01T12:30:00")
 
 year: i32 = dt.year()
 month: i32 = dt.month()
@@ -17,66 +22,76 @@ day: i32 = dt.day()
 hour: i32 = dt.hour()
 minute: i32 = dt.minute()
 second: i32 = dt.second()
-
-dt2: date_time = dt.add_days(7)
-dt3: date_time = dt.add_hours(3)
-diff: duration = dt.diff(dt2)
 ```
 
-### Methods de date_time
+### Methods
 
-| Method | Retorno | Description |
+| Method | Returns | Description |
 |--------|---------|-------------|
-| `date_time.now()` | `date_time` | Fecha/hora current |
-| `date_time.parse(s)` | `date_time` | Parsear string ISO |
-| `date_time.from_ymdhms(y, M, d, h, m, s)` | `date_time` | Construir from componentis |
+| `datetime.now()` | `datetime` | Current date and time |
+| `datetime.from_ymd_hms(y, m, d, h, mi, s)` | `datetime` | Construct from components |
+| `datetime.parse(s)` | `datetime` | Parse ISO 8601 string |
 | `.year()` | `i32` | Year |
-| `.month()` | `i32` | Mis (1-12) |
+| `.month()` | `i32` | Month (1-12) |
 | `.day()` | `i32` | Day (1-31) |
-| `.hour()` | `i32` | Hora (0-23) |
-| `.minute()` | `i32` | Minuto (0-59) |
-| `.second()` | `i32` | Segundo (0-59) |
-| `.add_days(n)` | `date_time` | Sumar days |
-| `.add_hours(n)` | `date_time` | Sumar horas |
-| `.diff(other)` | `duration` | Diferencia between fechas |
-| `.format(fmt)` | `str` | Formatear with patron |
-| `.to_str()` | `str` | String ISO |
-
-## date: solo fecha (without hora)
+| `.hour()` | `i32` | Hour (0-23) |
+| `.minute()` | `i32` | Minute (0-59) |
+| `.second()` | `i32` | Second (0-59) |
+| `.add_days(n)` | `datetime` | Add days |
+| `.add_hours(n)` | `datetime` | Add hours |
+| `.add_minutes(n)` | `datetime` | Add minutes |
+| `.add_seconds(n)` | `datetime` | Add seconds |
+| `.diff(other)` | `duration` | Difference between two datetimes |
+| `.format(fmt)` | `str` | Format with pattern |
+| `.to_str()` | `str` | ISO 8601 string |
 
 ```ky
-d: date = date.today()
-d = date.from_ymd(2024, 1, 1)
+start: datetime = datetime.now()
+# ... some work ...
+end: datetime = datetime.now()
+elapsed: duration = start.diff(end)
+println("took " + elapsed.total_milliseconds().to_str() + "ms")
+```
+
+## date
+
+Calendar date without time.
+
+```ky
+today: date = date.today()
+d: date = date.from_ymd(2024, 1, 1)
 d = date.parse("2024-01-01")
 
 year: i32 = d.year()
 month: i32 = d.month()
 day: i32 = d.day()
-weekday: i32 = d.weekday() # 0=domingo, 1=lunes...
+weekday: i32 = d.weekday()   # 0=sunday, 1=monday ...
 
-d2: date = d.add_days(7)
+next_week: date = d.add_days(7)
 ```
 
-### Methods de date
+### Methods
 
-| Method | Retorno | Description |
+| Method | Returns | Description |
 |--------|---------|-------------|
-| `date.today()` | `date` | Fecha current |
-| `date.from_ymd(y, M, d)` | `date` | Construir from componentis |
-| `date.parse(s)` | `date` | Parsear string |
+| `date.today()` | `date` | Current date |
+| `date.from_ymd(y, m, d)` | `date` | Construct from components |
+| `date.parse(s)` | `date` | Parse ISO date string |
 | `.year()` | `i32` | Year |
-| `.month()` | `i32` | Mis |
+| `.month()` | `i32` | Month |
 | `.day()` | `i32` | Day |
-| `.weekday()` | `i32` | Day de semana |
-| `.add_days(n)` | `date` | Sumar days |
-| `.format(fmt)` | `str` | Formatear |
-| `.to_str()` | `str` | String ISO |
+| `.weekday()` | `i32` | Day of week |
+| `.add_days(n)` | `date` | Add days |
+| `.format(fmt)` | `str` | Format with pattern |
+| `.to_str()` | `str` | ISO date string |
 
-## time: solo hora (without fecha)
+## time
+
+Time of day without date.
 
 ```ky
-t: time = time.now()
-t = time.from_hms(12, 30, 0)
+now: time = time.now()
+t: time = time.from_hms(12, 30, 0)
 t = time.parse("12:30:00")
 
 hour: i32 = t.hour()
@@ -84,65 +99,68 @@ minute: i32 = t.minute()
 second: i32 = t.second()
 ```
 
-### Methods de time
+### Methods
 
-| Method | Retorno | Description |
+| Method | Returns | Description |
 |--------|---------|-------------|
-| `time.now()` | `time` | Hora current |
-| `time.from_hms(h, m, s)` | `time` | Construir from componentis |
-| `time.parse(s)` | `time` | Parsear string |
-| `.hour()` | `i32` | Hora |
-| `.minute()` | `i32` | Minuto |
-| `.second()` | `i32` | Segundo |
-| `.to_str()` | `str` | String HH:MM:SS |
+| `time.now()` | `time` | Current time |
+| `time.from_hms(h, m, s)` | `time` | Construct from components |
+| `time.parse(s)` | `time` | Parse time string |
+| `.hour()` | `i32` | Hour |
+| `.minute()` | `i32` | Minute |
+| `.second()` | `i32` | Second |
+| `.to_str()` | `str` | HH:MM:SS string |
 
-## duration: intervalos de tiempo
+## duration
+
+Time interval between two points in time.
 
 ```ky
-d: duration = duration.from_secs(60)
-d = duration.from_millis(1000)
+d: duration = duration.from_seconds(60)
+d = duration.from_milliseconds(1000)
 d = duration.from_hours(1)
 d = duration.from_days(7)
 
 total_secs: i64 = d.total_seconds()
 total_ms: i64 = d.total_milliseconds()
-s: str = d.to_str() # → "1h 0m 0s"
+total_days: i64 = d.total_days()
+text: str = d.to_str()   # "1h 0m 0s"
 ```
 
-### Methods de duration
+### Methods
 
-| Method | Retorno | Description |
+| Method | Returns | Description |
 |--------|---------|-------------|
-| `duration.from_secs(n)` | `duration` | Desde segundos |
-| `duration.from_millis(n)` | `duration` | Desde milisegundos |
-| `duration.from_hours(n)` | `duration` | Desde horas |
-| `duration.from_days(n)` | `duration` | Desde days |
-| `.total_seconds()` | `i64` | Total en segundos |
-| `.total_milliseconds()` | `i64` | Total en ms |
-| `.to_str()` | `str` | String legible |
+| `duration.from_seconds(n)` | `duration` | From seconds |
+| `duration.from_milliseconds(n)` | `duration` | From milliseconds |
+| `duration.from_hours(n)` | `duration` | From hours |
+| `duration.from_days(n)` | `duration` | From days |
+| `.total_seconds()` | `i64` | Total seconds |
+| `.total_milliseconds()` | `i64` | Total milliseconds |
+| `.total_days()` | `i64` | Total days |
+| `.to_str()` | `str` | Human-readable string |
 
-### sleep (funcion global)
+## sleep
+
+Pause execution for a given number of milliseconds.
 
 ```ky
-sleep(1000) # pausa en milisegundos (funcion global)
+sleep(1000)  # pause for 1 second
 ```
 
-### Example completo
+## Example
 
 ```ky
-# Measurement de tiempo
-start: date_time = date_time.now()
-# ... code a medir ...
-end: date_time = date_time.now()
+use std.time
+
+today: date = date.today()
+birthday: date = date.from_ymd(2024, 12, 25)
+days_left: i64 = today.diff(birthday).total_days()
+println(days_left.to_str() + " days until birthday")
+
+start: datetime = datetime.now()
+sleep(500)
+end: datetime = datetime.now()
 elapsed: duration = start.diff(end)
-println("tomo " + elapsed.total_milliseconds().to_str() + "ms")
-
-# Fechas
-hoy: date = date.today()
-cumple: date = date.from_ymd(2024, 12, 25)
-dias: i64 = hoy.diff(cumple).total_days()
-println("faltan " + dias.to_str() + " days")
-
-# Timer
-sleep(500) # 500ms
+println("took " + elapsed.total_milliseconds().to_str() + "ms")
 ```

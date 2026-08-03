@@ -1,0 +1,12 @@
+final class Regex:
+    static fn compile(pattern: &str) i64:
+        regex_compile(&pattern) as i64
+
+    static fn is_match(re: i64, s: &str) bool:
+        regex_is_match(re as ptr, &s) == 1
+
+    static fn find(re: i64, s: &str) str:
+        regex_find(re as ptr, &s)
+
+    static fn replace(re: i64, s: &str, with: &str) str:
+        regex_replace(re as ptr, &s, &with)

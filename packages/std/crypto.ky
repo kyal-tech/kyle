@@ -1,0 +1,23 @@
+final class Crypto:
+    static fn sha256(data: &str) str:
+        sha256(&data)
+
+    static fn random_bytes(count: i32) i64:
+        random_bytes(count) as i64
+
+    static fn uuid_v4() i64:
+        uuid_v4() as i64
+
+    static fn uuid_parse(s: &str) i64:
+        uuid_parse(&s) as i64
+
+    static fn uuid_to_str(data: i64) str:
+        raw = data as ptr
+        if raw == 0 as ptr: return ""
+        raw as str
+
+    static fn base64_encode(data: i64, len: i32) str:
+        bytes_to_base64(data as ptr, len)
+
+    static fn to_hex(data: i64, len: i32) str:
+        bytes_to_hex(data as ptr, len)

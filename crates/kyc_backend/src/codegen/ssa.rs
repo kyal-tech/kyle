@@ -297,13 +297,10 @@ impl<'ctx> Codegen<'ctx> {
                             if found { val }
                             // 3. Constant values from const_values
                             else if let Some(c) = func.const_values.get(&id) { self.constant_to_llvm(c) }
-                            // 4. Fallback to alloca_map (non-promotable allocas like structs, slices)
-                            else if let Some(Some(ptr)) = self.alloca_map.get(id) {
-                                self.alloca_types.get(&id).and_then(|pointee_type| {
-                                    self.builder.build_load(*pointee_type, *ptr, "_ssaload").ok()
-                                }).unwrap_or_else(|| self.context.i32_type().const_zero().as_basic_value_enum())
-                            }
-                            // 5. Non-promotable dummy (_np{mir_id}): load from the actual MIR alloca
+                            // 4. Non-promotable dummy (_np{mir_id}): load from the actual MIR alloca.
+                            //    Must run BEFORE the alloca_map fallback: SsaValueIds and MIR local
+                            //    ids share a numeric namespace, so alloca_map.get(id) can collide
+                            //    with an unrelated MIR alloca for dummy SsaValueIds.
                             else if let Some(sv) = func.values.get(id) {
                                 let mir_id = sv.name.strip_prefix("_np")
                                     .and_then(|s| s.parse::<usize>().ok());
@@ -316,6 +313,12 @@ impl<'ctx> Codegen<'ctx> {
                                 } else {
                                     self.context.i32_type().const_zero().as_basic_value_enum()
                                 }
+                            }
+                            // 5. Fallback to alloca_map (non-promotable allocas like structs, slices)
+                            else if let Some(Some(ptr)) = self.alloca_map.get(id) {
+                                self.alloca_types.get(&id).and_then(|pointee_type| {
+                                    self.builder.build_load(*pointee_type, *ptr, "_ssaload").ok()
+                                }).unwrap_or_else(|| self.context.i32_type().const_zero().as_basic_value_enum())
                             }
                             // 6. Default zero
                             else { self.context.i32_type().const_zero().as_basic_value_enum() }

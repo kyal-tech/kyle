@@ -1,80 +1,102 @@
-# sync — Synchronization
+# sync — Synchronization primitives
 
-> Module for primitivis de synchronization between threads.
-> Imbyt: `from sync imbyt mutex, atomic, chann , barrier`
+> Mutex, atomic operations, and channels for thread synchronization.
+> Import: `use std.sync`
 
-## mutex: exclusion mutua
+## mutex
+
+Mutual exclusion for shared state.
 
 ```ky
-from sync imbyt mutex
+use std.sync
 
-m = mutex(0)
-i: ^i64 = 0
+m: mutex<i64> = mutex(0)
 
+# Lock with block (auto-release)
 lock(m):
- i = i + 1 # operation segura between threads
+    m.value = m.value + 1
+
+# Manual lock/unlock
+m.lock()
+m.value = m.value + 1
+m.unlock()
 ```
 
 ### Methods
 
-| Method | Description |
-|--------|-------------|
-| `mutex(initial)` | Create mutex with value inicial |
-| `lock(m): ...` | Lock hasta adquirir (with bloque) |
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `mutex(initial)` | `fn(initial: T) mutex<T>` | Create mutex with initial value |
+| `.lock()` | `fn()` | Acquire lock (blocks) |
+| `.unlock()` | `fn()` | Release lock |
+| `lock(m): ...` | block | Acquire lock for block duration |
 
-## atomic: operations atomicas
+## atomic
+
+Lock-free atomic operations for simple values.
 
 ```ky
-from sync imbyt atomic
-
-counter = atomic.i64(0)
+counter: atomic_i64 = sync.atomic_i64(0)
 counter.fetch_add(1)
-counter.load() # → 1
+val: i64 = counter.load()   # 1
 
-f g = atomic.bool(false)
-f g.store(true)
-f g.load() # → true
+flag: atomic_bool = sync.atomic_bool(false)
+flag.store(true)
+val: bool = flag.load()     # true
 ```
 
 ### Methods
 
-| Method | Description |
-|--------|-------------|
-| `atomic.i64(val)` | Create withtador atomico |
-| `atomic.bool(val)` | Create f g atomico |
-| `c.fetch_add(n)` | Incremento atomico |
-| `c.load()` | Lectura atomica |
-| `c.store(val)` | Escritura atomica |
-| `c.compare_and_swap(old, new)` | CAS atomico |
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `atomic_i64(val)` | `fn(val: i64) atomic_i64` | Create atomic counter |
+| `atomic_bool(val)` | `fn(val: bool) atomic_bool` | Create atomic flag |
+| `.fetch_add(n)` | `fn(n: i64) i64` | Atomic increment (returns old value) |
+| `.load()` | `fn() T` | Atomic read |
+| `.store(val)` | `fn(val: T)` | Atomic write |
+| `.compare_and_swap(old, new)` | `fn(old: T, new: T) bool` | CAS operation |
 
-## chann : communication between threads
+## channel
+
+Communication between threads via typed channels.
 
 ```ky
-from sync imbyt chann 
-
-ch = chann .i64(16) # buffer de 16
+ch: chan<i64> = sync.channel(16)   # buffered channel (16 items)
 ch.send(42)
-val = ch.recv()
-ch.len()
-ch.c e()
+val: i64 = ch.recv()
+ch.close()
 ```
 
 ### Methods
 
-| Method | Description |
-|--------|-------------|
-| `chann .i64(capacity)` | Create chann de i64 |
-| `ch.send(val)` | Send value |
-| `ch.recv()` | Receive value (blocks si vacio) |
-| `ch.len()` | Count de ements en buffer |
-| `ch.c e()` | C e chann |
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `channel(capacity)` | `fn(capacity: i32) chan<T>` | Create buffered channel |
+| `.send(val)` | `fn(val: T)` | Send value (blocks if full) |
+| `.recv()` | `fn() T` | Receive value (blocks if empty) |
+| `.len()` | `fn() i32` | Number of items in buffer |
+| `.close()` | `fn()` | Close channel |
 
-## barrier: synchronization de barrera
+## Example: producer-consumer
 
 ```ky
-from sync imbyt barrier
+use std.sync
+use std.thread
 
-b = barrier(4) # 4 threads must llegar
-# en cada thread:
-b.wait() # wait a que lleguen todos
+ch: chan<i64> = sync.channel(16)
+
+fn producer(ch: ^&chan<i64>):
+    for i in 0..10:
+        ch.send(i)
+    ch.close()
+
+fn consumer(ch: ^&chan<i64>):
+    while true:
+        val: i64 = ch.recv()
+        println("got: " + val.to_str())
+
+producer_h: thread = thread.spawn(producer, ch)
+consumer_h: thread = thread.spawn(consumer, ch)
+thread.join(producer_h)
+thread.join(consumer_h)
 ```

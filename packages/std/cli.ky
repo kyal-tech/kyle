@@ -1,0 +1,44 @@
+@link "c"
+extern fn ky_cli_parse() ptr
+extern fn ky_cli_argc() i32
+extern fn ky_cli_arg(i32) ptr
+extern fn ky_cli_has(ptr) i32
+extern fn ky_cli_get(ptr) ptr
+extern fn ky_cli_get_int(ptr) i64
+extern fn ky_cli_get_bool(ptr) i32
+extern fn ky_cli_define(ptr, ptr, ptr, ptr) i32
+extern fn ky_cli_help() ptr
+
+final class Cli:
+    static fn parse() i64:
+        ky_cli_parse() as i64
+
+    static fn argc() i32:
+        ky_cli_argc()
+
+    static fn arg(n: i32) str:
+        raw = ky_cli_arg(n) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn has(name: &str) bool:
+        ky_cli_has(name as ptr) == 1
+
+    static fn get(name: &str) str:
+        raw = ky_cli_get(name as ptr) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn get_int(name: &str) i64:
+        ky_cli_get_int(name as ptr)
+
+    static fn get_bool(name: &str) bool:
+        ky_cli_get_bool(name as ptr) == 1
+
+    static fn define(name: &str, short: &str, desc: &str, default: &str):
+        ky_cli_define(name as ptr, short as ptr, desc as ptr, default as ptr)
+
+    static fn help() str:
+        raw = ky_cli_help() as i64
+        if raw == 0: return ""
+        (raw as ptr) as str

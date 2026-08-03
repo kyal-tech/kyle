@@ -30,6 +30,9 @@ pub mod big_int;
 pub mod deque;
 pub mod linked_list;
 pub mod sync;
+pub mod log;
+pub mod cli;
+pub mod csv;
 
 pub use memory::{ky_alloc, ky_free, ky_retain, ky_release};
 pub use io::{ky_print, ky_println, ky_input, ky_input_with_prompt, ky_open, ky_read_str, ky_write_str, ky_close, ky_sleep, ky_now};
@@ -64,6 +67,12 @@ pub use linked_list::{ky_linked_list_new, ky_linked_list_free, ky_linked_list_pu
 pub use sync::{ky_mutex_new, ky_mutex_lock, ky_mutex_store, ky_mutex_free,
     ky_atomic_i64_new, ky_atomic_i64_load, ky_atomic_i64_store, ky_atomic_i64_add, ky_atomic_i64_free,
     ky_atomic_bool_new, ky_atomic_bool_load, ky_atomic_bool_store, ky_atomic_bool_free};
+
+pub use log::{ky_log_debug, ky_log_info, ky_log_warn, ky_log_error, ky_log_set_level, ky_log_set_output, ky_log_set_console};
+
+pub use cli::{ky_cli_parse, ky_cli_arg, ky_cli_argc, ky_cli_has, ky_cli_get, ky_cli_get_int, ky_cli_get_bool, ky_cli_define, ky_cli_help};
+
+pub use csv::{ky_csv_parse, ky_csv_free, ky_csv_row_count, ky_csv_col_count, ky_csv_get, ky_csv_get_col, ky_csv_to_str};
 
 /// Power: compute base ** exp for i64 values. Returns i64 (truncated).
 #[unsafe(no_mangle)]

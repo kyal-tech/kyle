@@ -819,6 +819,17 @@ impl Pipeline {
                                 }
                             }
                         }
+                        // Always carry the module's extern fn declarations so codegen
+                        // knows the true signatures (selective imports otherwise drop them).
+                        for d in &module.program.declarations {
+                            if let kyc_core::ast::Decl::Function(f) = d {
+                                if f.is_extern && !module_decls.iter().any(|m| {
+                                    matches!(m, kyc_core::ast::Decl::Function(mf) if mf.name == f.name && mf.is_extern)
+                                }) {
+                                    module_decls.push(d.clone());
+                                }
+                            }
+                        }
                         import_decls.push((i, module_decls));
                     } else {
                         import_decls.push((i, Vec::new()));

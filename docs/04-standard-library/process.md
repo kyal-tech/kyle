@@ -1,49 +1,47 @@
-# process — Process d Sistema
+# process — OS process management
 
-> Module for execution de operating system processis operativo.
-> Imbyt: `from process imbyt process`
+> Execute commands and interact with the operating system.
+> Import: `use std.process`
+>
+> For environment variables, use the `env` package (`ky add env`).
 
-## process: execute comandos
+## Executing commands
 
 ```ky
-from process imbyt process
+use std.process
 
-# Ejecutar comando y capturar output
-output = process.exec("ls - ")
+output: str = process.exec("ls -la")!
 println(output)
 
-# Ejecutar with argumentos
-output = process.exec_args("echo", {"h lo", "world"})
-
-# Leer variablis de entorno
-home = process.env("HOME")
-println(home)
-
-# Establecer variable de entorno
-process.set_env("MY_VAR", "value")
+# Safer: exec with explicit arguments (no shell injection)
+output = process.exec_args("echo", ["hello", "world"])!
 ```
 
-### Functions
-
-| Function | Description |
-|---------|-------------|
-| `process.exec(cmd)` | Ejecutar comando sh l (returns stdout as str) |
-| `process.exec_args(cmd, args)` | Ejecutar with argumentos (without sh l) |
-| `process.env(name)` | Leer variable de entorno |
-| `process.set_env(name, val)` | Establecer variable de entorno |
-| `process.exit(code)` | Terminar proceso with code |
-| `process.pid()` | PID d proceso current |
-| `process.cwd()` | Directorio de trabajo current |
-| `process.chdir(path)` | Cambiar directory de trabajo |
-
-### Example
+## Process control
 
 ```ky
-from process imbyt process
+pid: i64 = process.pid()
+cwd: str = process.cwd()
+process.chdir("/tmp")
+process.exit(0)
+```
 
-output = process.exec("python3 -c 'print(42)'")
-println("python dice: " + output.trim())
+## Functions
 
-if process.env("DEBUG") == "1":
- println("modo debug activado")
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `exec(cmd)` | `fn(cmd: &str) str!` | Execute shell command (returns stdout) |
+| `exec_args(cmd, args)` | `fn(cmd: &str, args: &[str]) str!` | Execute with arguments (no shell) |
+| `exit(code)` | `fn(code: i32)` | Terminate process with exit code |
+| `pid()` | `fn() i64` | Current process ID |
+| `cwd()` | `fn() str` | Current working directory |
+| `chdir(path)` | `fn(path: &str)!` | Change working directory |
+
+## Example
+
+```ky
+use std.process
+
+output: str = process.exec("python3 -c 'print(42)'")!
+println("python says: " + output.trim())
 ```

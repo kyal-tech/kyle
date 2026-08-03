@@ -1,0 +1,160 @@
+use std.bytes.{new, bytes_free, byte_at, set_byte, to_hex, to_base64, from_hex, from_base64, to_be_i32, to_le_i32, to_be_i64, to_le_i64, from_be_i32, from_le_i32, from_be_i64, from_le_i64, from_be_i32_at, from_be_i64_at, Buffer}
+
+fn main():
+    test_basic()
+    test_set_get()
+    test_hex_roundtrip()
+    test_base64_roundtrip()
+    test_endian()
+    test_endian_at()
+    test_buffer()
+    println(&"ALL BYTES TESTS PASSED")
+
+fn test_basic():
+    b := new(8)
+    if b == 0:
+        println(&"FAIL: new(8) returned null")
+        return
+    bytes_free(b, 8)
+    println(&"basic: ok")
+
+fn test_set_get():
+    b := new(3)
+    set_byte(b, 0, 65)
+    set_byte(b, 1, 66)
+    set_byte(b, 2, 67)
+    if byte_at(b, 0) != 65: println(&"FAIL: byte_at(0)")
+    if byte_at(b, 1) != 66: println(&"FAIL: byte_at(1)")
+    if byte_at(b, 2) != 67: println(&"FAIL: byte_at(2)")
+    bytes_free(b, 3)
+    println(&"set_get: ok")
+
+fn test_hex_roundtrip():
+    b := new(3)
+    set_byte(b, 0, 0x0a)
+    set_byte(b, 1, 0x1b)
+    set_byte(b, 2, 0xff)
+    h := to_hex(b, 3)
+    if h != "0a1bff":
+        println(&"FAIL: to_hex got '" + h + "'")
+        return
+    rb := from_hex(h)
+    if rb == 0:
+        println(&"FAIL: from_hex returned null")
+        return
+    if byte_at(rb, 0) != 0x0a: println(&"FAIL: from_hex[0]")
+    if byte_at(rb, 1) != 0x1b: println(&"FAIL: from_hex[1]")
+    if byte_at(rb, 2) != 0xff: println(&"FAIL: from_hex[2]")
+    bytes_free(b, 3)
+    bytes_free(rb, 3)
+    println(&"hex roundtrip: ok (" + h + ")")
+
+fn test_base64_roundtrip():
+    b := new(4)
+    set_byte(b, 0, 1)
+    set_byte(b, 1, 2)
+    set_byte(b, 2, 3)
+    set_byte(b, 3, 4)
+    s := to_base64(b, 4)
+    if s == "":
+        println(&"FAIL: to_base64 empty")
+        return
+    rb := from_base64(s)
+    if rb == 0:
+        println(&"FAIL: from_base64 returned null")
+        return
+    if byte_at(rb, 0) != 1: println(&"FAIL: from_base64[0]")
+    if byte_at(rb, 1) != 2: println(&"FAIL: from_base64[1]")
+    if byte_at(rb, 2) != 3: println(&"FAIL: from_base64[2]")
+    if byte_at(rb, 3) != 4: println(&"FAIL: from_base64[3]")
+    bytes_free(b, 4)
+    bytes_free(rb, 4)
+    println(&"base64 roundtrip: ok (" + s + ")")
+
+fn test_endian():
+    b := to_be_i32(0x01020304)
+    if b == 0:
+        println(&"FAIL: to_be_i32")
+        return
+    v := from_be_i32(b)
+    if v != 0x01020304: println(&"FAIL: from_be_i32 got " + v.to_str())
+    vle := from_le_i32(b)
+    if vle != 0x04030201: println(&"FAIL: from_le_i32 got " + vle.to_str())
+    bytes_free(b, 4)
+
+    l := to_le_i32(0x01020304)
+    if l == 0:
+        println(&"FAIL: to_le_i32")
+        return
+    vl := from_le_i32(l)
+    if vl != 0x01020304: println(&"FAIL: from_le_i32(le) got " + vl.to_str())
+    vbl := from_be_i32(l)
+    if vbl != 0x04030201: println(&"FAIL: from_be_i32(le) got " + vbl.to_str())
+    bytes_free(l, 4)
+
+    i := to_be_i64(0x0102030405060708)
+    if i == 0:
+        println(&"FAIL: to_be_i64")
+        return
+    vi := from_be_i64(i)
+    if vi != 0x0102030405060708: println(&"FAIL: from_be_i64 got " + vi.to_str())
+    vli := from_le_i64(i)
+    if vli != 0x0807060504030201: println(&"FAIL: from_le_i64 got " + vli.to_str())
+    bytes_free(i, 8)
+
+    j := to_le_i64(0x0102030405060708)
+    if j == 0:
+        println(&"FAIL: to_le_i64")
+        return
+    vj := from_le_i64(j)
+    if vj != 0x0102030405060708: println(&"FAIL: from_le_i64(le) got " + vj.to_str())
+    vbj := from_be_i64(j)
+    if vbj != 0x0807060504030201: println(&"FAIL: from_be_i64(le) got " + vbj.to_str())
+    bytes_free(j, 8)
+    println(&"endian: ok")
+
+fn test_endian_at():
+    b := new(8)
+    set_byte(b, 0, 0x01)
+    set_byte(b, 1, 0x02)
+    set_byte(b, 2, 0x03)
+    set_byte(b, 3, 0x04)
+    set_byte(b, 4, 0x05)
+    set_byte(b, 5, 0x06)
+    set_byte(b, 6, 0x07)
+    set_byte(b, 7, 0x08)
+    a32 := from_be_i32_at(b, 0)
+    if a32 != 0x01020304: println(&"FAIL: from_be_i32_at got " + a32.to_str())
+    a64 := from_be_i64_at(b, 0)
+    if a64 != 0x0102030405060708: println(&"FAIL: from_be_i64_at got " + a64.to_str())
+    a64b := from_be_i64_at(b, 1)
+    if a64b != 0x0203040506070800:
+        if a64b != 0x0203040506070800: println(&"FAIL: from_be_i64_at[1] got " + a64b.to_str())
+    bytes_free(b, 8)
+    println(&"endian_at: ok")
+
+fn test_buffer():
+    buf := Buffer.new(16)
+    buf.write_byte(65)
+    buf.write_byte(66)
+    buf.write_byte(67)
+    if buf.len() != 3: println(&"FAIL: buffer len " + buf.len().to_str())
+    buf.write_be_i32(7)
+    if buf.len() != 7: println(&"FAIL: buffer len after be_i32")
+    buf.write_le_i64(8)
+    if buf.len() != 15: println(&"FAIL: buffer len after le_i64 " + buf.len().to_str())
+    buf.write_str("hi")
+    if buf.len() != 17: println(&"FAIL: buffer len after str " + buf.len().to_str())
+    out_size: ^i32 = 0
+    raw := buf.to_bytes(&out_size)
+    if raw == 0:
+        println(&"FAIL: buffer to_bytes")
+    else:
+        if out_size != 17: println(&"FAIL: buffer to_bytes out_size " + out_size.to_str())
+        h := to_hex(raw, 17)
+        println(&"buffer bytes: " + h)
+        bytes_free(raw, 17)
+    buf.clear()
+    if buf.len() != 0: println(&"FAIL: buffer clear")
+    buf.free()
+    println(&"buffer: ok")

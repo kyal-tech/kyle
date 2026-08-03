@@ -5894,6 +5894,15 @@ impl super::Lowerer {
                         return ctx;
                     }
                     if let Some(&local_id) = ctx.locals.get(name) {
+                        // For ^T (ref param) locals: load the stored pointer and pass it through
+                        if ctx.ref_param_locals.contains(&local_id) {
+                            let dest = ctx.alloc_local("_addr", MirType::Ptr(Box::new(MirType::I8)));
+                            ctx.current_block.insts.push(MirInst::Load {
+                                dest,
+                                src: local_id,
+                            });
+                            return ctx;
+                        }
                         let local_ty = ctx.local_types.get(&local_id).cloned();
                         if let Some(t) = local_ty {
                             let is_heap_type = matches!(t,

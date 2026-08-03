@@ -1,0 +1,14 @@
+@link "c"
+extern fn ky_json_parse(ptr) ptr
+extern fn ky_json_stringify(ptr) ptr
+extern fn ky_json_stringify_str(ptr) ptr
+
+final class Json:
+    static fn parse(s: &str) i64:
+        ky_json_parse(s as ptr) as i64
+
+    static fn stringify(obj: i64) str:
+        ky_json_stringify(obj as ptr) as str
+
+    static fn pretty(obj: i64) str:
+        ky_json_stringify_str(obj as ptr) as str

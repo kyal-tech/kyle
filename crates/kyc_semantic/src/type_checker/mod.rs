@@ -929,14 +929,20 @@ impl TypeChecker {
                                     for (i, (arg, param)) in arguments.iter().zip(fdecl.params.iter()).enumerate() {
                                         let has_borrow = matches!(arg, Expr::BorrowRef { mutable: false, .. });
                                         let has_mut_borrow = matches!(arg, Expr::BorrowRef { mutable: true, .. });
-                                        let type_name = match &param.type_ {
+                                        // Unwrap borrow/mutable wrappers to inspect the underlying type
+                                        // (e.g. `&str` should behave like a copy type `str`).
+                                        let inner_type: &AstType = match &param.type_ {
+                                            AstType::Borrow { inner, .. } | AstType::Mutable { inner, .. } => inner,
+                                            t => t,
+                                        };
+                                        let type_name = match inner_type {
                                             AstType::User { name, .. } | AstType::Primitive { name, .. } => Some(name.as_str()),
                                             AstType::Set { .. } | AstType::Queue { .. } | AstType::Stack { .. } | AstType::Deque { .. } | AstType::LinkedList { .. } | AstType::List { .. } | AstType::Array { .. } | AstType::Chan { .. } | AstType::Bytes { .. } => Some("__array__"),
                                             AstType::Ptr { .. } => Some("ptr"),
                                             _ => None,
                                         };
                                         let is_copy_type = type_name.map_or(false, |n| n != "void" && n != "any" && n != "__array__")
-                                            || matches!(&param.type_, AstType::Set { .. } | AstType::Queue { .. } | AstType::Stack { .. } | AstType::Deque { .. } | AstType::LinkedList { .. } | AstType::List { .. } | AstType::Array { .. } | AstType::Chan { .. } | AstType::Bytes { .. });
+                                            || matches!(inner_type, AstType::Set { .. } | AstType::Queue { .. } | AstType::Stack { .. } | AstType::Deque { .. } | AstType::LinkedList { .. } | AstType::List { .. } | AstType::Array { .. } | AstType::Chan { .. } | AstType::Bytes { .. });
                                         match param.mode {
                                             ParamMode::Borrow if !has_borrow && !is_copy_type => {
                                                 self.reporter.report(

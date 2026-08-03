@@ -45,8 +45,8 @@ Desktop.ini
 # === Distribution / Release artifacts ===
 dist/
 
-# === Removed — now in kyle-packages repo ===
-# packages/, docs/, registry/ moved to ../kyle-packages/
+# === VS Code extension build output ===
+vscode-extension/out/
 
 # === Temporary / Logs ===
 tmp/

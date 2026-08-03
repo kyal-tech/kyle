@@ -1,21 +1,32 @@
 # 11-project
 
-> Documentation del proyecto Kyle: contribucion, estilo, releases.
+> Planning, roadmap, and task tracking for the Kyle project.
 
 ## Files
 
-| Documento | Description |
-|-----------|-------------|
+| Document | Description |
+|----------|-------------|
+| `backend-packages-plan.md` | **Active** — Backend package implementation plan with task checklists |
+| `roadmap.md` | **Active** — Development roadmap and phase tracking |
+| `remaining-work.md` | Remaining bugs and features |
+| `status.md` | Project status summary |
+| `release.md` | Release process |
 | `ci-cd.md` | GitHub Actions workflows |
-| `contributing.md` | How contribuir (ver `AGENTS.md`) |
-| `coding-style.md` | Estilo de code |
-| `release-process.md` | Proceso de release |
-| `repository-structure.md` | Estructura del repository |
+| `benchmarks.md` | Benchmark methodology |
+| `test-checklist.md` | Pre-release test checklist |
+| `syntax-roadmap.md` | Syntax feature roadmap |
+| `self-hosting.md` | Self-hosting compiler plan |
 
-## Referencias externas
+## Current Focus
 
-| Recurso | Location |
-|---------|-----------|
-| Roadmap | `../../ROADMAP.md` (root del repo) |
-| Changelog | `../12-history/changelog.md` |
-| Guide de contribucion | `../../AGENTS.md` (root del repo) |
+The project is in **backend package development** mode.
+See [`backend-packages-plan.md`](backend-packages-plan.md) for detailed task breakdown.
+
+## Key References
+
+| Resource | Location |
+|----------|----------|
+| Agent context | [`AGENTS.md`](../../AGENTS.md) |
+| Std library docs | [`docs/04-standard-library/`](../04-standard-library/) |
+| Package docs | [`docs/packages/`](../packages/) |
+| Syntax reference | [`docs/15-kyle-syntax-reference.md`](../15-kyle-syntax-reference.md) |

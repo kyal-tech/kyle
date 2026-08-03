@@ -1,47 +1,46 @@
-# io — Entrada / Salida
+# io — Console input/output
 
-> Module de input y output by console.
-> Import: `use io.console`
+> Print to and read from the terminal.
+> Import: `use std.io`
 
-## console: read y write en terminal
+## Printing
 
 ```ky
-use io.console
+use std.io
 
-print("hello") # without newline
-println("hello") # with newline
-line: str = input() # leer line
-line = input("> ") # leer line with prompt
+print("hello")     # without newline
+println("hello")   # with newline
 ```
 
-### Shorthands globales
-
-Las functions `print()` y `println()` are disponiblis globalmente without import:
+## Reading input
 
 ```ky
-print("hello") # print()
-println("hello") # println()
-input("> ") # input()
+line: str = io.input()       # read line
+line = io.input("> ")        # read line with prompt
 ```
 
-### Methods de console
+## Globals
 
-| Nombre | Firma | Description |
-|--------|-------|-------------|
-| `print` | `fn(text: str)` | Imprimir texto without salto |
-| `println` | `fn(text: str)` | Imprimir texto with salto |
-| `input` | `fn(prompt: str) str` | Leer line with prompt |
-| `clear` | `fn()` | Limpiar terminal |
-
-### Examples
+`print()` and `println()` are available globally without import:
 
 ```ky
-use io.console
+print("hello")
+println("hello")
+name: str = input("> ")
+```
 
+## Functions
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `print(text)` | `fn(text: &str)` | Print text without newline |
+| `println(text)` | `fn(text: &str)` | Print text with newline |
+| `io.input(prompt)` | `fn(prompt: &str) str` | Read line with prompt |
+| `io.clear()` | `fn()` | Clear terminal |
+
+## Example
+
+```ky
 name: str = input("What is your name? ")
-println("Hola, " + name + "!")
-
-# Equivalente with shorthands globales
-name = input("What is your name? ")
-println("Hola, " + name + "!")
+println("Hello, " + name + "!")
 ```

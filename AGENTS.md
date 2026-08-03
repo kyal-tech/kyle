@@ -1,7 +1,8 @@
 # Kyle Monorepo — AI Agent Context
 
 > Single entry-point for AI agents and team members working on the Kyle codebase.
-> See also: [`BUILD.md`](BUILD.md) · [`BENCHMARKS.md`](BENCHMARKS.md) · [`VSCODE.md`](VSCODE.md) · [`PACKAGES.md`](PACKAGES.md) · [`tests/SYNTAX_CHECKLIST.md`](tests/SYNTAX_CHECKLIST.md) · [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md)
+> Current focus: **Backend package ecosystem** (see [`BACKEND_PACKAGES_PLAN.md`](docs/11-project/backend-packages-plan.md))
+> See also: [`BUILD.md`](BUILD.md) · [`BENCHMARKS.md`](BENCHMARKS.md) · [`VSCODE.md`](VSCODE.md) · [`PACKAGES.md`](PACKAGES.md) · [`tests/SYNTAX_CHECKLIST.md`](tests/SYNTAX_CHECKLIST.md)
 
 ## Quick Reference
 
@@ -15,12 +16,25 @@ ky run examples/hello.ky
 # Test
 cargo test --workspace --exclude kyc_runtime_wasm
 for f in tests/syntax/*.ky; do ky run "$f"; done
+for f in tests/std_*.ky; do ky run "$f"; done
+
+# Check package
+ky check packages/http/src/lib.ky
+
+# Run package tests
+ky test packages/http/tests/test_http.ky
+
+# Install package
+ky add http
+
+# Create project
+ky new myapp
 ```
 
 ## Architecture Overview
 
 ```
-kl/                          ← Monorepo root
+kl/
 ├── crates/                  ← Rust compiler & tooling
 │   ├── kyc_frontend/        → Lexer + parser
 │   ├── kyc_hir/             → HIR desugaring
@@ -29,107 +43,84 @@ kl/                          ← Monorepo root
 │   ├── kyc_backend/         → LLVM codegen, runtime linkage
 │   ├── kyc_driver/          → Compilation pipeline
 │   ├── kyc_cli/             → CLI binary (`ky`)
-│   ├── kyc_ui/              → .kyx parser → UI-IR → backends
-│   ├── kyc_runtime/         → Runtime library (Rust)
+│   ├── kyc_runtime/         → Runtime library (Rust) — 190+ extern "C" functions
 │   └── kyc_tools/           → LSP, formatter, package manager
 │
-├── packages/                → Kyle libraries (see [`PACKAGES.md`](PACKAGES.md))
-├── vscode-extension/        → VS Code extension (see [`VSCODE.md`](VSCODE.md))
-├── kyle-benchmarks/         → Multi-language benchmarks (see [`BENCHMARKS.md`](BENCHMARKS.md))
-├── docs/                    → Language docs, specs, RFCs, roadmap
-├── tests/                   → 13 syntax tests (see [`SYNTAX_CHECKLIST.md`](tests/SYNTAX_CHECKLIST.md))
+├── packages/                → Kyle installable packages
+├── vscode-extension/        → VS Code extension
+├── docs/                    → Language docs, specs, plans
+│   ├── 04-standard-library/ → 21 std modules (native)
+│   ├── packages/            → 9 package docs
+│   └── 11-project/          → Roadmaps, plans
+├── tests/                   → Syntax tests, package tests
 ├── examples/                → .ky + .kyx example programs
-└── scripts/                 → install.sh, install.ps1
+└── scripts/                 → install.sh, dev-install.sh
 ```
 
-- **`.ky`** (core language) → Rust compiler (`crates/kyc_*`)
-- **`.kyx`** (UI markup) → Rust parser + backends + Kyle component library
-- **Packages** (`packages/*/`) → Pure Kyle libraries
+## Backend Ecosystem
 
-## Compilation Pipeline
+### Standard Library (native — `use std.<module>`)
 
-```
-source (.ky) → kyc_frontend (lexer+parser) → kyc_hir (desugar)
-  → kyc_semantic (type check) → kyc_mir (lower+SSA+optimize)
-  → kyc_backend (LLVM codegen) → binary
+| Module | File | Status |
+|--------|------|--------|
+| `result` | `docs/04-standard-library/result.md` | ✅ Runtime (language) |
+| `json` | `docs/04-standard-library/json.md` | ✅ Runtime (`ky_json_*`) |
+| `time` | `docs/04-standard-library/time.md` | ✅ Runtime (`ky_datetime_*`) |
+| `fs` | `docs/04-standard-library/fs.md` | ✅ Runtime (`ky_fs_*`) |
+| `path` | `docs/04-standard-library/path.md` | ✅ Runtime (`ky_path_*`) |
+| `str` | `docs/04-standard-library/str.md` | ✅ Runtime (`ky_str_*`) |
+| `math` | `docs/04-standard-library/math.md` | ✅ Runtime (`ky_pow`, etc.) |
+| `io` | `docs/04-standard-library/io.md` | ✅ Runtime (`ky_print*`) |
+| `net` | `docs/04-standard-library/net.md` | ✅ Runtime (`ky_tcp_*`) |
+| `random` | `docs/04-standard-library/random.md` | ✅ Runtime (`ky_random_bytes`) |
+| `regex` | `docs/04-standard-library/regex.md` | ✅ Runtime (`ky_regex_*`) |
+| `thread` | `docs/04-standard-library/thread.md` | ✅ Runtime (`ky_spawn_thread`) |
+| `sync` | `docs/04-standard-library/sync.md` | ✅ Runtime (`ky_mutex_*`) |
+| `crypto` | `docs/04-standard-library/crypto.md` | ✅ Runtime (sha256, base64, uuid) |
+| `process` | `docs/04-standard-library/process.md` | ✅ Runtime (`ky_getenv`, libc) |
+| `testing` | `docs/04-standard-library/testing.md` | ✅ Runtime (`ky_assert*`) |
+| `log` | `docs/04-standard-library/log.md` | ✅ Runtime (`ky_log_*` + wrapper) |
+| `cli` | `docs/04-standard-library/cli.md` | ✅ Runtime (`ky_cli_*`) |
+| `csv` | `docs/04-standard-library/csv.md` | ✅ Runtime (`ky_csv_*`, handle-based) |
+| `url` | `docs/04-standard-library/url.md` | 🟡 Extend existing runtime |
+| `bytes` | `docs/04-standard-library/bytes.md` | 🟡 Extend existing runtime |
 
-.kyx → kyc_ui parser → UI-IR → (web: JS | desktop: native | ios: Swift)
-```
+### Packages (installable — `ky add`)
+
+| Package | Doc | Status |
+|---------|-----|--------|
+| `http` | `docs/packages/http.md` | 🟡 Rewrite client (TCP direct), sub-modules |
+| `postgres` | `docs/packages/postgres.md` | 🟡 Add typed params, transactions |
+| `sqlite` | `docs/packages/sqlite.md` | 🟡 Add Database/Statement classes |
+| `env` | `docs/packages/env.md` | 🟡 Add .env loader, typed accessors |
+| `crypto` | `docs/packages/crypto.md` | ❌ New (password hash, JWT, HMAC) |
+| `config` | `docs/packages/config.md` | ❌ New (YAML/TOML loader) |
+| `compress` | `docs/packages/compress.md` | ❌ New (gzip) |
+| `mail` | `docs/packages/mail.md` | ❌ New (SMTP) |
+
+---
 
 ## Documentation Map
 
 | Document | Location | Content |
 |----------|----------|---------|
-| **AGENTS.md** (this) | [`AGENTS.md`](AGENTS.md) | Main entry point |
-| **Build guide** | [`BUILD.md`](BUILD.md) | Build, install, test instructions |
-| **Benchmarks** | [`BENCHMARKS.md`](BENCHMARKS.md) | Multi-language benchmark runner |
-| **VS Code Extension** | [`VSCODE.md`](VSCODE.md) | Extension features, install, development |
-| **Packages** | [`PACKAGES.md`](PACKAGES.md) | Library development guide |
-| **Syntax reference** | `docs/15-kyle-syntax-reference.md` | Complete .ky language reference |
-| **UI syntax** | `docs/03-language/syntax/ui-syntax.md` | .kyx component markup spec |
-| **SYNTAX_CHECKLIST** | [`tests/SYNTAX_CHECKLIST.md`](tests/SYNTAX_CHECKLIST.md) | 244/247 features verified |
-| **Remaining work** | `docs/11-project/remaining-work.md` | Bugs & features status |
-| **UI design** | `docs/03-language/ui/*.md` | Routing, styles, a11y, i18n, SSR |
-| **Type system** | `docs/09-specification/` | Type system, ABI, memory model |
-| **RFCs** | `docs/10-design/rfc/` | 0005 UI architecture |
-| **Kyle UI Roadmap** | [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md) | Implementation plan & priorities |
+| **AGENTS.md** (this) | `AGENTS.md` | Main entry point |
+| **Build guide** | `BUILD.md` | Build, install, test |
+| **Packages** | `PACKAGES.md` | Library development guide |
+| **Backend plan** | `docs/11-project/backend-packages-plan.md` | Complete implementation plan with tasks |
+| **Std library docs** | `docs/04-standard-library/` | 21 native module docs |
+| **Package docs** | `docs/packages/` | 9 installable package docs |
+| **Syntax reference** | `docs/15-kyle-syntax-reference.md` | .ky language reference |
+| **Roadmap** | `docs/11-project/roadmap.md` | Overall project state |
+| **Remaining work** | `docs/11-project/remaining-work.md` | Bugs & features |
+| **Runtime functions** | `crates/kyc_runtime/src/` | 190+ `extern "C"` functions |
+| **KYUI docs** | `docs/03-language/ui/` | UI framework (paused) |
 
-## Kyle UI Documentation
-
-Complete documentation for Kyle UI framework at `docs/03-language/ui/`:
-
-### Core Documentation
-
-| Document | Description |
-|----------|-------------|
-| [README.md](docs/03-language/ui/README.md) | Main index & quick start |
-| [architecture.md](docs/03-language/ui/architecture.md) | Multi-platform architecture, anti-patterns |
-| [style-system.md](docs/03-language/ui/style-system.md) | Typed styles (color, spacing, layout, theme) |
-| [state-events.md](docs/03-language/ui/state-events.md) | State, events, binding, forms, validation |
-| [events.md](docs/03-language/ui/events.md) | Complete event system (click, hover, touch, keyboard) |
-| [lifecycle.md](docs/03-language/ui/lifecycle.md) | Component lifecycle hooks (on_mounted, on_unmounted, etc.) |
-| [animation.md](docs/03-language/ui/animation.md) | Animations & transitions |
-| [routing.md](docs/03-language/ui/routing.md) | Routing, navigation, guards |
-| [accessibility.md](docs/03-language/ui/accessibility.md) | WCAG 2.1 AA, ARIA, keyboard, screen readers |
-| [anti-patterns.md](docs/03-language/ui/anti-patterns.md) | Anti-patterns from other frameworks |
-| [framework-comparison.md](docs/03-language/ui/framework-comparison.md) | Comparison with React, Vue, SwiftUI, Compose, Flutter |
-
-### Component Documentation
-
-All components documented at `docs/03-language/ui/components/`:
-
-| Category | Components |
-|----------|-----------|
-| **Layout** | view, card |
-| **Text** | text, link |
-| **Input** | button, text_field, text_area, checkbox, radio, switch, slider, select, file_picker, form |
-| **Media** | img, video, audio |
-| **Feedback** | progress, spinner, skeleton |
-| **Overlay** | modal, alert, tooltip, toast |
-| **Navigation** | app_bar, sidebar, tab_bar, bottom_nav |
-| **Data** | list, table, grid |
-
-### Advanced Patterns
-
-| Document | Description |
-|----------|-------------|
-| [composition.md](docs/03-language/ui/composition.md) | Slots, render props, compound components |
-| [context-patterns.md](docs/03-language/ui/context-patterns.md) | Context, selectors, reducers |
-| [portals.md](docs/03-language/ui/portals.md) | Portals for modals, tooltips |
-| [error-boundaries.md](docs/03-language/ui/error-boundaries.md) | Error handling, fallback UI |
-
-### Infrastructure
-
-| Document | Description |
-|----------|-------------|
-| [ssr.md](docs/03-language/ui/ssr.md) | Server-Side Rendering |
-| [i18n.md](docs/03-language/ui/i18n.md) | Internationalization |
-| [testing.md](docs/03-language/ui/testing.md) | Testing (unit, integration, E2E) |
-| [file-picker.md](docs/03-language/ui/file-picker.md) | Native file picker |
+---
 
 ## Current State
 
-### ✅ Core Language (.ky) — Stable
+### ✅ Core Language — Stable
 
 | Component | Status |
 |-----------|--------|
@@ -139,67 +130,70 @@ All components documented at `docs/03-language/ui/components/`:
 | MIR (lowering, SSA, optimizations) | ✅ |
 | LLVM codegen | ✅ |
 | Collections: `[T]`, `{K:V}`, `set{T}`, `queue{T}`, `stack{T}`, `deque{T}` | ✅ |
-| Orthogonal types: `^` `&` `?` `!` on all types | ✅ |
+| Orthogonal types: `^` `&` `?` `!` | ✅ |
 | Module system: `use X.Y` | ✅ |
 | Package manager: `ky add`, `ky.toml` | ✅ |
 | Syntax tests: 13/13 passing | ✅ |
-| Workspace tests: 117+ passing | ✅ |
+| Workspace tests: 117+ | ✅ |
 
-### ✅ UI Framework (.kyx) — Web Working
+### 🟢 Runtime — Rich FFI Surface
 
-| Component | Status |
-|-----------|--------|
-| `.kyx` parser → UI-IR | ✅ |
-| Web backend (JS generation) | ✅ Functional |
-| JS runtime (9 files: glue, router, reactivity, a11y, i18n, ssr, portal, error boundary, testing) | ✅ |
-| 30+ UI components (packages/ui/src/components/) | ✅ |
-| Module resolver (views/, components/, src/) | ✅ |
-| Routing: `<router>` + `<route>` + `<layout>` + `<slot>` | ✅ |
-| Theming (light/dark) | ✅ |
-| Styles, animations, state/events | ✅ |
-| File picker, form models | ✅ |
-| **Complete documentation** (35+ components, events, lifecycle) | ✅ |
+190+ `extern "C"` functions available in `kyc_runtime/src/`:
+- `ky_tcp_*` — TCP networking
+- `ky_fs_*` — File system
+- `ky_str_*` — String manipulation
+- `ky_list_*`, `ky_dict_*`, `ky_set_*`, `ky_queue_*`, `ky_stack_*`, `ky_deque_*`
+- `ky_json_*` — JSON parse/stringify
+- `ky_datetime_*`, `ky_date_*`, `ky_time_*`, `ky_duration_*`
+- `ky_regex_*` — Regular expressions
+- `ky_sha256`, `ky_base64_encode`, `ky_uuid_v4` — Crypto
+- `ky_mutex_*`, `ky_atomic_*`, `ky_channel_*` — Sync
+- `ky_spawn_thread`, `ky_join_thread` — Threading
+- `ky_ws_*` — WebSocket frames
 
-### ✅ VS Code Extension — Included in Monorepo
+### ⏸️ KYUI — Paused
 
-| Component | Location | Status |
-|-----------|----------|--------|
-| Extension manifest | `vscode-extension/package.json` | ✅ v0.8.8 |
-| .ky grammar | `vscode-extension/syntaxes/ky.tmLanguage.json` | ✅ Updated |
-| .kyx grammar | `vscode-extension/syntaxes/kyx.tmLanguage.json` | ✅ Updated |
-| Snippets (60+) | `vscode-extension/snippets/ky.json` + `kyx.json` | ✅ Complete |
-| LSP client | `vscode-extension/src/extension.ts` | ✅ |
-| Debugger UI | `vscode-extension/src/debugger.ts` | ✅ |
-| Testing UI | `vscode-extension/src/testUI.ts` | ✅ |
-| Theme | `vscode-extension/themes/` | 🟡 Needs color refinements |
+UI framework development is paused. Existing code at `packages/ui/`, `crates/kyc_ui/`.
+All 30+ components, web backend, JS runtime are functional but not in active development.
 
-### 🟡 UI Backends — Needing Work
+---
 
-| Backend | Status |
-|---------|--------|
-| **Web** | ✅ Functional (see [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md) for remaining features) |
-| **Desktop (SDL2/Skia)** | 🟡 WIP — SDL_PollEvent + RenderFillRect added |
-| **iOS (SwiftUI)** | 🟡 Broken — invalid Swift output |
-| **WASM** | ❌ Untested |
-| **Android** | ❌ Does not exist |
-| **TUI (Terminal)** | 📅 Pending |
+## Implementation Plan
 
-### ✅ Packages (publishable Kyle code)
+See [`docs/11-project/backend-packages-plan.md`](docs/11-project/backend-packages-plan.md) for complete task breakdown.
 
-| Package | Status | Notes |
-|---------|--------|-------|
-| `ui/` | ✅ | 30 .kyx components, themes, desktop renderer |
-| `http/` | ✅ | Client + server + websocket |
-| `json/` | ✅ | In registry (docs/packages/json.json) |
-| `sqlite/` | ✅ | SQLite bindings |
-| `env/` | ✅ | Environment variables |
-| `postgres/` | ✅ | PostgreSQL client (WIP, needs testing) |
-| `webapp/` | ✅ | Project template for `ky new` |
-| `std/` | ✅ | Standard library modules |
+### Phase 1: Std Core Wrappers (16 modules)
+Create `use std.X` Kyle wrappers for existing runtime functions.
 
-### ⏸️ Self-Hosting — Paused
+### Phase 2: Std New Runtime (5 modules)
+Implement `ky_log_*`, `ky_cli_*`, `ky_csv_*`, extend `url.rs` and `bytes.rs`.
 
-The self-hosting compiler (`runtimes/ky/`) works for transpiling simple Kyle to C, but has an architectural limitation: `kyle_main` can't be a real C function due to the two-stage transpilation pipeline (Kyle→C→clang→binary). Not a priority. See `docs/11-project/self-hosting.md`.
+### Phase 3: Package Improvements (4 packages)
+Rewrite `http` (TCP client), improve `postgres`, `sqlite`, `env`.
+
+### Phase 4: New Packages (4 packages)
+Implement `crypto`, `config` (YAML/TOML), `compress` (gzip), `mail` (SMTP).
+
+---
+
+## Development Workflow
+
+### Backend Package Development
+
+1. **Check runtime** — Verify `kyc_runtime/src/` has needed extern fns, or add them
+2. **Register codegen** — Add new extern fns to `kyc_backend/src/codegen/function.rs`
+3. **Create Kyle wrapper** — Write `packages/<name>/src/lib.ky` or `packages/std/<name>.ky`
+4. **Build** — `./scripts/dev-install.sh`
+5. **Test** — `ky test packages/<name>/tests/`
+
+### Adding a New Runtime Function
+
+1. Add Rust function in `kyc_runtime/src/<module>.rs` with `#[no_mangle] pub extern "C" fn ky_*`
+2. Export it in `kyc_runtime/src/lib.rs`
+3. In Kyle: `@link "c" extern fn ky_*(...) <type>`
+4. Rebuild: `cargo build --release --bin ky`
+
+---
 
 ## ✅ All Known Compiler Bugs Fixed
 
@@ -222,137 +216,3 @@ The self-hosting compiler (`runtimes/ky/`) works for transpiling simple Kyle to 
 | `_call` SSA verify error in large files | ✅ FIXED |
 | `!` error propagation operator | ✅ FIXED |
 | `&str` prelude functions (fs, uuid, etc.) SIGSEGV | ✅ FIXED |
-
-## Unimplemented Features (no priority)
-
-- `unsafe` block (`as_ptr`)
-- Macros (`macro_rules!`, derive, proc macros)
-- Async/await (runtime exists, no compiler lowering)
-
-### 🟡 MEDIUM — UI (.kyx) Backend Fixes
-
-| Task | Files | Status |
-|------|-------|--------|
-| Fix desktop backend (SDL2 events, rendering) | `kyc_ui/src/backend/desktop.rs` | 🟡 |
-| Fix iOS backend (Swift output) | `kyc_ui/src/backend/ios.rs` | 🟡 |
-| Create .kyx integration tests | `tests/ui/` | ❌ |
-| Test WASM target | `kyc_ui/src/backend/web.rs` | ❌ |
-
-### 🟢 LOW — Packages & Documentation
-
-| Task | Files |
-|------|-------|
-| Test all packages compile with current syntax | ✅ done — all pass `ky check` |
-| Create more .kyx examples | `examples/*.kyx` |
-| Update docs/11-project/ui-roadmap.md | `docs/11-project/` |
-| Deprecate old `kyle-packages` repo | README there |
-
-## Documentation Map
-
-| Document | Content | Location |
-|----------|---------|----------|
-| Language syntax | Complete .ky reference | `docs/15-kyle-syntax-reference.md` |
-| .kyx UI syntax | Component markup spec v2.0 | `docs/03-language/syntax/ui-syntax.md` |
-| UI design docs | Styles, routing, a11y, i18n, SSR, etc. | `docs/03-language/ui/*.md` |
-| UI architecture RFCs | 0002 (original), 0003 (translation), 0005 (v2) | `docs/10-design/rfc/` |
-| Roadmap | Overall project state | `docs/11-project/roadmap.md` |
-| Test checklist | What to test before release | `docs/11-project/test-checklist.md` |
-| VS Code extension | Grammar, snippets, themes, LSP client | `vscode-extension/` |
-| Extension package.json | Manifest, commands, activation events | `vscode-extension/package.json` |
-| Extension grammar (.ky) | TextMate grammar for `.ky` files | `vscode-extension/syntaxes/ky.tmLanguage.json` |
-| Extension grammar (.kyx) | TextMate grammar for `.kyx` files | `vscode-extension/syntaxes/kyx.tmLanguage.json` |
-| Extension snippets | 60+ code snippets for .ky and .kyx | `vscode-extension/snippets/` |
-| Extension theme | "Kyle Pastel" dark theme | `vscode-extension/themes/` |
-
-## Key Commands
-
-```bash
-# Build compiler
-cargo build --release --bin ky
-
-# Development install (compiler + runtime)
-./scripts/dev-install.sh
-
-# Development install (VS Code extension)
-./scripts/dev-ext.sh
-
-# Run tests
-cargo test --workspace
-
-# Run Kyle program
-ky run examples/hello.ky
-
-# Build UI web app
-ky build examples/counter.kyx
-
-# Type-check UI package
-ky check packages/ui/src/lib.kyx
-
-# Run package test
-ky test packages/http/tests/test_http.ky
-
-# Install package
-ky add http
-
-# Create new project
-ky new myapp
-
-# Open docs
-ky doc
-```
-
-## Development Workflow
-
-### Quick Development Cycle
-
-1. **Make changes** to compiler or UI components
-2. **Build and install**: `./scripts/dev-install.sh`
-3. **Test**: `ky run examples/hello.ky`
-4. **Repeat**
-
-### VS Code Extension Development
-
-1. **Make changes** to extension code
-2. **Build and install**: `./scripts/dev-ext.sh`
-3. **Reload VS Code** window (Cmd+Shift+P → Reload Window)
-4. **Test** extension features
-
-### UI Component Development
-
-1. **Edit component** in `packages/ui/src/components/`
-2. **Build**: `./scripts/dev-install.sh`
-3. **Test in browser**: `ky run web` in a kyui project
-4. **Verify** component renders correctly
-
-## Implementation Priorities
-
-See [`KYUI_ROADMAP.md`](KYUI_ROADMAP.md) for detailed implementation plan.
-
-### Current Focus: Phase 1 - Core Web Backend
-
-**Priority:** 🔴 CRITICAL
-
-- [x] Implement touch events (touch_start, touch_end, touch_move)
-- [x] Implement lifecycle hooks (on_created, on_mounted, on_updated, on_unmounted)
-- [x] Implement image lazy loading
-- [x] Implement list virtualization
-- [x] Create unit tests
-- [x] Implement CSS transitions
-- [ ] Create integration tests
-
-### Next: Phase 2 - Testing & Validation
-
-**Priority:** 🔴 CRITICAL
-
-- [ ] Unit tests (>80% coverage)
-- [ ] Integration tests
-- [ ] Browser testing (Chrome, Firefox, Safari, Edge)
-- [ ] Mobile browser testing
-- [ ] Accessibility testing
-
-### Future: Phase 3-6
-
-- Phase 3: Desktop backend (SDL2/Skia)
-- Phase 4: iOS backend (SwiftUI)
-- Phase 5: Android backend (Jetpack Compose)
-- Phase 6: Advanced features (SSR, DevTools)

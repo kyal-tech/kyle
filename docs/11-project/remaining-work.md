@@ -4,8 +4,10 @@
 >
 > Versión: Jul 2026. Basado en commit `0864350` + múltiples fixes posteriores.
 >
-> **Estado actual:** ✅ 243/243 features del core language funcionando, 0 bugs abiertos.
+> **Estado actual:** ✅ 243/243 features del core language funcionando. 4 bugs conocidos (ver §9).
 > **Lo que falta:** 3 features sin prioridad + 3 UI backends rotos.
+>
+> **Backend packages:** See [`backend-packages-plan.md`](backend-packages-plan.md) for the active development plan.
 
 ---
 
@@ -622,3 +624,16 @@ ky build --emit-llvm file.ky   # LLVM IR → .ll
 | `.split()` wrong substrings | `ky_clone_substr` faltaba | Added by-length clone | `runtime/string.rs` |
 | `ky_clone_str` crash | `#[unsafe(no_mangle)]` faltaba | Restored | `runtime/string.rs` |
 | `_name`/`__name` scope | Scope no manejaba `_` prefix | Added lookup | `scope/mod.rs` |
+
+---
+
+## 9. Bugs Conocidos (2026-08)
+
+Descubiertos al implementar los módulos `std.*`. Workarounds ya aplicados en `packages/std/`.
+
+| Bug | Síntoma | Workaround/aplicado | Nota |
+|-----|---------|---------------------|------|
+| Clase **sin campos** + método estático `new` | SSA: `ret %Foo` ≠ i64 (collisiona con el constructor default auto-sintetizado `Foo::new()` en `parser/decl.rs:459`) | `std/sync.ky` usa `create` en vez de `new` | Fix real: no sintetizar ctor `new()` si hay `static fn new`; o manejar struct vacío en `ret` |
+| Clases con campo `str` **dentro de listas** | Leer el campo `str` de `list[i]` crashea/pierde el puntero (slot `i64` de 8 bytes) | `std::csv` usa API handle-based en vez de `[Row]` | Codemic `arr` de elementos; struct >8 B no cabe en slot `i64` |
+| Literal `[]` vacío en binding local | Infiere `list<i32>` aunque se anote `: [str]` | `out := src[0..0]` (slice vacío tipado) | Inferencia ignora la anotación de binding local |
+| `i32 as str` | Crashea en runtime | Usar `.to_str()` | `as str` es cast de puntero, no de dígito |

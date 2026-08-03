@@ -1,0 +1,35 @@
+@link "c"
+extern fn ky_log_debug(ptr)
+extern fn ky_log_info(ptr)
+extern fn ky_log_warn(ptr)
+extern fn ky_log_error(ptr)
+extern fn ky_log_set_level(i32)
+extern fn ky_log_set_output(ptr) i32
+extern fn ky_log_set_console()
+
+LOG_DEBUG := 0
+LOG_INFO  := 1
+LOG_WARN  := 2
+LOG_ERROR := 3
+
+final class Log:
+    static fn debug(msg: &str):
+        ky_log_debug(msg as ptr)
+
+    static fn info(msg: &str):
+        ky_log_info(msg as ptr)
+
+    static fn warn(msg: &str):
+        ky_log_warn(msg as ptr)
+
+    static fn error(msg: &str):
+        ky_log_error(msg as ptr)
+
+    static fn set_level(level: i32):
+        ky_log_set_level(level)
+
+    static fn set_output(path: &str) i32:
+        ky_log_set_output(path as ptr)
+
+    static fn set_console():
+        ky_log_set_console()

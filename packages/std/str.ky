@@ -1,0 +1,76 @@
+@link "c"
+extern fn ky_str_contains(ptr, ptr) i32
+extern fn ky_str_to_upper(ptr) ptr
+extern fn ky_str_to_lower(ptr) ptr
+extern fn ky_str_trim(ptr) ptr
+extern fn ky_str_replace(ptr, ptr, ptr) ptr
+extern fn ky_char_at(ptr, i32) i32
+extern fn ky_is_digit(i32) i32
+extern fn ky_is_alpha(i32) i32
+extern fn ky_is_alnum(i32) i32
+extern fn ky_is_whitespace(i32) i32
+extern fn ky_is_upper(i32) i32
+extern fn ky_is_lower(i32) i32
+extern fn ky_ord(i32) i32
+extern fn ky_substr(ptr, i32, i32) ptr
+extern fn ky_str_starts_with(ptr, ptr) i32
+extern fn ky_str_ends_with(ptr, ptr) i32
+
+final class Str:
+    static fn contains(s: &str, sub: &str) bool:
+        ky_str_contains(s as ptr, sub as ptr) == 1
+
+    static fn starts_with(s: &str, prefix: &str) bool:
+        ky_str_starts_with(s as ptr, prefix as ptr) == 1
+
+    static fn ends_with(s: &str, suffix: &str) bool:
+        ky_str_ends_with(s as ptr, suffix as ptr) == 1
+
+    static fn to_upper(s: &str) str:
+        raw := ky_str_to_upper(s as ptr) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn to_lower(s: &str) str:
+        raw := ky_str_to_lower(s as ptr) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn trim(s: &str) str:
+        raw := ky_str_trim(s as ptr) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn replace(s: &str, frm: &str, dst: &str) str:
+        raw := ky_str_replace(s as ptr, frm as ptr, dst as ptr) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn char_at(s: &str, i: i32) i32:
+        ky_char_at(s as ptr, i)
+
+    static fn substr(s: &str, start: i32, count: i32) str:
+        raw := ky_substr(s as ptr, start, count) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn is_digit(c: i32) bool:
+        ky_is_digit(c) == 1
+
+    static fn is_alpha(c: i32) bool:
+        ky_is_alpha(c) == 1
+
+    static fn is_alnum(c: i32) bool:
+        ky_is_alnum(c) == 1
+
+    static fn is_whitespace(c: i32) bool:
+        ky_is_whitespace(c) == 1
+
+    static fn is_upper(c: i32) bool:
+        ky_is_upper(c) == 1
+
+    static fn is_lower(c: i32) bool:
+        ky_is_lower(c) == 1
+
+    static fn ord(c: i32) i32:
+        ky_ord(c)

@@ -1,0 +1,21 @@
+final class Path:
+    static fn new(p: &str) i64:
+        path_new(&p)
+
+    static fn dirname(h: i64) str:
+        path_dirname(h)
+
+    static fn basename(h: i64) str:
+        path_basename(h)
+
+    static fn extension(h: i64) str:
+        path_extension(h)
+
+    static fn join(h: i64, other: &str) i64:
+        path_join(h, &other)
+
+    static fn to_str(h: i64) str:
+        path_to_str(h)
+
+    static fn free(h: i64):
+        path_free(h)

@@ -1,0 +1,14 @@
+@link "c"
+extern fn ky_spawn_thread(ptr, i64) i64
+extern fn ky_join_thread(i64) i64
+extern fn ky_parallel_for(ptr, i64, i64) i64
+
+final class Thread:
+    static fn spawn(fn_ptr: ptr, arg: i64) i64:
+        ky_spawn_thread(fn_ptr, arg)
+
+    static fn join(handle: i64) i64:
+        ky_join_thread(handle)
+
+    static fn parallel_for(fn_ptr: ptr, start: i64, end: i64) i64:
+        ky_parallel_for(fn_ptr, start, end)

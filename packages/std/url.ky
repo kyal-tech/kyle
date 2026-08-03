@@ -1,0 +1,94 @@
+@link "c"
+extern fn ky_url_new() i64
+extern fn ky_url_parse(ptr) i64
+extern fn ky_url_free(i64)
+extern fn ky_url_to_str(i64) ptr
+extern fn ky_url_get_scheme(i64) ptr
+extern fn ky_url_get_host(i64) ptr
+extern fn ky_url_get_port(i64) i32
+extern fn ky_url_get_path(i64) ptr
+extern fn ky_url_get_query(i64) ptr
+extern fn ky_url_get_fragment(i64) ptr
+extern fn ky_url_get_userinfo(i64) ptr
+extern fn ky_url_get_query_value(i64, ptr) ptr
+extern fn ky_url_set_scheme(i64, ptr) i32
+extern fn ky_url_set_host(i64, ptr) i32
+extern fn ky_url_set_port(i64, i32)
+extern fn ky_url_set_path(i64, ptr) i32
+extern fn ky_url_set_query(i64, ptr) i32
+extern fn ky_url_encode(ptr) ptr
+extern fn ky_url_decode(ptr) ptr
+
+final class Url:
+    handle: ^i64
+
+    static fn new() Url:
+        Url{handle: ky_url_new()}
+
+    static fn parse(s: &str) Url:
+        h = ky_url_parse(s as ptr)
+        u := Url.new()
+        u.handle = h
+        u
+
+    static fn from_parts(scheme: &str, host: &str, port: i32, path: &str, query: &str) Url:
+        u := Url.new()
+        u.set_scheme(scheme)
+        u.set_host(host)
+        u.set_port(port)
+        u.set_path(path)
+        u.set_query(query)
+        u
+
+    static fn encode(s: &str) str:
+        ky_url_encode(s as ptr) as str
+
+    static fn decode(s: &str) str:
+        ky_url_decode(s as ptr) as str
+
+    fn free(this):
+        if this.handle != 0:
+            ky_url_free(this.handle)
+            this.handle = 0
+
+    fn to_str(this) str:
+        ky_url_to_str(this.handle) as str
+
+    fn scheme(this) str:
+        ky_url_get_scheme(this.handle) as str
+
+    fn host(this) str:
+        ky_url_get_host(this.handle) as str
+
+    fn port(this) i32:
+        ky_url_get_port(this.handle)
+
+    fn path(this) str:
+        ky_url_get_path(this.handle) as str
+
+    fn query(this) str:
+        ky_url_get_query(this.handle) as str
+
+    fn fragment(this) str:
+        ky_url_get_fragment(this.handle) as str
+
+    fn userinfo(this) str:
+        ky_url_get_userinfo(this.handle) as str
+
+    fn query_get(this, key: &str) str:
+        ky_url_get_query_value(this.handle, key as ptr) as str
+
+    fn set_scheme(this, s: &str):
+        ky_url_set_scheme(this.handle, s as ptr)
+
+    fn set_host(this, s: &str):
+        ky_url_set_host(this.handle, s as ptr)
+
+    fn set_port(this, p: i32):
+        ky_url_set_port(this.handle, p)
+
+    fn set_path(this, s: &str):
+        ky_url_set_path(this.handle, s as ptr)
+
+    fn set_query(this, s: &str):
+        ky_url_set_query(this.handle, s as ptr)

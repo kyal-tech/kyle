@@ -1,0 +1,151 @@
+@link "c"
+
+extern fn ky_datetime_now() i64
+extern fn ky_datetime_from_ymdhms(i32, i32, i32, i32, i32, i32) i64
+extern fn ky_datetime_parse(ptr) i64
+extern fn ky_datetime_format(i64, ptr) ptr
+extern fn ky_datetime_year(i64) i32
+extern fn ky_datetime_month(i64) i32
+extern fn ky_datetime_day(i64) i32
+extern fn ky_datetime_hour(i64) i32
+extern fn ky_datetime_minute(i64) i32
+extern fn ky_datetime_second(i64) i32
+extern fn ky_datetime_add_days(i64, i32) i64
+extern fn ky_datetime_add_hours(i64, i32) i64
+extern fn ky_datetime_diff(i64, i64) i64
+
+extern fn ky_date_today() i32
+extern fn ky_date_from_ymd(i32, i32, i32) i32
+extern fn ky_date_parse(ptr) i32
+extern fn ky_date_year(i32) i32
+extern fn ky_date_month(i32) i32
+extern fn ky_date_day(i32) i32
+extern fn ky_date_weekday(i32) i32
+extern fn ky_date_add_days(i32, i32) i32
+extern fn ky_date_format(i32, ptr) ptr
+
+extern fn ky_time_now() i32
+extern fn ky_time_from_hms(i32, i32, i32) i32
+extern fn ky_time_parse(ptr) i32
+extern fn ky_time_hour(i32) i32
+extern fn ky_time_minute(i32) i32
+extern fn ky_time_second(i32) i32
+
+extern fn ky_duration_from_secs(i64) i64
+extern fn ky_duration_from_millis(i64) i64
+extern fn ky_duration_from_hours(i64) i64
+extern fn ky_duration_from_days(i64) i64
+extern fn ky_duration_to_str(i64) ptr
+extern fn ky_duration_free(i64)
+
+final class Datetime:
+    static fn now() i64:
+        ky_datetime_now()
+
+    static fn from_ymdhms(y: i32, m: i32, d: i32, h: i32, min: i32, s: i32) i64:
+        ky_datetime_from_ymdhms(y, m, d, h, min, s)
+
+    static fn parse(s: &str) i64:
+        ky_datetime_parse(s as ptr)
+
+    static fn year(ms: i64) i32:
+        ky_datetime_year(ms)
+
+    static fn month(ms: i64) i32:
+        ky_datetime_month(ms)
+
+    static fn day(ms: i64) i32:
+        ky_datetime_day(ms)
+
+    static fn hour(ms: i64) i32:
+        ky_datetime_hour(ms)
+
+    static fn minute(ms: i64) i32:
+        ky_datetime_minute(ms)
+
+    static fn second(ms: i64) i32:
+        ky_datetime_second(ms)
+
+    static fn add_days(ms: i64, n: i32) i64:
+        ky_datetime_add_days(ms, n)
+
+    static fn add_hours(ms: i64, n: i32) i64:
+        ky_datetime_add_hours(ms, n)
+
+    static fn diff(ms1: i64, ms2: i64) i64:
+        ky_datetime_diff(ms1, ms2)
+
+    static fn format(ms: i64, fmt: &str) str:
+        raw := ky_datetime_format(ms, fmt as ptr) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+final class Date:
+    static fn today() i32:
+        ky_date_today()
+
+    static fn from_ymd(y: i32, m: i32, d: i32) i32:
+        ky_date_from_ymd(y, m, d)
+
+    static fn parse(s: &str) i32:
+        ky_date_parse(s as ptr)
+
+    static fn year(packed: i32) i32:
+        ky_date_year(packed)
+
+    static fn month(packed: i32) i32:
+        ky_date_month(packed)
+
+    static fn day(packed: i32) i32:
+        ky_date_day(packed)
+
+    static fn weekday(packed: i32) i32:
+        ky_date_weekday(packed)
+
+    static fn add_days(packed: i32, n: i32) i32:
+        ky_date_add_days(packed, n)
+
+    static fn format(packed: i32, fmt: &str) str:
+        raw := ky_date_format(packed, fmt as ptr) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+final class Time:
+    static fn now() i32:
+        ky_time_now()
+
+    static fn from_hms(h: i32, m: i32, s: i32) i32:
+        ky_time_from_hms(h, m, s)
+
+    static fn parse(s: &str) i32:
+        ky_time_parse(s as ptr)
+
+    static fn hour(packed: i32) i32:
+        ky_time_hour(packed)
+
+    static fn minute(packed: i32) i32:
+        ky_time_minute(packed)
+
+    static fn second(packed: i32) i32:
+        ky_time_second(packed)
+
+final class Duration:
+    static fn from_secs(secs: i64) i64:
+        ky_duration_from_secs(secs)
+
+    static fn from_millis(ms: i64) i64:
+        ky_duration_from_millis(ms)
+
+    static fn from_hours(hours: i64) i64:
+        ky_duration_from_hours(hours)
+
+    static fn from_days(days: i64) i64:
+        ky_duration_from_days(days)
+
+    static fn to_str(d: i64) str:
+        raw := ky_duration_to_str(d) as i64
+        if raw == 0: return ""
+        (raw as ptr) as str
+
+    static fn free(d: i64):
+        ky_duration_free(d)

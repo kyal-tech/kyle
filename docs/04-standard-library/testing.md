@@ -1,68 +1,79 @@
-# testing — Testing y Aserciones
+# testing — Test assertions
 
-> Module de testing y aserciones.
-> Import: `use testing.assert`
+> Assertions and testing framework.
+> Import: `use std.testing`
 
-## assert: aserciones
+## Assertions
 
 ```ky
-use testing.assert
+use std.testing
 
 #[test]
 fn test_addition():
- assert.eq(2 + 2, 4)
+    assert.eq(2 + 2, 4)
 
 #[test]
 fn test_string():
- assert.eq("hello", "hello")
- assert.ne("hello", "world")
- assert.str_eq("hello", "hello")
+    assert.eq("hello", "hello")
+    assert.ne("hello", "world")
+
+#[test]
+fn test_conditions():
+    assert.is_true(condition)
+    assert.is_false(condition)
 ```
 
-### Functions
-
-| Function | Firma | Description |
-|---------|-------|-------------|
-| `assert.is_true(cond)` | `fn(cond: bool)` | Afirmar que conditionn is `true` |
-| `assert.eq(a, b)` | `fn(a: T, b: T)` | Afirmar que a == b |
-| `assert.ne(a, b)` | `fn(a: T, b: T)` | Afirmar que a != b |
-| `assert.str_eq(a, b)` | `fn(a: str, b: str)` | Afirmar strings igualis |
-| `assert.gt(a, b)` | `fn(a: T, b: T)` | Afirmar a > b |
-| `assert.lt(a, b)` | `fn(a: T, b: T)` | Afirmar a < b |
-| `assert.gte(a, b)` | `fn(a: T, b: T)` | Afirmar a >= b |
-| `assert.lte(a, b)` | `fn(a: T, b: T)` | Afirmar a <= b |
-
-### Attribute `#[test]`
+## Comparison
 
 ```ky
-#[test]
-fn test_sum_list():
- result: i32 = sum_list({1, 2, 3})
- assert.eq(result, 6)
+assert.eq(a, b)     # a == b
+assert.ne(a, b)     # a != b
+assert.gt(a, b)     # a > b
+assert.lt(a, b)     # a < b
+assert.gte(a, b)    # a >= b
+assert.lte(a, b)    # a <= b
 ```
 
-Ejecutar:
+## Functions
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `assert.is_true(cond)` | `fn(cond: bool)` | Assert condition is true |
+| `assert.is_false(cond)` | `fn(cond: bool)` | Assert condition is false |
+| `assert.eq(a, b)` | `fn(a: T, b: T)` | Assert a == b |
+| `assert.ne(a, b)` | `fn(a: T, b: T)` | Assert a != b |
+| `assert.gt(a, b)` | `fn(a: T, b: T)` | Assert a > b |
+| `assert.lt(a, b)` | `fn(a: T, b: T)` | Assert a < b |
+| `assert.gte(a, b)` | `fn(a: T, b: T)` | Assert a >= b |
+| `assert.lte(a, b)` | `fn(a: T, b: T)` | Assert a <= b |
+| `assert.near(a, b, epsilon)` | `fn(a: f64, b: f64, eps: f64)` | Assert float near |
+
+## Running tests
 
 ```bash
 ky test
 ```
 
-### Example completo
+## Example
 
 ```ky
-use testing.assert
+use std.testing
 
-fn sum_list(lst: {i32}) i32:
- result: ^i32 = 0
- for val in lst:
- result = result + val
- result
+fn sum_list(items: &[i32]) i32:
+    result: ^i32 = 0
+    for val in items:
+        result = result + val
+    result
 
 #[test]
 fn test_sum_list():
- assert.eq(sum_list({1, 2, 3}), 6)
+    assert.eq(sum_list([1, 2, 3]), 6)
 
 #[test]
 fn test_sum_empty():
- assert.eq(sum_list({}), 0)
+    assert.eq(sum_list([]), 0)
+
+#[test]
+fn test_sum_single():
+    assert.eq(sum_list([42]), 42)
 ```

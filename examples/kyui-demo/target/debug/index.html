@@ -7,8 +7,12 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body { width: 100%; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-      button, input, select, textarea { font: inherit; border: none; background: none; outline: none; }
-      button { cursor: pointer; }
+      button { font: inherit; cursor: pointer; }
+      input, select, textarea { font: inherit; }
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+      select, textarea { border: 1px solid #E2E8F0; background: #FFF; border-radius: 8px; padding: 12px; outline: none; }
+      select { appearance: auto; }
+      input:focus, select:focus, textarea:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
       a { color: inherit; text-decoration: none; }
       ul, ol { list-style: none; }
       img { max-width: 100%; display: block; }

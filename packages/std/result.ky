@@ -1,0 +1,4 @@
+# result — core language
+#
+# `ok(value)` / `error(message)`, `some(value)` / `none`, y los tipos `T!` / `T?`
+# son sintaxis del lenguaje (keywords builtins). No se necesita wrapper.
