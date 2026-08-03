@@ -343,8 +343,13 @@ fn gen_node(node: &UiNode, js: &mut String, indent: usize, parent: &str, model: 
                     for a in attrs {
                         if a.name == "virtual" { v = true; }
                         if a.name == "item_height" {
-                            if let AttrValue::String(ref s) = a.value {
-                                item_height = s.parse::<i32>().unwrap_or(0);
+                            let raw = match &a.value {
+                                AttrValue::String(s) => Some(s.clone()),
+                                AttrValue::Expr(e) => Some(e.clone()),
+                                AttrValue::Flag => None,
+                            };
+                            if let Some(s) = raw {
+                                item_height = s.trim().parse::<i32>().unwrap_or(0);
                             }
                         }
                     }

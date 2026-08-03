@@ -135,7 +135,7 @@ pub extern "C" fn ky_csv_to_str(h: *mut std::ffi::c_void) -> *mut u8 {
     }
     let csv = unsafe { &*(h.cast::<CsvData>()) };
     let mut out = String::new();
-    let mut push_row = |fields: &[String], out: &mut String| {
+    let push_row = |fields: &[String], out: &mut String| {
         for (i, f) in fields.iter().enumerate() {
             if i > 0 {
                 out.push(',');

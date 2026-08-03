@@ -1,4 +1,3 @@
-use std::ffi::CString;
 use std::path::PathBuf;
 
 fn to_str(ptr: *const u8) -> &'static str {

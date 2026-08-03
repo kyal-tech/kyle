@@ -364,7 +364,7 @@ pub extern "C" fn ky_ws_read_frame(fd: i32) -> *mut u8 {
     unsafe { *payload_buf.add(payload_size) = 0; }
 
     // Allocate WsFrame struct: [opcode: i32, fin: i32, payload_len: i32, payload: ptr]
-    let frame = unsafe { crate::ky_alloc(32) as *mut i32 };
+    let frame = crate::ky_alloc(32) as *mut i32;
     if frame.is_null() { crate::ky_free(payload_buf); return std::ptr::null_mut(); }
     unsafe {
         *frame = opcode as i32;

@@ -710,8 +710,8 @@ pub extern "C" fn str_cat(a: *const u8, b: *const u8) -> *const u8 {
 #[unsafe(no_mangle)]
 pub extern "C" fn ky_str_index_of(s: *const u8, substr: *const u8) -> i32 {
     if s.is_null() || substr.is_null() { return -1; }
-    let s_str = unsafe { std::ffi::CStr::from_ptr(s as *const i8) }.to_str().unwrap_or("");
-    let sub_str = unsafe { std::ffi::CStr::from_ptr(substr as *const i8) }.to_str().unwrap_or("");
+    let s_str = unsafe { std::ffi::CStr::from_ptr(s.cast::<std::ffi::c_char>()) }.to_str().unwrap_or("");
+    let sub_str = unsafe { std::ffi::CStr::from_ptr(substr.cast::<std::ffi::c_char>()) }.to_str().unwrap_or("");
     s_str.find(sub_str).map(|i| i as i32).unwrap_or(-1)
 }
 
@@ -722,8 +722,8 @@ pub extern "C" fn ky_str_split(s: *const u8, delimiter: *const u8) -> *mut std::
     use crate::string::ky_clone_str;
     let result = ky_list_new();
     if s.is_null() || delimiter.is_null() { return result as *mut std::ffi::c_void; }
-    let s_str = unsafe { std::ffi::CStr::from_ptr(s as *const i8) }.to_str().unwrap_or("");
-    let delim_str = unsafe { std::ffi::CStr::from_ptr(delimiter as *const i8) }.to_str().unwrap_or("");
+    let s_str = unsafe { std::ffi::CStr::from_ptr(s.cast::<std::ffi::c_char>()) }.to_str().unwrap_or("");
+    let delim_str = unsafe { std::ffi::CStr::from_ptr(delimiter.cast::<std::ffi::c_char>()) }.to_str().unwrap_or("");
     if delim_str.is_empty() {
         // Split into characters
         for c in s_str.chars() {
@@ -742,7 +742,7 @@ pub extern "C" fn ky_str_split(s: *const u8, delimiter: *const u8) -> *mut std::
 }
 
 // Bootstrap helpers for ky2c.ky StringBuilder optimization
-use crate::list::{ky_list_new, ky_list_push, ky_list_len, ky_list_get, ky_list_free as kl_free};
+use crate::list::{ky_list_new, ky_list_push, ky_list_len, ky_list_get};
 
 /// Bootstrap helper: str_builder_new() creates a new string builder.
 /// Returns a pointer to a list (used internally as a char buffer).
@@ -786,7 +786,7 @@ pub extern "C" fn str_builder_to_str(sb: *mut std::ffi::c_void) -> *mut u8 {
 /// Runtime automatically frees str-type variables at scope exit via ky_release.
 /// Explicit free would cause double-free since both this and the runtime free the same pointer.
 #[unsafe(no_mangle)]
-pub extern "C" fn str_builder_free(sb: *mut std::ffi::c_void) {
+pub extern "C" fn str_builder_free(_sb: *mut std::ffi::c_void) {
     // No-op — runtime manages cleanup automatically
 }
 

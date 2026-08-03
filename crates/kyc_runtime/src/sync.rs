@@ -22,7 +22,6 @@ pub extern "C" fn ky_mutex_lock(ptr: i64) -> i64 {
 #[unsafe(no_mangle)]
 pub extern "C" fn ky_mutex_store(ptr: i64, val: i64) {
     if ptr == 0 { return; }
-    let m = unsafe { &*(ptr as *const Mutex<i64>) };
     // We need mutable access for store. We'll use a different approach.
     // Actually let's just unlock and re-lock with the pattern the docs suggest.
     // For now, this is a simple store via unsafe.
