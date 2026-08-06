@@ -31,7 +31,7 @@ por API y sirve para cualquiera de tus proyectos.
 
 ```bash
 # Usar tu propio CI (los nombres exactos salen del run de GitHub)
-REQUIRED_CHECKS="CI / build|CI / test (ubuntu-24.04)" \
+REQUIRED_CHECKS="CI / build|test (ubuntu-24.04)" \
   ./scripts/protect-branch.sh mi-usuario mi-app main
 
 # Con equipo: exigir 1 revisión aprobada
@@ -45,6 +45,12 @@ APPROVALS=1 ./scripts/protect-branch.sh mi-usuario mi-app main
 
 > Para sacar los nombres exactos de tus checks:
 > `gh api repos/OWNER/REPO/commits/main/check-runs --jq '.check_runs[].name'`
+>
+> ⚠️ **Gotcha importante**: usa los nombres que devuelve la API de check-runs
+> (`test (ubuntu-24.04)`), **sin** el prefijo del workflow. Aunque en la UI de
+> GitHub aparezcan como `CI / test (ubuntu-24.04)`, la protección solo matchea
+> el nombre corto. Si pones el prefijo, los checks nunca se reconocen y el PR
+> queda bloqueado con "3 of 3 required status checks are expected".
 
 ### Qué protege el script
 - ☑ Require PR (obligatorio siempre)
@@ -65,7 +71,7 @@ APPROVALS=1 ./scripts/protect-branch.sh mi-usuario mi-app main
 ```bash
 gh api --method PUT /repos/USER/REPO/branches/main/protection \
   -F required_status_checks[strict]=true \
-  -F required_status_checks[contexts][]=CI / test (ubuntu-24.04) \
+  -F required_status_checks[contexts][]=test (ubuntu-24.04) \
   -F required_pull_request_reviews[required_approving_review_count]=1 \
   -F enforce_admins=true \
   -F allow_force_pushes=false \

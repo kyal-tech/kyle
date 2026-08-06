@@ -67,7 +67,7 @@ fi
 # exact names with:
 #   gh api repos/OWNER/REPO/commits/BRANCH/check-runs --jq '.check_runs[].name'
 # Override at call time:  REQUIRED_CHECKS="CI / build|CI / test" ./protect-branch.sh ...
-CHECKS="${REQUIRED_CHECKS:-CI / test (ubuntu-24.04)|CI / test (macos-15)|CI / test-arm}"
+CHECKS="${REQUIRED_CHECKS:-test (ubuntu-24.04)|test (macos-15)|test-arm}"
 APPROVALS="${APPROVALS:-0}"
 
 contexts_json=$(CHECKS="$CHECKS" python3 -c 'import json, os; print(json.dumps([x for x in os.environ["CHECKS"].split("|") if x]))')
