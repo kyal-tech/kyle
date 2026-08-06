@@ -14,6 +14,10 @@
 #   3. gh CLI fallback:  GITHUB_TOKEN= gh auth token
 #
 # To REMOVE protection:  ./protect-branch.sh OWNER REPO BRANCH --remove
+#
+# Configuration:
+#   REQUIRED_CHECKS   CI checks to require, pipe-separated.
+#   APPROVALS         Required approvals (0 = solo dev; >=1 = team). Default 0.
 set -eu
 
 if [ "$#" -lt 3 ]; then
@@ -64,12 +68,14 @@ fi
 #   gh api repos/OWNER/REPO/commits/BRANCH/check-runs --jq '.check_runs[].name'
 # Override at call time:  REQUIRED_CHECKS="CI / build|CI / test" ./protect-branch.sh ...
 CHECKS="${REQUIRED_CHECKS:-CI / test (ubuntu-24.04)|CI / test (macos-15)|CI / test-arm}"
+APPROVALS="${APPROVALS:-0}"
 
 contexts_json=$(CHECKS="$CHECKS" python3 -c 'import json, os; print(json.dumps([x for x in os.environ["CHECKS"].split("|") if x]))')
 
 if command -v jq >/dev/null 2>&1; then
     payload=$(jq -n \
         --argjson ctx "$contexts_json" \
+        --argjson reviews "$APPROVALS" \
         '{
             required_status_checks: {
                 strict: true,
@@ -77,7 +83,7 @@ if command -v jq >/dev/null 2>&1; then
             },
             enforce_admins: true,
             required_pull_request_reviews: {
-                required_approving_review_count: 1,
+                required_approving_review_count: $reviews,
                 dismiss_stale_reviews: true,
                 require_code_owner_reviews: false
             },
@@ -86,14 +92,15 @@ if command -v jq >/dev/null 2>&1; then
             allow_deletions: false
         }')
 else
-    payload=$(python3 - "$contexts_json" <<'PY'
+    payload=$(python3 - "$contexts_json" "$APPROVALS" <<'PY'
 import json, sys
 contexts = json.loads(sys.argv[1])
+reviews = int(sys.argv[2])
 print(json.dumps({
     "required_status_checks": {"strict": True, "contexts": contexts},
     "enforce_admins": True,
     "required_pull_request_reviews": {
-        "required_approving_review_count": 1,
+        "required_approving_review_count": reviews,
         "dismiss_stale_reviews": True,
         "require_code_owner_reviews": False
     },
@@ -115,7 +122,7 @@ code=$(curl -s -o /tmp/protect_branch_resp.json -w "%{http_code}" -X PUT \
 case "$code" in
     200)
         echo "OK: $OWNER/$REPO:$BRANCH protected"
-        echo "  - PR required with 1 approval"
+        echo "  - PR required, $APPROVALS approval(s)"
         echo "  - CI checks (strict): $CHECKS"
         echo "  - Applies to admins, force-push and deletions blocked"
         ;;

@@ -27,11 +27,15 @@ por API y sirve para cualquiera de tus proyectos.
 |----------|----------|---------|
 | `GITHUB_TOKEN` | Token de acceso (si no usas keychain ni gh) | auto-detecta |
 | `REQUIRED_CHECKS` | Checks de CI a exigir, separados por `\|` | los 3 del CI de Kyle |
+| `APPROVALS` | Aprobaciones de revisión requeridas (`0` solo; `>=1` con equipo) | `0` |
 
 ```bash
 # Usar tu propio CI (los nombres exactos salen del run de GitHub)
 REQUIRED_CHECKS="CI / build|CI / test (ubuntu-24.04)" \
   ./scripts/protect-branch.sh mi-usuario mi-app main
+
+# Con equipo: exigir 1 revisión aprobada
+APPROVALS=1 ./scripts/protect-branch.sh mi-usuario mi-app main
 ```
 
 ### Autenticación (orden de prioridad)
@@ -43,10 +47,16 @@ REQUIRED_CHECKS="CI / build|CI / test (ubuntu-24.04)" \
 > `gh api repos/OWNER/REPO/commits/main/check-runs --jq '.check_runs[].name'`
 
 ### Qué protege el script
-- ☑ Require PR + 1 aprobación
+- ☑ Require PR (obligatorio siempre)
 - ☑ Require status checks (strict — rama al día)
 - ☑ Aplica a admins (`enforce_admins`)
 - ☑ Bloquea force-push y eliminación de la rama
+- Aprobaciones: `0` por defecto (colaborador único). Con equipo: `APPROVALS=1`
+
+> **Nota GitHub**: la aprobación del propio autor de un PR no cuenta. Con
+> `APPROVALS=1` y un solo colaborador, los PRs quedarán esperando a un segundo
+> revisor. Por eso el default es `0` para equipos pequeños, y se sube a `>=1`
+> cuando haya revisión cruzada real.
 
 ---
 
