@@ -1,0 +1,57 @@
+name: Bug report
+description: Reporta un comportamiento incorrecto de Kyle
+title: "bug: "
+labels: ["bug", "needs triage"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción
+      description: Qué está pasando de forma incorrecta.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Pasos para reproducir
+      description: Código .ky y comandos exactos.
+      render: ky
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Resultado real
+      description: "Incluye el error completo (backtrace si es crash)."
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión de Kyle
+      description: "Salida de `ky --version`."
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Sistema operativo
+      options:
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Linux x64
+        - Linux arm64
+        - Windows
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto adicional (opcional)
+      description: Cualquier dato que ayude a diagnosticar.
