@@ -142,7 +142,8 @@ La revisión es obligatoria y es **la defensa de calidad del proyecto**.
 ### Roles
 
 - **Author**: quien abre el PR.
-- **Reviewer**: quien revisa (al menos 1 aprobación requerida por la protección de `main`).
+- **Reviewer**: quien revisa (1 aprobación requerida por la protección de `main`
+  una vez el equipo tenga revisión cruzada; hoy el requisito es `0`).
 
 ### Qué revisar
 
@@ -225,7 +226,8 @@ Kyle sigue **SemVer**: `MAJOR.MINOR.PATCH`.
 
 - **Push directo bloqueado**: nadie puede hacer `git push origin main`.
 - **PR obligatorio**: todo cambio entra vía Pull Request.
-- **Aprobación requerida**: mínimo 1 revisión.
+- **Aprobación requerida**: hoy `0` (colaborador único); se subirá a `>=1` cuando
+  haya revisión cruzada de equipo.
 - **CI obligatorio**: el status check debe estar verde antes de mergear.
 - **Historia limpia**: force-push y eliminación de la rama bloqueados.
 
