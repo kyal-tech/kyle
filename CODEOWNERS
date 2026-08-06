@@ -1,0 +1,31 @@
+# CODEOWNERS — dueños de cada área del repositorio.
+# Cualquier PR que toque estos archivos requiere aprobación del dueño listado.
+# Más info: https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Raíz / global
+*                       @kyal-bo
+
+# Compilador (core)
+/crates/kyc_frontend/   @kyal-bo
+/crates/kyc_hir/        @kyal-bo
+/crates/kyc_semantic/   @kyal-bo
+/crates/kyc_mir/        @kyal-bo
+/crates/kyc_backend/    @kyal-bo
+/crates/kyc_driver/     @kyal-bo
+
+# CLI y herramientas
+/crates/kyc_cli/        @kyal-bo
+/crates/kyc_tools/      @kyal-bo
+
+# Runtime y std
+/crates/kyc_runtime/    @kyal-bo
+
+# UI
+/crates/kyc_ui/         @kyal-bo
+
+# Paquetes
+/packages/              @kyal-bo
+
+# Docs y configuración de proyecto
+/docs/                  @kyal-bo
+/.github/               @kyal-bo

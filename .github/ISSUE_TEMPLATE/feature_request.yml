@@ -1,0 +1,38 @@
+name: Feature request
+description: Propone una nueva funcionalidad para Kyle
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema / motivación
+      description: Qué necesidad cubre esta funcionalidad.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Propuesta
+      description: Cómo debería verse/usarse. Incluye ejemplos de sintaxis .ky si aplica.
+      render: ky
+    validations:
+      required: true
+  - type: checkboxes
+    id: areas
+    attributes:
+      label: Áreas afectadas
+      options:
+        - label: Compilador (crates/kyc_*)
+        - label: Runtime / std
+        - label: UI (kyc_ui)
+        - label: Paquetes (packages/)
+        - label: Herramientas (LSP, formatter, CLI)
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas (opcional)
+  - type: textarea
+    id: extra
+    attributes:
+      label: Información adicional (opcional)
