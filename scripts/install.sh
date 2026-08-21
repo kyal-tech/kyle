@@ -1,8 +1,8 @@
 #!/bin/bash
 set -eu
 
-REPO="IT-KYNERA/KYLE"
-VERSION="${KY_VERSION:-v0.8.6}"
+REPO="kyal-tech/kyle"
+VERSION="${KY_VERSION:-v0.9.1}"
 
 usage() {
     echo "Usage: curl -fsSL https://raw.githubusercontent.com/$REPO/main/scripts/install.sh | sh"
@@ -22,7 +22,7 @@ detect_platform() {
         Linux)  os="linux" ;;
         *)
             echo "Error: Windows? Use PowerShell:"
-            echo "  iwr -Uri \"https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/scripts/install.ps1\" | iex"
+            echo "  iwr -Uri \"https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.ps1\" | iex"
             exit 1 ;;
     esac
     case "$(uname -m)" in

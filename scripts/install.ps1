@@ -1,18 +1,18 @@
 # install.ps1 — Windows PowerShell installer for Kyle
 #
 # Usage:
-#   iwr -Uri "https://raw.githubusercontent.com/IT-KYNERA/KYLE/main/install.ps1" | iex
+#   iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/install.ps1" | iex
 #
 # Environment variables:
 #   $env:KY_VERSION = "v0.6.1"     Version to install (default: latest)
 #   $env:KY_PREFIX = "C:\ky"       Install directory (default: ~\.ky)
 
 param(
-    [string]$Version = "v0.8.6",
+    [string]$Version = "v0.9.1",
     [string]$Prefix = ""
 )
 
-$Repo = "IT-KYNERA/KYLE"
+$Repo = "kyal-tech/kyle"
 
 # ─── Detect architecture ────────────────────────────────────
 
