@@ -162,6 +162,8 @@ if [ "$(uname -s)" = "Darwin" ] && command -v install_name_tool >/dev/null 2>&1;
         # Rewrite any @executable_path/lib/X.dylib → @executable_path/../lib/X.dylib
         install_name_tool -change "@executable_path/lib/$libname" "@executable_path/../lib/$libname" "$KY_BIN" 2>/dev/null || true
     done
+    # Re-sign after install_name_tool invalidates the code signature
+    codesign -f -s - "$KY_BIN" 2>/dev/null || true
 fi
 
 # Add to PATH
