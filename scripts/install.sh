@@ -153,6 +153,17 @@ else
     KY_PREFIX="$HOME/.ky"
 fi
 
+# Fix dylib paths for macOS (resolve @executable_path relative to installed binary)
+if [ "$(uname -s)" = "Darwin" ] && command -v install_name_tool >/dev/null 2>&1; then
+    KY_BIN="${INSTALL_DIR}/ky"
+    for dylib in "$KY_PREFIX"/lib/lib*.dylib; do
+        [ -f "$dylib" ] || continue
+        libname=$(basename "$dylib")
+        # Rewrite any @executable_path/lib/X.dylib → @executable_path/../lib/X.dylib
+        install_name_tool -change "@executable_path/lib/$libname" "@executable_path/../lib/$libname" "$KY_BIN" 2>/dev/null || true
+    done
+fi
+
 # Add to PATH
 SHELL_NAME=$(basename "${SHELL:-}")
 case "$SHELL_NAME" in
