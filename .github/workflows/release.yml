@@ -105,7 +105,7 @@ jobs:
           for lib in /opt/homebrew/opt/zstd/lib/libzstd.1.dylib /opt/homebrew/opt/llvm@18/lib/libunwind.1.dylib; do
             if [ -f "$lib" ]; then
               cp -L "$lib" dist/lib/
-              install_name_tool -change "$lib" "@executable_path/lib/$(basename $lib)" dist/ky
+              install_name_tool -change "$lib" "@executable_path/../lib/$(basename $lib)" dist/ky
             fi
           done
           # Ad-hoc sign binary + bundled libs together
