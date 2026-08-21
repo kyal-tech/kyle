@@ -2,7 +2,7 @@
 set -eu
 
 REPO="kyal-tech/kyle"
-VERSION="${KY_VERSION:-v0.9.1}"
+VERSION="${KY_VERSION:-v0.9.2}"
 
 usage() {
     echo "Usage: curl -fsSL https://raw.githubusercontent.com/$REPO/main/scripts/install.sh | sh"
