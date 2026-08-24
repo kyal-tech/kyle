@@ -47,6 +47,9 @@ if [ "${1:-}" = "uninstall" ]; then
     for d in "$HOME/.ky" "$HOME/.kl" /usr/local/lib/ky; do
         [ -d "$d" ] && rm -rf "$d" && echo "  Removed $d"
     done
+    # Remove from /etc/paths.d (current installer)
+    sudo rm -f /etc/paths.d/ky 2>/dev/null || true
+    # Remove from dotfiles (legacy installer)
     for rc in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile"; do
         [ -f "$rc" ] && sed -i '' '/\.ky\/bin/d' "$rc" 2>/dev/null || true
         [ -f "$rc" ] && sed -i '/\.ky\/bin/d' "$rc" 2>/dev/null || true
@@ -166,24 +169,19 @@ if [ "$(uname -s)" = "Darwin" ] && command -v install_name_tool >/dev/null 2>&1;
     codesign -f -s - "$KY_BIN" 2>/dev/null || true
 fi
 
-# Add to PATH
-SHELL_NAME=$(basename "${SHELL:-}")
-case "$SHELL_NAME" in
-    zsh)  SHELL_CONFIG="$HOME/.zshrc" ;;
-    bash) SHELL_CONFIG="$HOME/.bashrc" ;;
-    *)    SHELL_CONFIG="" ;;
-esac
-
-if [ -n "$SHELL_CONFIG" ] && [ -w "$SHELL_CONFIG" ]; then
-    if ! grep -q "$INSTALL_DIR" "$SHELL_CONFIG" 2>/dev/null; then
-        echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >> "$SHELL_CONFIG"
-        echo "  Added $INSTALL_DIR to PATH in $SHELL_CONFIG"
+# Add to PATH via /etc/paths.d/ (macOS-native, works with all shells)
+PATHS_D="/etc/paths.d"
+if [ -d "$PATHS_D" ] || mkdir "$PATHS_D" 2>/dev/null || sudo mkdir "$PATHS_D" 2>/dev/null; then
+    if [ -w "$PATHS_D" ]; then
+        if [ ! -f "$PATHS_D/ky" ] || [ "$(cat "$PATHS_D/ky" 2>/dev/null)" != "$INSTALL_DIR" ]; then
+            echo "$INSTALL_DIR" | sudo tee "$PATHS_D/ky" > /dev/null
+            echo "  Added $INSTALL_DIR to PATH via $PATHS_D/ky"
+        else
+            echo "  PATH already configured in $PATHS_D/ky"
+        fi
     else
-        echo "  PATH already configured in $(basename "$SHELL_CONFIG")"
+        echo "  Warning: $PATHS_D not writable. Run: sudo echo \"$INSTALL_DIR\" | sudo tee /etc/paths.d/ky"
     fi
-elif [ -n "$SHELL_CONFIG" ]; then
-    echo "  Warning: $SHELL_CONFIG not writable."
-    echo "  Run: export PATH=\"$INSTALL_DIR:\$PATH\""
 fi
 
 export PATH="$INSTALL_DIR:$PATH"
@@ -197,7 +195,7 @@ if ky --version 2>/dev/null; then
     echo "  Binary:  $INSTALL_DIR/ky"
     [ -f "$KY_PREFIX/lib/libkyc_runtime.a" ] && echo "  Runtime: installed"
     echo ""
-    echo "  Use: source ${SHELL_CONFIG:-~/.profile} && ky -v"
+    echo "  Use: Open a new terminal and run: ky -v"
     echo "  Or:  export PATH=\"$INSTALL_DIR:\$PATH\" && ky -v"
     echo "  Try: ky run examples/hello.ky"
 else
