@@ -51,7 +51,9 @@ if [ "${1:-}" = "uninstall" ]; then
     sudo rm -f /etc/paths.d/ky 2>/dev/null || true
     # Remove from dotfiles (legacy installer)
     for rc in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile"; do
+        [ -f "$rc" ] && sed -i '' '/# Kyle/d' "$rc" 2>/dev/null || true
         [ -f "$rc" ] && sed -i '' '/\.ky\/bin/d' "$rc" 2>/dev/null || true
+        [ -f "$rc" ] && sed -i '/# Kyle/d' "$rc" 2>/dev/null || true
         [ -f "$rc" ] && sed -i '/\.ky\/bin/d' "$rc" 2>/dev/null || true
     done
     echo "ky uninstalled. Close and reopen terminal."
@@ -169,18 +171,44 @@ if [ "$(uname -s)" = "Darwin" ] && command -v install_name_tool >/dev/null 2>&1;
     codesign -f -s - "$KY_BIN" 2>/dev/null || true
 fi
 
-# Add to PATH via /etc/paths.d/ (macOS-native, works with all shells)
+# Add to PATH — try /etc/paths.d/ first, fall back to shell config
+ADDED_PATH=false
 PATHS_D="/etc/paths.d"
 if [ -d "$PATHS_D" ] || mkdir "$PATHS_D" 2>/dev/null || sudo mkdir "$PATHS_D" 2>/dev/null; then
     if [ -w "$PATHS_D" ]; then
         if [ ! -f "$PATHS_D/ky" ] || [ "$(cat "$PATHS_D/ky" 2>/dev/null)" != "$INSTALL_DIR" ]; then
             echo "$INSTALL_DIR" | sudo tee "$PATHS_D/ky" > /dev/null
             echo "  Added $INSTALL_DIR to PATH via $PATHS_D/ky"
+            ADDED_PATH=true
         else
             echo "  PATH already configured in $PATHS_D/ky"
+            ADDED_PATH=true
         fi
-    else
-        echo "  Warning: $PATHS_D not writable. Run: sudo echo \"$INSTALL_DIR\" | sudo tee /etc/paths.d/ky"
+    fi
+fi
+
+if [ "$ADDED_PATH" = false ]; then
+    SHELL_NAME=$(basename "${SHELL:-}")
+    case "$SHELL_NAME" in
+        zsh)  SHELL_CONFIG="$HOME/.zshrc" ;;
+        bash) SHELL_CONFIG="$HOME/.bashrc" ;;
+        *)    SHELL_CONFIG="" ;;
+    esac
+    if [ -n "$SHELL_CONFIG" ]; then
+        touch "$SHELL_CONFIG" 2>/dev/null || true
+        if [ -w "$SHELL_CONFIG" ]; then
+            if ! grep -q "$INSTALL_DIR" "$SHELL_CONFIG" 2>/dev/null; then
+                echo "" >> "$SHELL_CONFIG"
+                echo "# Kyle" >> "$SHELL_CONFIG"
+                echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >> "$SHELL_CONFIG"
+                echo "  Added $INSTALL_DIR to PATH in $SHELL_CONFIG"
+            else
+                echo "  PATH already configured in $(basename "$SHELL_CONFIG")"
+            fi
+        else
+            echo "  Warning: $SHELL_CONFIG not writable."
+            echo "  Run: echo 'export PATH=\"$INSTALL_DIR:\$PATH\"' >> $SHELL_CONFIG"
+        fi
     fi
 fi
 
