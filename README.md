@@ -20,11 +20,11 @@ Readable like Python · Typed like Rust · Simple like Go · **Fast like C**
 
 Kyle compiles directly to **native machine code** via LLVM. You get the ergonomics of a high-level language with the performance of C — without garbage collection pauses, without a heavyweight runtime, and without giving up type safety.
 
-- ⚡ **Native speed** — compiles to machine code, benchmarks within **1.0–1.3× of C**
-- 🔒 **Statically typed** — deep type system: `?` optional, `!` fallible, `^` mutable, `&` borrow
-- 🧵 **Batteries included** — threads, channels, mutexes, async, TCP, HTTP, JSON, regex, crypto
-- 📦 **Packages** — install and reuse libs with `ky add`
-- 🧹 **Predictable** — no GC, deterministic ownership, low memory footprint
+- **Native speed** — compiles to machine code, benchmarks within **1.0–1.3× of C**
+- **Statically typed** — deep type system: `?` optional, `!` fallible, `^` mutable, `&` borrow
+- **Batteries included** — threads, channels, mutexes, async, TCP, HTTP, JSON, regex, crypto
+- **Packages** — install and reuse libs with `ky add`
+- **Predictable** — no GC, deterministic ownership, low memory footprint
 
 ---
 
@@ -126,19 +126,25 @@ Kyle compiles to native code and sits squarely next to C. Benchmarks on an **App
 
 ### 1. Compiler (`ky`)
 
-**macOS / Linux** (one command):
+#### macOS / Linux
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.sh | sh
 ```
 
-**Windows** (PowerShell):
+> Requires macOS 12+ (ARM64) or any modern Linux (x64 / ARM64).
+
+#### Windows
 
 ```powershell
 iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.ps1" | iex
 ```
 
-| Platform | Arch | Direct link |
+> Requires Windows 10+ (x64). Run PowerShell as Administrator.
+
+#### Direct downloads
+
+| Platform | Arch | Download |
 | :--- | :--- | :--- |
 | **macOS** | ARM64 | [ky-macos-arm64.tar.gz](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-macos-arm64.tar.gz) |
 | **Linux** | ARM64 | [ky-linux-arm64.tar.gz](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-linux-arm64.tar.gz) |
