@@ -4,7 +4,7 @@
 
 **A compiled, statically-typed language for backend systems and CLI tools.**
 
-Readable like Python · Typed like Rust · Simple like Go · Fast like C
+Readable like Python · Typed like Rust · Simple like Go · **Fast like C**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-6C3FC5?style=for-the-badge)](LICENSE)
 [![Release](https://img.shields.io/badge/release-v0.8.9-6C3FC5?style=for-the-badge)](https://github.com/kyal-tech/kyle/releases/latest)
@@ -13,6 +13,112 @@ Readable like Python · Typed like Rust · Simple like Go · Fast like C
 [![Built with Rust](https://img.shields.io/badge/built%20with-Rust-6C3FC5?style=for-the-badge)](https://www.rust-lang.org)
 
 </div>
+
+---
+
+## Why Kyle?
+
+Kyle compiles directly to **native machine code** via LLVM. You get the ergonomics of a high-level language with the performance of C — without garbage collection pauses, without a heavyweight runtime, and without giving up type safety.
+
+- ⚡ **Native speed** — compiles to machine code, benchmarks within **1.0–1.3× of C**
+- 🔒 **Statically typed** — deep type system: `?` optional, `!` fallible, `^` mutable, `&` borrow
+- 🧵 **Batteries included** — threads, channels, mutexes, async, TCP, HTTP, JSON, regex, crypto
+- 📦 **Packages** — install and reuse libs with `ky add`
+- 🧹 **Predictable** — no GC, deterministic ownership, low memory footprint
+
+---
+
+## Quick Start
+
+```bash
+# One-command install (macOS / Linux)
+curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.sh | sh
+
+# Create a project and run it
+ky new myapp && cd myapp
+ky run
+```
+
+Or compile a single file straight to a native binary:
+
+```bash
+echo 'print("Hello from Kyle!")' > hello.ky
+ky run hello.ky
+ky build hello.ky && ./hello   # native binary
+```
+
+---
+
+## Hello, Kyle
+
+```kyle
+print("Hello, World!")
+```
+
+### Variables — immutable by default, mutable with `^`
+
+```kyle
+name = "Kyle"          # immutable (default)
+count: ^i32 = 0        # mutable
+count += 1
+```
+
+### Fallible results with `!` — no more exceptions
+
+```kyle
+fn parse(s: &str) i32!:
+    n = int(s)?
+    if n < 0: return error("negative")
+    n
+
+x: i32! = parse("42")
+y = x!                 # propagates the error automatically
+```
+
+### Possibilities with `?` — no more null checks
+
+```kyle
+fn find_user(id: i32) User?:
+    ...
+user = find_user(1)?
+if user == nil: ...
+```
+
+### Orthogonal types
+
+```kyle
+x: i32            # primitive
+x: i32?           # optional
+x: i32!           # fallible (Result)
+x: ^i32           # mutable
+x: &str           # borrow
+x: ^&[i32]!       # mutable borrow of a list, may error
+```
+
+### Collections
+
+```kyle
+items = [1, 2, 3]                    # list [i32]
+nums = set{1, 2, 3}                  # set <i32>
+dict = {"name": "kyle", "ver": 1}    # dict {str: i32}
+q = queue{1, 2, 3}                   # queue <i32>
+s = stack{"a", "b"}                  # stack <str>
+```
+
+---
+
+## Performance
+
+Kyle compiles to native code and sits squarely next to C. Benchmarks on an **Apple M5**, release mode, median of 15 runs:
+
+| Benchmark | C | C++ | Rust | **Kyle** | **Kyle vs C** |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Fibonacci (500M iters) | 118ms | 121ms | 122ms | **128ms** | **1.08×** |
+| Prime Sieve (3M) | 8.5ms | 8.3ms | 8.6ms | **10.6ms** | **1.25×** |
+| String Concat (500k) | 8.2ms | 8.1ms | 1.9ms | **10.3ms** | **1.26×** |
+| MatMul (100×100) | 6.6ms | 6.8ms | 7.2ms | **6.7ms** | **1.02×** |
+
+> Full benchmark runner and history: [`BENCHMARKS.md`](BENCHMARKS.md)
 
 ---
 
@@ -43,7 +149,7 @@ iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.
 
 ### 2. VS Code Extension (`ky` language support)
 
-The extension provides syntax highlighting, LSP integration, snippets, debugging UI, and a color theme.
+Syntax highlighting, LSP integration, snippets, debugging UI, and a color theme.
 
 **macOS / Linux**:
 
@@ -65,100 +171,32 @@ code --install-extension ky-0.8.9.vsix
 code --install-extension kynera.ky
 ```
 
-Or download the `.vsix` and install:
-
-```powershell
-code --install-extension ky-0.8.9.vsix
-```
-
 > **Source**: The extension source is at [`vscode-extension/`](vscode-extension/) in this repository.
 
 ---
 
-## Quick Start
+## Packages
+
+The standard library ships with the language. Install extra libraries with `ky add`:
 
 ```bash
-ky new myapp && cd myapp
-ky run
+ky add http        # HTTP client/server
+ky add postgres    # PostgreSQL
+ky add sqlite      # SQLite
+ky add env         # .env loader
 ```
 
-Or run a single file:
-
-```bash
-echo 'print("Hello from Kyle!")' > hello.ky
-ky run hello.ky
-```
-
----
-
-## Hello World
+| Package | Description |
+| :------- | :---------- |
+| [`http`](docs/packages/http.md) | HTTP client and server |
+| [`postgres`](docs/packages/postgres.md) | PostgreSQL driver |
+| [`sqlite`](docs/packages/sqlite.md) | SQLite driver |
+| [`env`](docs/packages/env.md) | .env loader |
 
 ```kyle
-print("Hello, World!")
-```
-
-## Variables
-
-```kyle
-name = "Kyle"          # immutable (default)
-count: ^i32 = 0        # mutable with ^
-count += 1
-
-items: ^[str] = []     # mutable list
-```
-
-## Collections
-
-```kyle
-items = [1, 2, 3]                    # list [i32]
-items: ^[str] = ["a", "b"]           # mutable list
-nums = set{1, 2, 3}                  # set set<i32>
-dict = {"name": "kyle", "ver": 1}    # dict {str: i32}
-q = queue{1, 2, 3}                   # queue queue<i32>
-s = stack{"a", "b"}                  # stack stack<str>
-```
-
-## Imports
-
-```kyle
-use std.io                       # module
-use std.io.{print, read}         # selective
-use ~utils.helpers               # relative
-```
-
-## Functions
-
-```kyle
-fn add(a: i32, b: i32) i32:
-    a + b
-
-fn greet(name: &str):
-    print("Hello, " + name)
-```
-
-## Error Handling
-
-```kyle
-fn parse(s: &str) i32!:
-    n = int(s)?
-    if n < 0: return error("negative")
-    n
-
-x: i32! = parse("42")
-y = x!   # propagate on error
-```
-
-## Types
-
-```kyle
-x: i32            # primitive
-x: i32?           # optional (Option)
-x: i32!           # fallible (Result)
-x: ^i32           # mutable
-x: &str           # borrow
-x: ^&[i32]!       # mutable borrow of list, may error
-x: ^&[str]?       # mutable borrow of list, optional
-x: ^set<i32>!     # mutable set with error
+use std.http
+use std.json
+use http.server.*
 ```
 
 ---
@@ -168,35 +206,16 @@ x: ^set<i32>!     # mutable set with error
 ```bash
 ky new <project>      # create new project
 ky run <file.ky>      # compile and run
-ky build <file.ky>    # compile to binary
+ky build <file.ky>    # compile to native binary
 ky check <file.ky>    # type-check only
 ky parse <file.ky>    # dump AST
 ky mir <file.ky>      # dump MIR
 ky fmt <file.ky>      # format source
 ky test               # run project tests
+ky add <package>      # install a package
 ```
 
 ---
-
-## Project Structure
-
-```
-kl/
-├── crates/              → Rust crates (compiler, tooling)
-│   ├── kyc_frontend     → Lexer + parser
-│   ├── kyc_semantic     → Type checker, borrow analysis
-│   ├── kyc_mir          → MIR lowering, SSA, optimizations
-│   ├── kyc_backend      → LLVM codegen
-│   ├── kyc_ui           → .kyx parser + UI backends
-│   ├── kyc_cli          → CLI binary (ky)
-│   ├── kyc_runtime      → Runtime library (Rust)
-│   └── kyc_driver       → Compilation pipeline
-├── packages/            → Kyle libraries (http, sqlite, ui, etc.)
-├── vscode-extension/    → VS Code extension (grammar, snippets, LSP)
-├── docs/                → Language documentation
-├── tests/               → Syntax tests
-└── examples/            → Example programs
-```
 
 ## Documentation
 
@@ -208,6 +227,7 @@ kl/
 | Modules & Imports | `docs/03-language/syntax/modules.md` |
 | Syntax Reference | `docs/15-kyle-syntax-reference.md` |
 | VS Code Extension | `vscode-extension/` |
+| Benchmarks | `BENCHMARKS.md` |
 | Roadmap | `docs/11-project/roadmap.md` |
 
 ---
@@ -230,17 +250,8 @@ $env:LLVM_SYS_181_PREFIX = "C:\Program Files\LLVM"
 
 # Build
 git clone https://github.com/kyal-tech/kyle.git
-cd KYLE
+cd kyle
 cargo build --release --bin ky
-```
-
----
-
-## Development
-
-```bash
-cargo test --workspace
-cargo build --workspace
 ```
 
 ---
