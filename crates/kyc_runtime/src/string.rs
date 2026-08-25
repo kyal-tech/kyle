@@ -20,12 +20,22 @@ pub extern "C" fn ky_str_builder_new(capacity: i64) -> *mut strBuilder {
         return std::ptr::null_mut();
     }
     unsafe { *data = 0; }
-    let builder = Box::into_raw(Box::new(strBuilder {
-        data,
-        len: 0,
-        cap,
-    }));
-    builder
+    // Allocate the strBuilder struct with the Ky memory allocator so that the
+    // generic string free path (ky_free) can deallocate it correctly. Using
+    // Box::into_raw places a Rust allocator header before the struct, which
+    // ky_free misreads (it expects a ky_alloc Header) — causing huge/corrupt
+    // dealloc sizes and slow, incorrect frees.
+    let raw = crate::ky_alloc(std::mem::size_of::<strBuilder>() as i64) as *mut strBuilder;
+    if raw.is_null() {
+        unsafe { dealloc(data, layout); }
+        return std::ptr::null_mut();
+    }
+    unsafe {
+        (*raw).data = data;
+        (*raw).len = 0;
+        (*raw).cap = cap;
+    }
+    raw
 }
 
 #[unsafe(no_mangle)]
@@ -92,12 +102,15 @@ pub extern "C" fn ky_str_builder_free(builder: *mut strBuilder) {
     if builder.is_null() {
         return;
     }
-    let b = unsafe { Box::from_raw(builder) };
+    let b = unsafe { &*builder };
     if !b.data.is_null() {
         let layout = Layout::from_size_align(b.cap as usize, 16)
             .unwrap_or_else(|_| Layout::from_size_align(16, 16).unwrap());
         unsafe { dealloc(b.data, layout); }
     }
+    // Struct was allocated via ky_alloc, so release it there too (matches
+    // the ky_free that Kyle's generic string cleanup uses).
+    unsafe { crate::ky_free(builder as *mut u8); }
 }
 
 /// Convert f32 to string (via integer formatting — fptosi result).

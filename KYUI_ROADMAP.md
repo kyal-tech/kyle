@@ -2,7 +2,7 @@
 
 **Status:** Active Planning
 **Last Updated:** 2026-07-28
-**Version:** v0.8.8
+**Version:** v0.8.9
 
 ---
 

@@ -2,13 +2,13 @@
 set -eu
 
 REPO="kyal-tech/kyle"
-VERSION="${KY_VERSION:-v0.9.1}"
+VERSION="${KY_VERSION:-v0.8.9}"
 
 usage() {
     echo "Usage: curl -fsSL https://raw.githubusercontent.com/$REPO/main/scripts/install.sh | sh"
     echo ""
     echo "Environment:"
-    echo "  KY_VERSION=v0.8.6     Version (default: latest)"
+    echo "  KY_VERSION=v0.8.9     Version (default: latest)"
     echo "  KY_PREFIX=/custom     Install dir (default: ~/.ky or /usr/local)"
     echo ""
     echo "  install.sh uninstall   Remove Kyle"
