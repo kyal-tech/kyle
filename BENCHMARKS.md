@@ -16,7 +16,7 @@ This compiles everything and runs 3 warmup + 5 measured iterations per language.
 > Snapshot log to track performance regressions/improvements over time.
 > Latest snapshot is on top.
 
-### 2026-08-25 (v0.8.8, Apple M5, release, median of 15 runs)
+### 2026-08-25 (v0.8.9, Apple M5, release, median of 15 runs)
 
 After inlining `ky_bytes_get`/`ky_bytes_set` (dense 1-byte buffer). Kyle/C ratio:
 
@@ -31,7 +31,7 @@ After inlining `ky_bytes_get`/`ky_bytes_set` (dense 1-byte buffer). Kyle/C ratio
 > buffer (`ky_bytes_get`/`ky_bytes_set` inlined in codegen). The 8-byte `KlList`
 > previously spilled 24MB out of L2 cache.
 
-### 2026-08-25 (v0.8.8, Apple M5, release, median of 9 runs)
+### 2026-08-25 (v0.8.9, Apple M5, release, median of 9 runs)
 
 Baseline after the `str_builder` allocator fix. Kyle/C ratio per benchmark:
 
