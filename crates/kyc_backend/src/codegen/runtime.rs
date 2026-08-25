@@ -2106,6 +2106,149 @@ impl<'ctx> Codegen<'ctx> {
         Ok(())
     }
 
+    /// Emit inline LLVM IR for a single-byte buffer access (`ky_bytes_get` /
+    /// `ky_bytes_set`) instead of calling the FFI functions. The byte buffer is
+    /// a dense `*mut u8`, so get/set are a single load/store — no bounds check.
+    pub(crate) fn emit_inline_bytes_op(
+        &self,
+        name: &str,
+        dest: &Option<usize>,
+        args: &[MirValue],
+        last_value_map: &mut HashMap<usize, BasicValueEnum<'ctx>>,
+    ) -> Result<(), String> {
+        if args.len() < 2 {
+            return Err(format!("inline bytes {}: expected 2+ args", name));
+        }
+        let ptr_val = self.value_to_llvm(&args[0], last_value_map)?;
+        let idx_val = self.value_to_llvm(&args[1], last_value_map)?;
+        self.emit_inline_bytes_vals(name, dest, ptr_val, idx_val, args, last_value_map)
+    }
+
+    fn emit_inline_bytes_vals(
+        &self,
+        name: &str,
+        dest: &Option<usize>,
+        ptr_val: BasicValueEnum<'ctx>,
+        idx_val: BasicValueEnum<'ctx>,
+        args: &[MirValue],
+        last_value_map: &mut HashMap<usize, BasicValueEnum<'ctx>>,
+    ) -> Result<(), String> {
+        let i32_ty = self.context.i32_type();
+        let i8_ty = self.context.i8_type();
+        let ptr_ty = self.context.ptr_type(Default::default());
+
+        let byte_ptr = match ptr_val {
+            BasicValueEnum::PointerValue(pv) => pv,
+            BasicValueEnum::IntValue(iv) => self.builder.build_int_to_ptr(iv, ptr_ty, "_bptr")
+                .map_err(|e| format!("inline bytes inttoptr: {}", e))?,
+            _ => return Err("inline bytes: expected ptr or i64 buffer".to_string()),
+        };
+        let idx_i32 = match idx_val {
+            BasicValueEnum::IntValue(iv) => iv,
+            _ => return Err("inline bytes: expected i32 index".to_string()),
+        };
+        let elem_ptr = unsafe {
+            self.builder.build_in_bounds_gep(i8_ty, byte_ptr, &[idx_i32], "_belem")
+                .map_err(|e| format!("inline bytes gep: {}", e))?
+        };
+
+        match name {
+            "ky_bytes_get" => {
+                let val = self.builder.build_load(i8_ty, elem_ptr, "_bval")
+                    .map_err(|e| format!("inline bytes get load: {}", e))?;
+                let val_i32 = self.builder.build_int_z_extend(val.into_int_value(), i32_ty, "_bvalz")
+                    .map_err(|e| format!("inline bytes get zext: {}", e))?;
+                if let Some(d) = dest {
+                    if let Some(alloca_ptr) = self.alloca_map.get(*d).and_then(|p| *p) {
+                        let sv = self.builder.build_store(alloca_ptr, val_i32)
+                            .map_err(|e| format!("inline bytes get store: {}", e))?;
+                        self.tbaa_store(sv, "int");
+                    }
+                    last_value_map.insert(*d, val_i32.as_basic_value_enum());
+                }
+            }
+            "ky_bytes_set" => {
+                if args.len() < 3 {
+                    return Err("inline bytes set: expected 3 args".to_string());
+                }
+                let val_val = self.value_to_llvm(&args[2], last_value_map)?;
+                let val_i32 = match val_val {
+                    BasicValueEnum::IntValue(iv) => iv,
+                    _ => return Err("inline bytes set: expected i32 value".to_string()),
+                };
+                let val_i8 = self.builder.build_int_truncate(val_i32, i8_ty, "_bvalset")
+                    .map_err(|e| format!("inline bytes set trunc: {}", e))?;
+                let sv = self.builder.build_store(elem_ptr, val_i8)
+                    .map_err(|e| format!("inline bytes set store: {}", e))?;
+                self.tbaa_store(sv, "int");
+            }
+            _ => return Err(format!("unknown inline bytes op: {}", name)),
+        }
+        Ok(())
+    }
+
+    /// SSA version of inline byte buffer access. Reads the SsaValueId args from
+    /// block_vals. Returns the computed value for `get` (to store into dest);
+    /// returns `None` for `set` (no result).
+    pub(crate) fn emit_ssa_inline_bytes_op(
+        &self,
+        name: &str,
+        args: &[SsaValueId],
+        block_vals: &HashMap<usize, BasicValueEnum<'ctx>>,
+    ) -> Result<Option<BasicValueEnum<'ctx>>, String> {
+        if args.len() < 2 {
+            return Err(format!("ssa inline bytes {}: expected 2+ args", name));
+        }
+        let i32_ty = self.context.i32_type();
+        let i8_ty = self.context.i8_type();
+        let ptr_ty = self.context.ptr_type(Default::default());
+        let read_val = |id: SsaValueId| -> BasicValueEnum<'ctx> {
+            block_vals.get(&id).copied()
+                .unwrap_or(self.context.i32_type().const_zero().as_basic_value_enum())
+        };
+
+        let byte_ptr = match read_val(args[0]) {
+            BasicValueEnum::PointerValue(pv) => pv,
+            BasicValueEnum::IntValue(iv) => self.builder.build_int_to_ptr(iv, ptr_ty, "_bptr")
+                .map_err(|e| format!("ssa inline bytes inttoptr: {}", e))?,
+            _ => return Err("ssa inline bytes: expected ptr or i64 buffer".to_string()),
+        };
+        let idx_i32 = match read_val(args[1]) {
+            BasicValueEnum::IntValue(iv) => iv,
+            _ => return Err("ssa inline bytes: expected i32 index".to_string()),
+        };
+        let elem_ptr = unsafe {
+            self.builder.build_in_bounds_gep(i8_ty, byte_ptr, &[idx_i32], "_belem")
+                .map_err(|e| format!("ssa inline bytes gep: {}", e))?
+        };
+
+        match name {
+            "ky_bytes_get" => {
+                let val = self.builder.build_load(i8_ty, elem_ptr, "_bval")
+                    .map_err(|e| format!("ssa inline bytes get load: {}", e))?;
+                let val_i32 = self.builder.build_int_z_extend(val.into_int_value(), i32_ty, "_bvalz")
+                    .map_err(|e| format!("ssa inline bytes get zext: {}", e))?;
+                Ok(Some(val_i32.as_basic_value_enum()))
+            }
+            "ky_bytes_set" => {
+                if args.len() < 3 {
+                    return Err("ssa inline bytes set: expected 3 args".to_string());
+                }
+                let val_i32 = match read_val(args[2]) {
+                    BasicValueEnum::IntValue(iv) => iv,
+                    _ => return Err("ssa inline bytes set: expected i32 value".to_string()),
+                };
+                let val_i8 = self.builder.build_int_truncate(val_i32, i8_ty, "_bvalset")
+                    .map_err(|e| format!("ssa inline bytes set trunc: {}", e))?;
+                let sv = self.builder.build_store(elem_ptr, val_i8)
+                    .map_err(|e| format!("ssa inline bytes set store: {}", e))?;
+                self.tbaa_store(sv, "int");
+                Ok(None)
+            }
+            _ => Err(format!("unknown ssa inline bytes op: {}", name)),
+        }
+    }
+
     /// SSA version of inline list operations. Uses block_vals directly instead of last_value_map.
     /// Reads SsaValueId from block_vals (same as ssa_read! macro).
     pub(crate) fn emit_ssa_inline_list_op(

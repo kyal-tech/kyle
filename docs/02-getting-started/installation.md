@@ -69,7 +69,7 @@ cargo build --release --bin ky
 ## Verify Installation
 
 ```bash
-ky --version    # Should show v0.8.6
+ky --version    # Should show v0.8.9
 ky check --help # Should show help
 ky run examples/hello.ky  # Should print "Hello, World!"
 ```

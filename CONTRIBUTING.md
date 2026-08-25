@@ -384,4 +384,4 @@ Estas reglas están pensadas para que el proyecto escale de 1 a N colaboradores:
 
 ---
 
-*Última actualización: v0.9.1 — si algo cambia en el flujo, actualiza este documento en el mismo PR.*
+*Última actualización: v0.8.9 — si algo cambia en el flujo, actualiza este documento en el mismo PR.*
