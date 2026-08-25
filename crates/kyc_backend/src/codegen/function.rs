@@ -623,6 +623,10 @@ impl<'ctx> Codegen<'ctx> {
                                     self.emit_inline_list_op(name, dest, args, &mut last_value_map)?;
                                     continue;
                                 }
+                                "ky_bytes_get" | "ky_bytes_set" => {
+                                    self.emit_inline_bytes_op(name, dest, args, &mut last_value_map)?;
+                                    continue;
+                                }
                                 _ => {}
                             }
                             // Don't apply runtime name mapping for user-defined functions

@@ -454,16 +454,25 @@ impl<'ctx> Codegen<'ctx> {
                             // Inline list operations in SSA path (same as MIR path)
                             match name.as_str() {
                                  "ky_list_get" | "ky_list_set" | "ky_list_len" | "ky_list_pop" => {
-                                    let val = self.emit_ssa_inline_list_op(name, &block_vals[bi], args)?;
-                                    if let Some(d) = dest {
-                                        if let Some(v) = val {
-                                            block_vals[bi].insert(*d, v);
-                                        }
-                                    }
-                                    continue;
-                                }
-                                _ => {}
-                            }
+                                     let val = self.emit_ssa_inline_list_op(name, &block_vals[bi], args)?;
+                                     if let Some(d) = dest {
+                                         if let Some(v) = val {
+                                             block_vals[bi].insert(*d, v);
+                                         }
+                                     }
+                                     continue;
+                                 }
+                                 "ky_bytes_get" | "ky_bytes_set" => {
+                                     let val = self.emit_ssa_inline_bytes_op(name, args, &block_vals[bi])?;
+                                     if let Some(d) = dest {
+                                         if let Some(v) = val {
+                                             block_vals[bi].insert(*d, v);
+                                         }
+                                     }
+                                     continue;
+                                 }
+                                 _ => {}
+                             }
                             let runtime_name = if self.fn_value_map.contains_key(name) {
                                 name.clone()
                             } else {
