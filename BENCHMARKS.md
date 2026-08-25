@@ -46,16 +46,16 @@ Baseline after the `str_builder` allocator fix. Kyle/C ratio per benchmark:
 
 | Benchmark | C | C++ | Rust | **Kyle** | Kyle vs C |
 |---|---|---|---|---|---|
-| Fibonacci (500M iter) | 125ms | 121ms | 118ms | **128ms** | 1.02x |
-| Prime Sieve (3M) | 7.9ms | 8.0ms | 8.3ms | **9.5ms** | 1.20x |
-| String Concat (500k) | 8.3ms | 7.5ms | 1.9ms | **9.7ms** | 1.16x |
-| MatMul (100x100x10) | 6.4ms | 6.4ms | 6.5ms | **6.1ms** | 0.95x |
+| Fibonacci (500M iter) | 118ms | 121ms | 122ms | **128ms** | 1.08x |
+| Prime Sieve (3M) | 8.5ms | 8.3ms | 8.6ms | **10.6ms** | 1.25x |
+| String Concat (500k) | 8.2ms | 8.1ms | 1.9ms | **10.3ms** | 1.26x |
+| MatMul (100x100x10) | 6.6ms | 6.8ms | 7.2ms | **6.7ms** | 1.02x |
 
 **Key findings:**
-- **MatMul: Kyle beats C/Rust (0.95x)** — nested loops + array access are native speed
-- **Fibonacci: near-identical to C (1.02x)** — native `i64` counters compile to a tight loop
-- **String Concat: 1.16x** — fixed the `str_builder` allocator mismatch (was 8.2x)
-- **Prime Sieve: 1.20x** — dense 1-byte buffer inlined in codegen (was 3.2x)
+- **MatMul: Kyle matches C (1.02x)** — nested loops + array access are native speed
+- **Fibonacci: near-identical to C (1.08x)** — native `i64` counters compile to a tight loop
+- **String Concat: 1.26x** — fixed the `str_builder` allocator mismatch (was 8.2x)
+- **Prime Sieve: 1.25x** — dense 1-byte buffer inlined in codegen (was 3.2x)
 
 > **String Concat improvement**: was **8.2x slower** before the `ky_str_builder_new`
 > allocator fix. The builder struct was allocated with Rust's `Box` (which places a
