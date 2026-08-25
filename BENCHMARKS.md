@@ -11,20 +11,38 @@ bash run_bench_local.sh
 
 This compiles everything and runs 3 warmup + 5 measured iterations per language.
 
-## Results (Apple M5, release mode)
+## Benchmark History
+
+> Snapshot log to track performance regressions/improvements over time.
+> Latest snapshot is on top.
+
+### 2026-08-25 (v0.8.8, Apple M5, release, median of 9 runs)
+
+Baseline after the `str_builder` allocator fix. Kyle/C ratio per benchmark:
 
 | Benchmark | C | C++ | Rust | **Kyle** | Kyle vs C |
 |---|---|---|---|---|---|
-| Fibonacci (500M iter) | 113ms | 114ms | 114ms | **225ms** | 2.0x |
-| Prime Sieve (3M) | 7.4ms | 7.4ms | 7.6ms | **18ms** | 2.4x |
-| String Concat (500k) | 7.3ms | 7.8ms | 1.7ms | **8.9ms** | 1.2x |
-| MatMul (100x100x10) | 6.1ms | 6.1ms | 6.2ms | **5.6ms** | 0.9x |
+| Fibonacci (500M iter) | 124ms | 126ms | 129ms | **131ms** | 1.06x |
+| Prime Sieve (3M) | 8.5ms | 9.6ms | 9.0ms | **27ms** | 3.2x |
+| String Concat (500k) | 8.3ms | 8.0ms | 2.0ms | **10.7ms** | 1.29x |
+| MatMul (100x100x10) | 7.1ms | 6.7ms | 7.1ms | **6.7ms** | 0.94x |
+
+> Next change (in progress): inline `ky_bytes_get`/`ky_bytes_set` to shrink the Prime Sieve below 3.2x.
+
+## Results (Apple M5, release mode, median of 9 runs)
+
+| Benchmark | C | C++ | Rust | **Kyle** | Kyle vs C |
+|---|---|---|---|---|---|
+| Fibonacci (500M iter) | 124ms | 126ms | 129ms | **131ms** | 1.06x |
+| Prime Sieve (3M) | 8.5ms | 9.6ms | 9.0ms | **27ms** | 3.2x |
+| String Concat (500k) | 8.3ms | 8.0ms | 2.0ms | **10.7ms** | 1.29x |
+| MatMul (100x100x10) | 7.1ms | 6.7ms | 7.1ms | **6.7ms** | 0.94x |
 
 **Key findings:**
-- **MatMul: Kyle matches/beats C/Rust** — nested loops + array access are native speed
-- **String Concat: near-identical to C (1.2x)** — fixed the `str_builder` allocator mismatch
-- **Fibonacci: 2x slower than C** — loop overhead from runtime type checking
-- **Prime Sieve: 2.4x slower** — list operations have bounds-checking overhead
+- **MatMul: Kyle matches/beats C/Rust (0.94x)** — nested loops + array access are native speed
+- **Fibonacci: near-identical to C (1.06x)** — uses native `i64` counters for the count-up loop
+- **String Concat: 1.29x** — fixed the `str_builder` allocator mismatch (was 8.2x)
+- **Prime Sieve: 3.2x** — limited by the 8-byte `KlList` element size (24MB vs C's 1-byte `char*` 3MB, beyond L2 cache)
 
 > **String Concat improvement**: was **8.2x slower** before the `ky_str_builder_new`
 > allocator fix. The builder struct was allocated with Rust's `Box` (which places a
