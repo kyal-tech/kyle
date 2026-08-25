@@ -16,6 +16,63 @@ Readable like Python · Typed like Rust · Simple like Go · **Fast like C**
 
 ---
 
+## Install
+
+### Compiler (`ky`)
+
+**macOS / Linux**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.sh | sh
+```
+
+> Requires macOS 12+ (ARM64) or any modern Linux (x64 / ARM64).
+
+**Windows**
+
+```powershell
+iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.ps1" | iex
+```
+
+> Requires Windows 10+ (x64). Run PowerShell as Administrator.
+
+**Direct downloads**
+
+| Platform | Arch | Download |
+| :--- | :--- | :--- |
+| **macOS** | ARM64 | [ky-macos-arm64.tar.gz](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-macos-arm64.tar.gz) |
+| **Linux** | ARM64 | [ky-linux-arm64.tar.gz](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-linux-arm64.tar.gz) |
+| **Linux** | x64 | [ky-linux-x64.tar.gz](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-linux-x64.tar.gz) |
+| **Windows** | x64 | [ky-windows-x64.zip](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-windows-x64.zip) |
+
+> macOS Intel (x64) is no longer supported. Use Apple Silicon (ARM64).
+
+### VS Code Extension (`ky`)
+
+Syntax highlighting, LSP integration, snippets, debugging UI, and a color theme.
+
+**macOS / Linux**
+
+```bash
+code --install-extension kynera.ky
+```
+
+Or install the `.vsix` from the [releases page](https://github.com/kyal-tech/kyle/releases):
+
+```bash
+code --install-extension ky-0.8.9.vsix
+```
+
+**Windows** (PowerShell)
+
+```powershell
+code --install-extension kynera.ky
+```
+
+> Source: [`vscode-extension/`](vscode-extension/)
+
+---
+
 ## Why Kyle?
 
 Kyle compiles directly to **native machine code** via LLVM. You get the ergonomics of a high-level language with the performance of C — without garbage collection pauses, without a heavyweight runtime, and without giving up type safety.
@@ -31,9 +88,6 @@ Kyle compiles directly to **native machine code** via LLVM. You get the ergonomi
 ## Quick Start
 
 ```bash
-# One-command install (macOS / Linux)
-curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.sh | sh
-
 # Create a project and run it
 ky new myapp && cd myapp
 ky run
@@ -109,75 +163,43 @@ s = stack{"a", "b"}                  # stack <str>
 
 ## Performance
 
-Kyle compiles to native code and sits squarely next to C. Benchmarks on an **Apple M5**, release mode, median of 15 runs:
+Kyle compiles to native machine code and sits right next to C. Benchmarks on an **Apple M5**, release mode, median of 15 runs. Bar length = relative speed (longer = faster); full length = the fastest language in that test.
 
-| Benchmark | C | C++ | Rust | **Kyle** | **Kyle vs C** |
-| :--- | ---: | ---: | ---: | ---: | ---: |
-| Fibonacci (500M iters) | 118ms | 121ms | 122ms | **128ms** | **1.08×** |
-| Prime Sieve (3M) | 8.5ms | 8.3ms | 8.6ms | **10.6ms** | **1.25×** |
-| String Concat (500k) | 8.2ms | 8.1ms | 1.9ms | **10.3ms** | **1.26×** |
-| MatMul (100×100) | 6.6ms | 6.8ms | 7.2ms | **6.7ms** | **1.02×** |
+```
+Fibonacci (500M iters)          (lower time = faster)
+C     |████████████████████████████|  118 ms
+C++   |███████████████████████████|  121 ms
+Rust  |███████████████████████████|  122 ms
+Kyle  |██████████████████████████|  128 ms
+```
+
+```
+Prime Sieve (3M)                (lower time = faster)
+C     |███████████████████████████|  8.5 ms
+C++   |████████████████████████████|  8.3 ms
+Rust  |███████████████████████████|  8.6 ms
+Kyle  |██████████████████████|     10.6 ms
+```
+
+```
+String Concat (500k)            (lower time = faster)
+C     |██████|                     8.2 ms
+C++   |███████|                    8.1 ms
+Rust  |████████████████████████████|  1.9 ms
+Kyle  |█████|                      10.3 ms
+```
+
+```
+MatMul (100×100)                (lower time = faster)
+C     |████████████████████████████|  6.6 ms
+C++   |███████████████████████████|  6.8 ms
+Rust  |██████████████████████████|  7.2 ms
+Kyle  |████████████████████████████|  6.7 ms
+```
+
+**Kyle is on par with C** — within **1.0–1.3×** across every benchmark, and competitive with Rust on integer-heavy workloads.
 
 > Full benchmark runner and history: [`BENCHMARKS.md`](BENCHMARKS.md)
-
----
-
-## Install
-
-### 1. Compiler (`ky`)
-
-#### macOS / Linux
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.sh | sh
-```
-
-> Requires macOS 12+ (ARM64) or any modern Linux (x64 / ARM64).
-
-#### Windows
-
-```powershell
-iwr -Uri "https://raw.githubusercontent.com/kyal-tech/kyle/main/scripts/install.ps1" | iex
-```
-
-> Requires Windows 10+ (x64). Run PowerShell as Administrator.
-
-#### Direct downloads
-
-| Platform | Arch | Download |
-| :--- | :--- | :--- |
-| **macOS** | ARM64 | [ky-macos-arm64.tar.gz](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-macos-arm64.tar.gz) |
-| **Linux** | ARM64 | [ky-linux-arm64.tar.gz](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-linux-arm64.tar.gz) |
-| **Linux** | x64 | [ky-linux-x64.tar.gz](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-linux-x64.tar.gz) |
-| **Windows** | x64 | [ky-windows-x64.zip](https://github.com/kyal-tech/kyle/releases/download/v0.8.9/ky-windows-x64.zip) |
-
-> **Note**: macOS Intel (x64) is no longer supported. Use Apple Silicon (ARM64).
-
-### 2. VS Code Extension (`ky` language support)
-
-Syntax highlighting, LSP integration, snippets, debugging UI, and a color theme.
-
-**macOS / Linux**:
-
-```bash
-# Install from VS Code Marketplace
-code --install-extension kynera.ky
-```
-
-Or download the `.vsix` from the [releases page](https://github.com/kyal-tech/kyle/releases) and install:
-
-```bash
-code --install-extension ky-0.8.9.vsix
-```
-
-**Windows** (PowerShell):
-
-```powershell
-# Install from VS Code Marketplace
-code --install-extension kynera.ky
-```
-
-> **Source**: The extension source is at [`vscode-extension/`](vscode-extension/) in this repository.
 
 ---
 
